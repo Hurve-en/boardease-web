@@ -22,12 +22,12 @@
 
 ### Business Process Flow Chart
 
-![Business Process Flow Chart](/docs_images/boardease_flowchart.png)
+![Business Process Flow Chart](/docs_images/flowchart.png)
 
 ### System Architecture
 
-![System Architecture](/docs_images/boardease_sys_arch.png)
+![System Architecture](/docs_images/sys_arch.png)
 
 ### Entity Relationship Diagram (ERD)
 
-![Entity Relationship Diagram](/docs_images/boardease_erd.png)
+![Entity Relationship Diagram](/docs_images/erd.png)
