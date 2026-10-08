@@ -15,6 +15,20 @@
       "when": 1791441084217,
       "tag": "0001_profiles_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791451520565,
+      "tag": "0002_clumsy_masked_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791451539444,
+      "tag": "0003_profiles_role_tenant",
+      "breakpoints": true
     }
   ]
 }
