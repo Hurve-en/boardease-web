@@ -1,31 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import TextField from "./auth/Textfield";
-
-import {useActionState} from "react";
-import {signIn, type LoginState} from "../login/actions";
+import AuthMessage from "./auth/AuthMessage";
+import { signIn, type LoginState } from "@/app/login/actions";
 
 const initialState: LoginState = {
-    message: "",
-    email: "",
+  message: "",
+  email: "",
 };
 
-
-
 export default function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const [state, action, pending] = useActionState(signIn, initialState);
 
-   const [state, action, pending] = useActionState(signIn, initialState);
-  
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: hook up your real auth here
-    console.log({ email, password });
-  }
+  useEffect(() => {
+    if (!state.success) return;
+    const t = setTimeout(() => router.push("/dashboard"), 1200);
+    return () => clearTimeout(t);
+  }, [state.success, router]);
 
   return (
     <div className="w-full max-w-md space-y-6">
@@ -39,40 +35,49 @@ export default function LoginForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form action={action} className="space-y-5">
         <TextField
           id="email"
+          name="email"
           label="Email address"
           type="email"
           placeholder="you@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          defaultValue={state.email}
           required
         />
         <TextField
           id="password"
+          name="password"
           label="Password"
           type="password"
           placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           required
         />
 
-        <Link href="/forgot-password" className="block text-xs font-medium text-[#613d2b]">
+        <Link
+          href="/forgot-password"
+          className="block text-xs font-medium text-[#613d2b]"
+        >
           Forgot password?
         </Link>
 
+        {state.message && (
+          <AuthMessage
+            type={state.success ? "success" : "error"}
+            message={state.message}
+          />
+        )}
+
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#613d2b] py-3 text-sm font-medium text-white transition hover:bg-[#4f3223]"
+          disabled={pending || state.success}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#613d2b] py-3 text-sm font-medium text-white transition hover:bg-[#4f3223] disabled:opacity-60"
         >
           <ArrowRight size={16} />
-          Sign in
+          {pending ? "Signing in..." : "Sign in"}
         </button>
       </form>
 
-      {/* Registration button */}
       <Link
         href="/register"
         className="block w-full rounded-lg border border-[#613d2b] py-3 text-center text-sm font-medium text-[#613d2b] transition hover:bg-[#efe3d5]"

@@ -5,8 +5,9 @@ import {createClient} from "@/lib/supabase/server";
 import {CredentialsSchema} from "@/lib/definitions";
 
 export type LoginState = {
-	message: string;
-	email: string;
+    message: string;
+    email: string;
+    success?: boolean;  
 };
 
 export async function signIn(
@@ -19,6 +20,8 @@ export async function signIn(
 		email,
 		password: form.get("password"),
 	});
+
+	
 
 	if (!parsed.success) {
 		return {
@@ -40,3 +43,4 @@ export async function signIn(
 
 	redirect("/dashboard");
 }
+
