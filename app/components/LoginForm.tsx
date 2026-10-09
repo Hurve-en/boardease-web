@@ -5,10 +5,22 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import TextField from "./auth/Textfield";
 
+import {useActionState} from "react";
+import {signIn, type LoginState} from "../login/actions";
+
+const initialState: LoginState = {
+    message: "",
+    email: "",
+};
+
+
+
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+   const [state, action, pending] = useActionState(signIn, initialState);
+  
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     // TODO: hook up your real auth here
