@@ -2,25 +2,25 @@
 
 ## Overview
 
-| | |
-|---|---|
-| **App Name** | BoardEase |
-| **Problem** | Boarding-house owners may have difficulty manually tracking tenant bills and payments. |
-| **Solution** | A practical web and mobile system that records tenants, calculates monthly bills, and tracks payments. |
-| **Main Users** | Boarding-house owner/admin |
-| **Core Features** | Tenant management, room management, billing, payments, and dashboard |
-| **Goal** | Make monthly billing and payment tracking easier and more organized. |
+|                   |                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| **App Name**      | BoardEase                                                                                              |
+| **Problem**       | Boarding-house owners may have difficulty manually tracking tenant bills and payments.                 |
+| **Solution**      | A practical web and mobile system that records tenants, calculates monthly bills, and tracks payments. |
+| **Main Users**    | Boarding-house owner/admin                                                                             |
+| **Core Features** | Tenant management, room management, billing, payments, and dashboard                                   |
+| **Goal**          | Make monthly billing and payment tracking easier and more organized.                                   |
 
 ---
 
 ## Team Roles
 
-| Role | Member |
-|---|---|
-| Project Manager | Hurveen Rayford Veloso |
-| Fullstack | Kendall Bryant Maputi |
-| Fullstack | Joachim Ray Chiong |
-| UI/UX Designer & Frontend | Elijah Bes |
+| Role                      | Member                 |
+| ------------------------- | ---------------------- |
+| Project Manager           | Hurveen Rayford Veloso |
+| Fullstack                 | Kendall Bryant Maputi  |
+| Fullstack                 | Joachim Ray Chiong     |
+| UI/UX Designer & Frontend | Elijah Bes             |
 
 ---
 
@@ -73,6 +73,10 @@
 
 ## Confirmed Business Rules
 
+### Database Security
+
+- Never add an RLS policy on `profiles` that allows client-side `INSERT` or `UPDATE`.
+
 ### 1. Tenant Registration
 
 - Tenants can register their own accounts through the mobile app.
@@ -104,8 +108,8 @@
 
 **Example:**
 
-| Tenant | Rent |
-|---|---|
+| Tenant   | Rent   |
+| -------- | ------ |
 | Tenant A | ₱2,000 |
 | Tenant B | ₱2,500 |
 | Tenant C | ₱1,500 |
@@ -126,12 +130,12 @@ Total Bill = Rent + Electricity + Water
 
 **Example:**
 
-| Item | Amount |
-|---|---|
-| Rent | ₱5,000 |
-| Electricity | ₱800 |
-| Water | ₱200 |
-| **Total** | **₱6,000** |
+| Item        | Amount     |
+| ----------- | ---------- |
+| Rent        | ₱5,000     |
+| Electricity | ₱800       |
+| Water       | ₱200       |
+| **Total**   | **₱6,000** |
 
 - The Admin can edit a bill if a correction is needed.
 
@@ -146,11 +150,11 @@ Total Bill = Rent + Electricity + Water
 
 ### 7. Payment Status
 
-| Condition | Status |
-|---|---|
-| No payment | `UNPAID` |
+| Condition       | Status    |
+| --------------- | --------- |
+| No payment      | `UNPAID`  |
 | Partial payment | `PARTIAL` |
-| Fully paid | `PAID` |
+| Fully paid      | `PAID`    |
 
 ## Technical Diagrams
 
@@ -160,8 +164,8 @@ Total Bill = Rent + Electricity + Water
 
 ### System Architecture
 
-![System Architecture](/docs_images/sys_arch.png)
+![System Architecture](/docs_images/new_sys_arch.png)
 
 ### Entity Relationship Diagram (ERD)
 
-![Entity Relationship Diagram](/docs_images/erd.png)
+![Entity Relationship Diagram](/docs_images/image_erd.png)
