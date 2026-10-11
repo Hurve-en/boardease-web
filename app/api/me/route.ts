@@ -1,12 +1,9 @@
-import {NextResponse} from "next/server";
-import {getApiUser} from "@/lib/api-auth";
+import { NextResponse } from "next/server";
+import { authorize } from "@/lib/api-auth";
 
 export async function GET(request: Request) {
-	const profile = await getApiUser(request);
+  const auth = await authorize(request, ["admin", "tenant"]);
+  if (auth.response) return auth.response;
 
-	if (!profile) {
-		return NextResponse.json({error: "Unauthorized"}, {status: 401});
-	}
-
-	return NextResponse.json(profile);
+  return NextResponse.json(auth.user);
 }
