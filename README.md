@@ -164,7 +164,7 @@ Total Bill = Rent + Electricity + Water
 
 ### System Architecture
 
-![System Architecture](/docs_images/new_sys_arch.png)
+![System Architecture](/docs_images/systemarchitecture.png)
 
 ### Entity Relationship Diagram (ERD)
 
