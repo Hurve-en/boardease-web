@@ -18,7 +18,7 @@ A user can sign in, and the Admin and Tenant have different access based on thei
 | 1.4 Build Admin Login (Web)           | Joachim        | Not yet merged                                                                                | In Progress  |
 | 1.5 Build Tenant Login (App)          | Joachim        | App #3                                                                                        | Done         |
 | 1.6 Implement Role-Based Access       | Hurveen        | Web #7                                                                                        | Done         |
-| 1.7 Implement Logout (Web and App)    | Hurveen        | Web #8, TODO fix PR · App #5, TODO fix PR                                                     | TODO confirm |
+| 1.7 Implement Logout (Web and App)    | Hurveen        | Web #8,  App #5,                                                     | Done |
 
 ## Demo
 
