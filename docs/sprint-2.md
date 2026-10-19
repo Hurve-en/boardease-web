@@ -1,4 +1,4 @@
-# Sprint 1
+# Sprint 2
 
 **Dates:** October 4 – October 11, 2026
 **Sprint Lead:** Hurveen Veloso
@@ -12,7 +12,7 @@ The goal is to test and verify API endpoints and implement tenant registration
 
 | Task                                                  | Member         | Pull Request                                     | Status |
 | ----------------------------------------------------- | -------------- | ------------------------------------------------ | ------ |
-| 2.1 Verify if Next.js API layer is done setting up    | Kendall Maputi | (already implemented on sprint 1)                | Done   |
+| 2.1 Verify if Next.js API layer is done setting up    | Kendall Maputi | (already implemented on sprint 1), App #6               | Done   |
 | 2.2 Connect API to Supabase                           | Hurveen Veloso | (already implemented on sprint 1)                | Done   |
 | 2.3 Test API authentication                           | Elijah Bes     | (no PR, testing was performed on main)           | Done   |
 | 2.4 Implement API validation and Error handling (Web) | Kendall Maputi | (already implemented on sprint 1)                | Done   |
