@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { CredentialsSchema } from "@/lib/definitions";
 
 export type LoginState = {
-  message: string;
-  email: string;
+    message: string;
+    email: string;
+    success?: boolean;  
 };
 
 export async function signIn(
@@ -15,10 +16,12 @@ export async function signIn(
 ): Promise<LoginState> {
   const email = String(form.get("email") ?? "");
 
-  const parsed = CredentialsSchema.safeParse({
-    email,
-    password: form.get("password"),
-  });
+	const parsed = CredentialsSchema.safeParse({
+		email,
+		password: form.get("password"),
+	});
+
+	
 
   if (!parsed.success) {
     return { message: parsed.error.issues[0].message, email };
@@ -44,6 +47,7 @@ export async function signIn(
 
   redirect("/dashboard");
 }
+
 
 export async function signOut() {
   const supabase = await createClient();
