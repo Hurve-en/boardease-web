@@ -1,0 +1,4 @@
+ALTER TABLE "tenant_room_assignment" ALTER COLUMN "end_date" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "tenant_room_assignment" ADD CONSTRAINT "room_assignment_room_start_unique" UNIQUE("tenant_id","room_id","start_date");--> statement-breakpoint
+ALTER TABLE "bills" ADD CONSTRAINT "bills_total_matches_charges" CHECK ("bills"."total_amount" = "bills"."rent_amount" + "bills"."electric_charge" + "bills"."water_charge");--> statement-breakpoint
+ALTER TABLE "tenant_room_assignment" ADD CONSTRAINT "start_date_must_be_lesser_than_end_date" CHECK ("tenant_room_assignment"."start_date" < "tenant_room_assignment"."end_date");
