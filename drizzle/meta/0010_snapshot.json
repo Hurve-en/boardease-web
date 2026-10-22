@@ -1,0 +1,538 @@
+{
+  "id": "bc4fbba4-5215-4de1-97c3-ca73b44c89e5",
+  "prevId": "57a0cc1c-98f1-498f-9ccb-c037821dfe27",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.bills": {
+      "name": "bills",
+      "schema": "",
+      "columns": {
+        "bill_id": {
+          "name": "bill_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "billing_month": {
+          "name": "billing_month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rent_amount": {
+          "name": "rent_amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "electric_charge": {
+          "name": "electric_charge",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "water_charge": {
+          "name": "water_charge",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "bill_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unpaid'"
+        },
+        "outstanding_balance": {
+          "name": "outstanding_balance",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bills_tenant_id_tenants_tenant_id_fk": {
+          "name": "bills_tenant_id_tenants_tenant_id_fk",
+          "tableFrom": "bills",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "tenant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bills_tenant_billing_month_unique": {
+          "name": "bills_tenant_billing_month_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id",
+            "billing_month"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "rent_amount_nonnegative": {
+          "name": "rent_amount_nonnegative",
+          "value": "\"bills\".\"rent_amount\" >= 0"
+        },
+        "electric_amount_nonnegative": {
+          "name": "electric_amount_nonnegative",
+          "value": "\"bills\".\"electric_charge\" >= 0"
+        },
+        "water_amount_nonnegative": {
+          "name": "water_amount_nonnegative",
+          "value": "\"bills\".\"water_charge\" >= 0"
+        },
+        "total_amount_nonnegative": {
+          "name": "total_amount_nonnegative",
+          "value": "\"bills\".\"total_amount\" >= 0"
+        },
+        "outstanding_balance_nonnegative": {
+          "name": "outstanding_balance_nonnegative",
+          "value": "\"bills\".\"outstanding_balance\" >= 0"
+        },
+        "bills_outstanding_not_greater_than_total": {
+          "name": "bills_outstanding_not_greater_than_total",
+          "value": "\"bills\".\"outstanding_balance\" <= \"bills\".\"total_amount\""
+        },
+        "bills_total_matches_charges": {
+          "name": "bills_total_matches_charges",
+          "value": "\"bills\".\"total_amount\" = \"bills\".\"rent_amount\" + \"bills\".\"electric_charge\" + \"bills\".\"water_charge\""
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.payments": {
+      "name": "payments",
+      "schema": "",
+      "columns": {
+        "payment_id": {
+          "name": "payment_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "bill_id": {
+          "name": "bill_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recorded_by": {
+          "name": "recorded_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payment_date": {
+          "name": "payment_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "payments_bill_id_bills_bill_id_fk": {
+          "name": "payments_bill_id_bills_bill_id_fk",
+          "tableFrom": "payments",
+          "tableTo": "bills",
+          "columnsFrom": [
+            "bill_id"
+          ],
+          "columnsTo": [
+            "bill_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payments_recorded_by_profiles_id_fk": {
+          "name": "payments_recorded_by_profiles_id_fk",
+          "tableFrom": "payments",
+          "tableTo": "profiles",
+          "columnsFrom": [
+            "recorded_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "amount_nonnegative": {
+          "name": "amount_nonnegative",
+          "value": "\"payments\".\"amount\" >= 0"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.profiles": {
+      "name": "profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.rooms": {
+      "name": "rooms",
+      "schema": "",
+      "columns": {
+        "room_id": {
+          "name": "room_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "room_number": {
+          "name": "room_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monthly_rent": {
+          "name": "monthly_rent",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_occupancy": {
+          "name": "max_occupancy",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "room_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unoccupied'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "rooms_room_number_unique": {
+          "name": "rooms_room_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "room_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "rooms_capacity_positive": {
+          "name": "rooms_capacity_positive",
+          "value": "\"rooms\".\"max_occupancy\" >= 1"
+        },
+        "rooms_monthly_rent_nonnegative": {
+          "name": "rooms_monthly_rent_nonnegative",
+          "value": "\"rooms\".\"monthly_rent\" >= 0"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.tenant_room_assignment": {
+      "name": "tenant_room_assignment",
+      "schema": "",
+      "columns": {
+        "assignment_id": {
+          "name": "assignment_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "assignment_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tenant_room_assignment_tenant_id_tenants_tenant_id_fk": {
+          "name": "tenant_room_assignment_tenant_id_tenants_tenant_id_fk",
+          "tableFrom": "tenant_room_assignment",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "tenant_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tenant_room_assignment_room_id_rooms_room_id_fk": {
+          "name": "tenant_room_assignment_room_id_rooms_room_id_fk",
+          "tableFrom": "tenant_room_assignment",
+          "tableTo": "rooms",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "room_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "room_assignment_room_start_unique": {
+          "name": "room_assignment_room_start_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id",
+            "room_id",
+            "start_date"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "start_date_must_be_lesser_than_end_date": {
+          "name": "start_date_must_be_lesser_than_end_date",
+          "value": "\"tenant_room_assignment\".\"start_date\" < \"tenant_room_assignment\".\"end_date\""
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.tenants": {
+      "name": "tenants",
+      "schema": "",
+      "columns": {
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_number": {
+          "name": "contact_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tenants_user_id_profiles_id_fk": {
+          "name": "tenants_user_id_profiles_id_fk",
+          "tableFrom": "tenants",
+          "tableTo": "profiles",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tenants_user_id_unique": {
+          "name": "tenants_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    }
+  },
+  "enums": {
+    "public.assignment_status": {
+      "name": "assignment_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "inactive"
+      ]
+    },
+    "public.bill_status": {
+      "name": "bill_status",
+      "schema": "public",
+      "values": [
+        "paid",
+        "partial",
+        "unpaid"
+      ]
+    },
+    "public.room_status": {
+      "name": "room_status",
+      "schema": "public",
+      "values": [
+        "occupied",
+        "unoccupied"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
