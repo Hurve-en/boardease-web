@@ -2,7 +2,12 @@ import "server-only";
 
 import {and, eq, gt, lt, sql} from "drizzle-orm";
 import {db} from "@/db";
-import {bills, payments, tenants} from "@/db/schema";
+import {
+	bills,
+	payments,
+	tenantRoomAssignment,
+	tenants,
+} from "@/db/schema";
 
 export type DashboardData = {
 	rooms: {
@@ -57,7 +62,7 @@ function currentDate(now = new Date()): string {
 export async function getDashboardData(): Promise<DashboardData> {
 	const month = currentBillingMonth();
 	const today = currentDate();
-	const [billing, overdue, recentPayments] = await Promise.all([
+	const [billing, overdue, recentPayments, tenantSummary] = await Promise.all([
 		db
 			.select({
 				totalBilled: sql<string>`coalesce(sum(${bills.totalAmount}), 0)`,
@@ -88,10 +93,24 @@ export async function getDashboardData(): Promise<DashboardData> {
 			.innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
 			.orderBy(sql`${payments.createdAt} desc`)
 			.limit(5),
+		db
+			.select({
+				total: sql<number>`count(*)`,
+				active: sql<number>`count(distinct ${tenantRoomAssignment.tenantId})`,
+			})
+			.from(tenants)
+			.leftJoin(
+				tenantRoomAssignment,
+				and(
+					eq(tenants.tenantId, tenantRoomAssignment.tenantId),
+					eq(tenantRoomAssignment.status, "active"),
+				),
+			),
 	]);
 
 	const [summary] = billing;
 	const [overdueSummary] = overdue;
+	const [tenantCounts] = tenantSummary;
 	const totalCollected = await db
 		.select({
 			value: sql<string>`coalesce(sum(${payments.amount}), 0)`,
@@ -102,7 +121,10 @@ export async function getDashboardData(): Promise<DashboardData> {
 
 	return {
 		rooms: {total: 0, occupied: 0, unoccupied: 0},
-		tenants: {total: 0, active: 0},
+		tenants: {
+			total: Number(tenantCounts?.total ?? 0),
+			active: Number(tenantCounts?.active ?? 0),
+		},
 		billing: {
 			month,
 			totalBilled: summary?.totalBilled ?? "0",
