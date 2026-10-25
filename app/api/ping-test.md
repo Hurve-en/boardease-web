@@ -45,3 +45,14 @@ Keep-Alive: timeout=5
 Transfer-Encoding: chunked
 
 {"rooms":{"total":0,"occupied":0,"unoccupied":0},"tenants":{"total":0,"active":0},"billing":{"month":"2026-10-01","totalBilled":"0","totalCollected":"0","totalOutstanding":"0","paidCount":0,"partialCount":0,"unpaidCount":0},"overdue":{"count":0,"amount":"0"},"recentPayments":[]}%
+
+BE-71 proof that the retrive of tenant information works
+HTTP/1.1 200 OK
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+content-type: application/json
+Date: Sun, 25 Oct 2026 04:19:08 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"rooms":{"total":0,"occupied":0,"unoccupied":0},"tenants":{"total":0,"active":0},"billing":{"month":"2026-10-01","totalBilled":"0","totalCollected":"0","totalOutstanding":"0","paidCount":0,"partialCount":0,"unpaidCount":0},"overdue":{"count":0,"amount":"0"},"recentPayments":[]}%
