@@ -524,21 +524,6 @@ The following categories are provisional and can be adjusted if an official eval
 
 ---
 
-## ✅ Submission Checklist
-
-- [ ] Verify all documented features against the source code.
-- [ ] Confirm that the logo and diagram files exist.
-- [ ] Verify development setup commands.
-- [ ] Confirm required environment-variable names.
-- [ ] Document actual test results.
-- [ ] Prepare screenshots of implemented features.
-- [ ] Prepare the application demonstration.
-- [ ] Check for accidentally committed secrets.
-- [ ] Verify all GitHub documentation links.
-- [ ] Confirm all completed work is merged into the main branch.
-
----
-
 ## 📄 License
 
 A repository license has not yet been confirmed.
