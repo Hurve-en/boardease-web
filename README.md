@@ -498,12 +498,12 @@ The following features are not part of the current BoardEase project:
 
 ## 👥 Development Team
 
-| Role                                | Member                 |
-| ----------------------------------- | ---------------------- |
-| Project Manager                     | Hurveen Rayford Veloso |
-| Fullstack Developer                 | Kendall Bryant Maputi  |
-| Fullstack Developer                 | Joachim Ray Chiong     |
-| UI/UX Designer & Frontend Developer | Elijah Bes             |
+| Role                      | Member                 |
+| ------------------------- | ---------------------- |
+| Project Manager & Backend | Hurveen Rayford Veloso |
+| Fullstack Developer       | Kendall Bryant Maputi  |
+| Fullstack Developer       | Joachim Ray Chiong     |
+| Fullstack Developer       | Elijah Bes             |
 
 ---
 
