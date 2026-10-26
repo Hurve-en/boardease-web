@@ -1,6 +1,8 @@
 import { verifyAdmin } from "@/lib/dal";
 import { signOut } from "@/app/login/actions";
+
 import { getDashboardData } from "@/lib/dashboard";
+import DashboardNavbar from "@/app/components/dashboard/navbar";
 import {
 	ArrowDownRight,
 	ArrowRight,
@@ -45,7 +47,10 @@ export default async function DashboardPage() {
 	const latestPayment = dashboardData.recentPayments[0];
 
   return (
-		<main className="dashboard-shell">
+		<main className="dashboard-shell" style={{ flexDirection: "row" }}>
+			<DashboardNavbar />
+			<div style={{ display: "flex", flex: 1, minWidth: 0, minHeight: "100vh", flexDirection: "column" }}>
+	
 			<header className="topbar">
 				<div className="breadcrumb"><span>OWNER / WEB</span><span className="crumb-divider">/</span><strong>DASHBOARD</strong></div>
 				<div className="topbar-actions"><span>{todayLabel}</span><button className="icon-button" aria-label="Notifications"><Bell size={18} /></button><form action={signOut}><button className="signout-button" type="submit">Sign out</button></form></div>
@@ -81,6 +86,9 @@ export default async function DashboardPage() {
 				</section>
 			</div>
 			<footer className="dashboard-footer"><span>BoardEase · Maple House · All amounts in Philippine pesos (PHP)</span><span>Owner workspace</span></footer>
+			</div>
 		</main>
   );
 }
+
+
