@@ -81,7 +81,30 @@ export default async function DashboardPage() {
 
 				<section className="bills-section" id="monthly-bills">
 					<div className="section-heading"><div><p className="eyebrow">LEDGER</p><h2>{currentMonth} bills</h2></div><a className="create-action" href="#monthly-bills"><FilePlus2 size={16} /> Create monthly bill</a></div>
-					<div className="bills-table-wrap"><table className="bills-table"><thead><tr><th>Tenant / bill</th><th>Room</th><th>Total bill</th><th>Outstanding</th><th>Status</th></tr></thead><tbody><tr><td colSpan={5}><div className="empty-state"><span className="empty-icon"><Receipt size={20} /></span><strong>Monthly bills will appear here</strong><span>Your bill records will show in this list once connected.</span></div></td></tr></tbody></table></div>
+					<div className="bills-table-wrap"><table className="bills-table"><thead><tr><th>Tenant / bill</th><th>Room</th><th>Total bill</th><th>Outstanding</th><th>Status</th></tr></thead>
+					<tbody>
+						{dashboardData.ledger.length === 0 ? (
+							<tr>
+							<td colSpan={5}>
+								<div className="empty-state">
+								<span className="empty-icon"><Receipt size={20} /></span>
+								<strong>Monthly bills will appear here</strong>
+								<span>Your bill records will show in this list once connected.</span>
+								</div>
+							</td>
+							</tr>
+						) : (
+							dashboardData.ledger.map((bill) => (
+							<tr key={bill.billId}>
+								<td><div className="ledger-tenant"><span className="ledger-avatar">{bill.tenantName.split(" ").map((part) => part[0]).slice(0, 2).join("")}</span><span><strong>{bill.tenantName}</strong><small>Monthly bill</small></span></div></td>
+								<td><span className="room-chip">{bill.roomNumber ?? "Unassigned"}</span></td>
+								<td className="ledger-money">{peso(bill.totalAmount)}</td>
+								<td className="ledger-money ledger-outstanding">{peso(bill.outstandingBalance)}</td>
+								<td><span className={`bill-status bill-status-${bill.status}`}>{bill.status}</span></td>
+							</tr>
+							))
+						)}
+					</tbody></table></div>
 					<p className="ledger-note">{latestPayment ? `Latest payment: ${latestPayment.tenantName} · ${peso(latestPayment.amount)} · ${latestPayment.paymentDate}` : "No payments recorded this month yet."}</p>
 				</section>
 			</div>
@@ -90,5 +113,6 @@ export default async function DashboardPage() {
 		</main>
   );
 }
+
 
 
