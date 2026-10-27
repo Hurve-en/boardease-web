@@ -1,5 +1,7 @@
 import "server-only";
 
+import {getRoomSummary} from "@/lib/room";
+
 import {and, eq, gt, lt, sql} from "drizzle-orm";
 import {db} from "@/db";
 import {
@@ -41,12 +43,12 @@ export type DashboardData = {
 		billingMonth: string;
 	}[];
 	ledger: {
-	billId: string;
-	tenantName: string;
-	roomNumber: string | null;
-	totalAmount: string;
-	outstandingBalance: string;
-	status: "paid" | "partial" | "unpaid";
+		billId: string;
+		tenantName: string;
+		roomNumber: string | null;
+		totalAmount: string;
+		outstandingBalance: string;
+		status: "paid" | "partial" | "unpaid";
 	}[];
 };
 
@@ -71,78 +73,78 @@ function currentDate(now = new Date()): string {
 export async function getDashboardData(): Promise<DashboardData> {
 	const month = currentBillingMonth();
 	const today = currentDate();
-	const [roomSummary, billing, overdue, recentPayments, tenantSummary, ledger] = await Promise.all([
-		db
-			.select({
-				total: sql<number>`count(*)`,
-				occupied: sql<number>`count(*) filter (where ${rooms.status} = 'occupied')`,
-			}).from(rooms),
+	const [roomSummary, billing, overdue, recentPayments, tenantSummary, ledger] =
+		await Promise.all([
+			getRoomSummary(),
 
-		db
-			.select({
-				totalBilled: sql<string>`coalesce(sum(${bills.totalAmount}), 0)`,
-				totalOutstanding: sql<string>`coalesce(sum(${bills.outstandingBalance}), 0)`,
-				paidCount: sql<number>`count(*) filter (where ${bills.status} = 'paid')`,
-				partialCount: sql<number>`count(*) filter (where ${bills.status} = 'partial')`,
-				unpaidCount: sql<number>`count(*) filter (where ${bills.status} = 'unpaid')`,
-			})
-			.from(bills)
-			.where(eq(bills.billingMonth, month)),
-		db
-			.select({
-				count: sql<number>`count(*)`,
-				amount: sql<string>`coalesce(sum(${bills.outstandingBalance}), 0)`,
-			})
-			.from(bills)
-			.where(and(lt(bills.dueDate, today), gt(bills.outstandingBalance, "0"))),
-		db
-			.select({
-				paymentId: payments.paymentId,
-				tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
-				amount: payments.amount,
-				paymentDate: payments.paymentDate,
-				billingMonth: bills.billingMonth,
-			})
-			.from(payments)
-			.innerJoin(bills, eq(payments.billId, bills.billId))
-			.innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
-			.orderBy(sql`${payments.createdAt} desc`)
-			.limit(5),
-		db
-			.select({
-				total: sql<number>`count(*)`,
-				active: sql<number>`count(distinct ${tenantRoomAssignment.tenantId})`,
-			})
-			.from(tenants)
-			.leftJoin(
-				tenantRoomAssignment,
-				and(
-					eq(tenants.tenantId, tenantRoomAssignment.tenantId),
-					eq(tenantRoomAssignment.status, "active"),
+			db
+				.select({
+					totalBilled: sql<string>`coalesce(sum(${bills.totalAmount}), 0)`,
+					totalOutstanding: sql<string>`coalesce(sum(${bills.outstandingBalance}), 0)`,
+					paidCount: sql<number>`count(*) filter (where ${bills.status} = 'paid')`,
+					partialCount: sql<number>`count(*) filter (where ${bills.status} = 'partial')`,
+					unpaidCount: sql<number>`count(*) filter (where ${bills.status} = 'unpaid')`,
+				})
+				.from(bills)
+				.where(eq(bills.billingMonth, month)),
+			db
+				.select({
+					count: sql<number>`count(*)`,
+					amount: sql<string>`coalesce(sum(${bills.outstandingBalance}), 0)`,
+				})
+				.from(bills)
+				.where(
+					and(lt(bills.dueDate, today), gt(bills.outstandingBalance, "0")),
 				),
-			),
+			db
+				.select({
+					paymentId: payments.paymentId,
+					tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+					amount: payments.amount,
+					paymentDate: payments.paymentDate,
+					billingMonth: bills.billingMonth,
+				})
+				.from(payments)
+				.innerJoin(bills, eq(payments.billId, bills.billId))
+				.innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
+				.orderBy(sql`${payments.createdAt} desc`)
+				.limit(5),
+			db
+				.select({
+					total: sql<number>`count(*)`,
+					active: sql<number>`count(distinct ${tenantRoomAssignment.tenantId})`,
+				})
+				.from(tenants)
+				.leftJoin(
+					tenantRoomAssignment,
+					and(
+						eq(tenants.tenantId, tenantRoomAssignment.tenantId),
+						eq(tenantRoomAssignment.status, "active"),
+					),
+				),
 
-		db	.select({
-			billId: bills.billId,
-			tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
-			roomNumber: rooms.roomNumber,
-			totalAmount: bills.totalAmount,
-			outstandingBalance: bills.outstandingBalance,
-			status: bills.status,
-		})
-		.from(bills)
-		.innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
-		.leftJoin(
-			tenantRoomAssignment,
-			and(
-			eq(tenants.tenantId, tenantRoomAssignment.tenantId),
-			eq(tenantRoomAssignment.status, "active"),
-			),
-		)
-		.leftJoin(rooms, eq(tenantRoomAssignment.roomId, rooms.roomId))
-		.where(eq(bills.billingMonth, month))
-		.orderBy(bills.dueDate),
-			]);
+			db
+				.select({
+					billId: bills.billId,
+					tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+					roomNumber: rooms.roomNumber,
+					totalAmount: bills.totalAmount,
+					outstandingBalance: bills.outstandingBalance,
+					status: bills.status,
+				})
+				.from(bills)
+				.innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
+				.leftJoin(
+					tenantRoomAssignment,
+					and(
+						eq(tenants.tenantId, tenantRoomAssignment.tenantId),
+						eq(tenantRoomAssignment.status, "active"),
+					),
+				)
+				.leftJoin(rooms, eq(tenantRoomAssignment.roomId, rooms.roomId))
+				.where(eq(bills.billingMonth, month))
+				.orderBy(bills.dueDate),
+		]);
 
 	const [summary] = billing;
 	const [overdueSummary] = overdue;
@@ -154,24 +156,15 @@ export async function getDashboardData(): Promise<DashboardData> {
 		.from(payments)
 		.innerJoin(bills, eq(payments.billId, bills.billId))
 		.where(eq(bills.billingMonth, month));
-	
 
 	return {
-		
-		rooms: {
-			total: Number(roomSummary[0]?.total ?? 0),
-			occupied: Number(roomSummary[0]?.occupied ?? 0),
-			unoccupied:
-				Number(roomSummary[0]?.total ?? 0) -
-				Number(roomSummary[0]?.occupied ?? 0),
-			},
+		rooms: roomSummary,
 
-			tenants: {
+		tenants: {
 			total: Number(tenantCounts?.total ?? 0),
 			active: Number(tenantCounts?.active ?? 0),
-			},
+		},
 
-		
 		billing: {
 			month,
 			totalBilled: summary?.totalBilled ?? "0",
