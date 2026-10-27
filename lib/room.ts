@@ -58,7 +58,7 @@ export async function getRooms(): Promise<RoomListItem[]> {
 				eq(tenantRoomAssignment.roomId, rooms.roomId),
 				eq(tenantRoomAssignment.status, "active"),
 			),
-		)
+		) // first join is for the frontend to determine if it has an active tenant or not
 		.leftJoin(tenants, eq(tenants.tenantId, tenantRoomAssignment.tenantId))
-		.orderBy(rooms.roomNumber);
+		.orderBy(rooms.roomNumber); // second join is for the tenant's name
 }
