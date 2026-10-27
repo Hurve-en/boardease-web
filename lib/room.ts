@@ -1,5 +1,7 @@
 import "server-only";
 
+import type {CreateRoomInput} from "@/lib/definitions";
+
 import {and, eq, sql} from "drizzle-orm";
 import {rooms, tenantRoomAssignment, tenants} from "@/db/schema";
 import {db} from "@/db";
@@ -61,4 +63,24 @@ export async function getRooms(): Promise<RoomListItem[]> {
 		) // first join is for the frontend to determine if it has an active tenant or not
 		.leftJoin(tenants, eq(tenants.tenantId, tenantRoomAssignment.tenantId))
 		.orderBy(rooms.roomNumber); // second join is for the tenant's name
+}
+
+export async function createRoom(input: CreateRoomInput) {
+	const [room] = await db
+		.insert(rooms)
+		.values({
+			roomNumber: input.roomNumber,
+			monthlyRent: input.monthlyRent.toFixed(2),
+			maxOccupancy: input.maxOccupancy,
+		})
+		.returning();
+
+	return room;
+}
+
+export function isDuplicateRoomNumber(error: unknown): boolean {
+	return (
+		error instanceof Error &&
+		(error.cause as {code?: string} | undefined)?.code === "23505"
+	);
 }
