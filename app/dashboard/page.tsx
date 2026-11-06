@@ -1,12 +1,9 @@
 import { verifyAdmin } from "@/lib/dal";
-import { signOut } from "@/app/login/actions";
-
 import { getDashboardData } from "@/lib/dashboard";
-import DashboardNavbar from "@/app/components/dashboard/navbar";
+import DashboardShell from "@/app/components/dashboard/DashboardShell";
 import {
 	ArrowDownRight,
 	ArrowRight,
-	Bell,
 	CalendarDays,
 	Clock3,
 	DoorOpen,
@@ -28,14 +25,6 @@ const monthLabel = (value: string) =>
 		new Date(`${value}T00:00:00+08:00`),
 	);
 
-const todayLabel = new Intl.DateTimeFormat("en-GB", {
-	day: "2-digit",
-	month: "long",
-	year: "numeric",
-	timeZone: "Asia/Manila",
-}).format(new Date());
-
-
 export default async function DashboardPage() {
   const admin = await verifyAdmin();
   const dashboardData = await getDashboardData();
@@ -47,15 +36,7 @@ export default async function DashboardPage() {
 	const latestPayment = dashboardData.recentPayments[0];
 
   return (
-		<main className="dashboard-shell" style={{ flexDirection: "row" }}>
-			<DashboardNavbar />
-			<div style={{ display: "flex", flex: 1, minWidth: 0, minHeight: "100vh", flexDirection: "column" }}>
-	
-			<header className="topbar">
-				<div className="breadcrumb"><span>OWNER / WEB</span><span className="crumb-divider">/</span><strong>DASHBOARD</strong></div>
-				<div className="topbar-actions"><span>{todayLabel}</span><button className="icon-button" aria-label="Notifications"><Bell size={18} /></button><form action={signOut}><button className="signout-button" type="submit">Sign out</button></form></div>
-			</header>
-
+		<DashboardShell section="DASHBOARD">
 			<div className="dashboard-content">
 				<section className="welcome-row">
 					<div><p className="eyebrow">YOUR PROPERTY AT A GLANCE</p><h1>Good morning, {firstName}</h1><p className="welcome-copy">Here&apos;s where Maple House stands this month.</p></div>
@@ -108,11 +89,7 @@ export default async function DashboardPage() {
 					<p className="ledger-note">{latestPayment ? `Latest payment: ${latestPayment.tenantName} · ${peso(latestPayment.amount)} · ${latestPayment.paymentDate}` : "No payments recorded this month yet."}</p>
 				</section>
 			</div>
-			<footer className="dashboard-footer"><span>BoardEase · Maple House · All amounts in Philippine pesos (PHP)</span><span>Owner workspace</span></footer>
-			</div>
-		</main>
+		</DashboardShell>
   );
 }
-
-
 
