@@ -849,6 +849,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  text-decoration: none;
   border: 0;
   background: none;
   color: #79583f;

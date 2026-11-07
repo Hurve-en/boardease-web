@@ -2,14 +2,15 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
+  ArrowRight,
   DoorOpen,
-  Eye,
   LoaderCircle,
   Plus,
   RefreshCw,
   Search,
   X,
 } from "lucide-react";
+import Link from "next/link";
 
 type Room = {
   roomId: string;
@@ -41,7 +42,6 @@ export default function RoomsClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Room | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
@@ -260,12 +260,12 @@ export default function RoomsClient() {
                       </span>
                     </td>
                     <td>
-                      <button
+                      <Link
                         className="detail-button"
-                        onClick={() => setSelected(room)}
+                        href={`/room_management/${encodeURIComponent(room.roomId)}`}
                       >
-                        <Eye size={14} /> Details
-                      </button>
+                        View Room <ArrowRight size={14} />
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -274,66 +274,6 @@ export default function RoomsClient() {
           </div>
         )}
       </section>
-      {selected && (
-        <div
-          className="room-overlay"
-          role="presentation"
-          onClick={() => setSelected(null)}
-        >
-          <aside
-            className="room-drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="room-detail-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="drawer-heading">
-              <div>
-                <p className="eyebrow">ROOM DETAILS</p>
-                <h2 id="room-detail-title">Room {selected.roomNumber}</h2>
-              </div>
-              <button
-                className="drawer-close"
-                onClick={() => setSelected(null)}
-                aria-label="Close details"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="drawer-status">
-              <span className={`room-status ${selected.status}`}>
-                {selected.status === "occupied" ? "Occupied" : "Available"}
-              </span>
-              <span>Added to your property</span>
-            </div>
-            <dl className="room-detail-list">
-              <div>
-                <dt>Room type</dt>
-                <dd>Standard</dd>
-              </div>
-              <div>
-                <dt>Capacity</dt>
-                <dd>
-                  {selected.maxOccupancy}{" "}
-                  {selected.maxOccupancy === 1 ? "person" : "people"}
-                </dd>
-              </div>
-              <div>
-                <dt>Occupied tenants</dt>
-                <dd>{selected.currentTenant ?? "No tenant assigned"}</dd>
-              </div>
-              <div>
-                <dt>Monthly rent</dt>
-                <dd>{money(selected.monthlyRent)}</dd>
-              </div>
-            </dl>
-            <div className="drawer-note">
-              <strong>Editing room details</strong>
-              <p>Room editing will be available when the property API supports updates.</p>
-            </div>
-          </aside>
-        </div>
-      )}
       {showForm && (
         <div
           className="room-overlay"

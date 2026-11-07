@@ -39,7 +39,9 @@ export default function DashboardSidebar() {
 
       <nav aria-label="Workspace" className="sidebar-navigation">
         {navigation.map(({ label, icon: Icon, href }) => {
-          const active = pathname === href;
+          const active =
+            pathname === href ||
+            (href === "/rooms" && pathname.startsWith("/room_management"));
           return (
             <Link
               key={label}
