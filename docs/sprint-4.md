@@ -10,12 +10,12 @@ To finalize admin room management UI design and create room data api to be able 
 
 ## Tasks
 
-| Task                                   | Member         | Pull Request  | Status      |
-| -------------------------------------- | -------------- | ------------- | ----------- |
-| 4.1 Create Room API                    | Kendall Maputi | Web: #15, #16 | Done        |
-| 4.2 Design Room Management UI in Figma | Elijah Bes     | in Figma      | in Progress |
-| 4.3 Build Room Management interface    | Hurveen Veloso | Web:          | Done        |
-| 4.4 Manage Room Information            | Joachim Chiong | in Progress   | in Progess  |
+| Task                                   | Member         | Pull Request   | Status |
+| -------------------------------------- | -------------- | -------------- | ------ |
+| 4.1 Create Room API                    | Kendall Maputi | Web: #15, #16  | Done   |
+| 4.2 Design Room Management UI in Figma | Elijah Bes     | in Figma       | Done   |
+| 4.3 Build Room Management interface    | Hurveen Veloso | Web: #17       | Done   |
+| 4.4 Manage Room Information            | Joachim Chiong | Pushed in Main | Done   |
 
 **Demo result:**
 
@@ -24,25 +24,25 @@ To finalize admin room management UI design and create room data api to be able 
 ### Hurveen Veloso
 
 - **Merged:** 4.3 Build Room Management Interface
-- **Next:**
+- **Next:** None
 - **Blocked by:** None
 
 ### Kendall Maputi
 
 - **Merged:** 4.1 Create Room Api
-- **Next:**
+- **Next:** 5.4 Manage Tenant Information
 - **Blocked by:** None
 
 ### Joachim Chiong
 
 - **Merged:** 4.4 Manage Room information
-- **Next:**
+- **Next:** 5.1 Create Tenant API, 5.3 Build Tenant Management Interface
 - **Blocked by:** None
 
 ### Elijah Bes
 
 - **Merged:** 4.2 Design Room Management UI in Figma
-- **Next:**
+- **Next:** 5.2 Design Tenant Management UI in Figma
 - **Blocked by:** None
 
 ## Product Owner

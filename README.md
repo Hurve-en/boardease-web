@@ -332,22 +332,6 @@ The ERD illustrates the planned database tables and relationships.
 
 ## 🚀 Development Status
 
-BoardEase is currently under active development.
-
-### Sprint 1 — Authentication and Authorization
-
-The team has reported completing the first sprint, covering:
-
-- Supabase authentication setup
-- Authentication integration testing
-- Authentication UI design
-- Admin login
-- Tenant login
-- Role-based access control
-- Logout functionality
-
-**Repository verification:** Confirm that each completed task has been reviewed, merged into the main branch, and demonstrated successfully before treating it as verified implementation.
-
 ### Planned Development Modules
 
 | Module                         | Description                                 |
