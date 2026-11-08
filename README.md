@@ -1,4 +1,4 @@
-<div align="center">
+ <div align="center">
 
 <img src="docs_images/boardease%20logo.png" alt="BoardEase Logo" width="200" />
 
@@ -6,7 +6,7 @@
 
 ### Boarding House Billing and Management System
 
-**A web and mobile solution for managing tenants, rooms, monthly billing, and payment records.**
+**A web and mobile application for managing tenants, rooms, monthly billing, and payment records.**
 
 <br />
 
@@ -35,102 +35,94 @@
 
 ## 📖 Overview
 
-**BoardEase** is a boarding-house billing and management system designed to help property owners organize tenant information, room assignments, monthly bills, and payment records.
+**BoardEase** is a boarding house billing and management system designed to help boarding-house owners organize tenant information, room assignments, monthly bills, and payment records.
 
-Traditional manual recordkeeping can make it difficult for boarding-house owners to track rent, utility charges, partial payments, and outstanding balances.
+Instead of relying on manual recordkeeping, BoardEase provides two applications:
 
-BoardEase addresses these challenges through two applications:
+- **Web Application:** For owners and administrators to manage rooms, tenants, billing, and payments.
+- **Mobile Application:** For tenants to register accounts and access their personal billing information.
 
-- **Web Application:** Allows boarding-house owners and administrators to manage rooms, tenants, bills, and payment records.
-- **Mobile Application:** Allows tenants to access their monthly billing information and payment status.
+The goal is to make boarding-house billing and payment tracking more organized and manageable.
 
-The goal is to make boarding-house management more organized, practical, and easier to maintain.
+## 👥 User Roles and Responsibilities
 
-### Project Objectives
-
-- Centralize tenant and room information.
-- Simplify monthly rent and utility billing.
-- Track paid, unpaid, and partially paid bills.
-- Monitor outstanding balances.
-- Provide tenants with access to their own billing records.
-- Reduce manual recordkeeping.
-
----
-
-## ✨ Features
-
-> The following features represent the approved project scope. Implementation progress is tracked separately in the Development Status section.
+BoardEase has two primary user roles, each with different permissions and responsibilities.
 
 ### 🖥️ Admin / Owner — Web Application
 
-#### Authentication and Dashboard
+The Admin manages the boarding-house operations through the web application.
 
-- Admin login and logout
-- Role-based access control
-- Admin dashboard
+**Account Access**
 
-#### Room Management
+- Admin accounts are provided by the system owner or authorized project administrator.
+- Admins sign in using their assigned credentials.
+- Public Admin registration is not available.
 
-- Add and manage rooms
-- Set room rental rates
-- Configure maximum room occupancy
-- Manage room information
+**Dashboard**
 
-#### Tenant Management
+- View the administrative dashboard.
 
-- Manage tenant records
-- Assign tenants to rooms
-- Support single and shared room occupancy
-- Configure tenant-specific rental amounts
+**Room Management**
 
-#### Billing Management
+- Add and manage rooms.
+- Set monthly room rental rates.
+- Configure maximum room occupancy.
+- Monitor room information.
 
-- Create monthly bills
-- Manage monthly rent charges
-- Enter electricity charges
-- Enter water charges
-- Automatically calculate total bills
-- Edit incorrect billing records
-- View billing history
+**Tenant Management**
 
-#### Payment Management
+- View and manage tenant records.
+- Assign registered tenants to rooms.
+- Manage tenant-specific rental amounts.
 
-- Record tenant payments
-- Support partial payments
-- Edit or delete incorrect payment records
-- Track payment status
-- Monitor outstanding balances
+**Billing Management**
+
+- Create monthly bills.
+- Enter rent, electricity, and water charges.
+- Automatically calculate total bills.
+- Edit billing records when corrections are needed.
+- View billing history.
+
+**Payment Management**
+
+- Record payments received from tenants.
+- Support partial payments.
+- Edit or delete incorrect payment records.
+- Monitor payment status and outstanding balances.
 
 ### 📱 Tenant — Mobile Application
 
-#### Account Management
+The Tenant uses the mobile application to manage their account and view personal billing information.
 
-- Tenant registration
-- Tenant login and logout
+**Account Access**
 
-#### Dashboard and Billing
+- Register an account through the mobile application.
+- Sign in and sign out.
+- No Admin-provided account is required for initial tenant registration.
 
-- Tenant dashboard
-- View current monthly bill
-- View bill breakdown
-- View payment status
-- View outstanding balance
-- View billing history
+**Dashboard and Billing**
 
-Tenant access is restricted to the tenant's own authorized records.
+- View personal dashboard.
+- View current monthly bill.
+- View bill breakdown.
+- View payment status.
+- View outstanding balance.
+- View billing history.
+
+**Important:** Tenants can only access their own authorized records. After registration, their account must be properly associated with their tenant record before accessing tenant-specific information. The Admin handles room assignment.
 
 ---
 
 ## 🏗️ System Architecture
 
-BoardEase uses a shared backend architecture consisting of a Next.js web application, an Expo mobile application, and Supabase services.
+BoardEase uses a shared backend architecture. The Admin web application and Tenant mobile application communicate with the same Next.js API/backend.
 
 ### Architecture Overview
 
 ```mermaid
 flowchart TD
-    A["Admin / Owner"] --> B["Next.js Web App"]
-    C["Tenant"] --> D["Expo Mobile App"]
+    A["Admin / Owner"] --> B["Next.js Web Application"]
+    C["Tenant"] --> D["Expo Mobile Application"]
 
     B --> E["Next.js API / Server"]
     D --> E
@@ -143,25 +135,24 @@ flowchart TD
     E -. "Token Validation" .-> H
 ```
 
-### Architecture Components
+### Component Responsibilities
 
-| Component        | Technology             | Responsibility                                              |
-| ---------------- | ---------------------- | ----------------------------------------------------------- |
-| Web Frontend     | Next.js                | Admin and owner interface                                   |
-| Mobile Frontend  | Expo / React Native    | Tenant interface                                            |
-| Backend / API    | Next.js Route Handlers | API requests, validation, authorization, and business logic |
-| Database         | PostgreSQL             | Application data storage                                    |
-| Backend Services | Supabase               | Database integration and services                           |
-| Authentication   | Supabase Auth          | User authentication and sessions                            |
+| Component          | Technology             | Responsibility                                              |
+| ------------------ | ---------------------- | ----------------------------------------------------------- |
+| Web Application    | Next.js                | Admin interface                                             |
+| Mobile Application | Expo / React Native    | Tenant interface                                            |
+| Backend / API      | Next.js Route Handlers | API requests, validation, authorization, and business logic |
+| Database           | PostgreSQL             | Application data storage                                    |
+| Backend Services   | Supabase               | Database and backend services                               |
+| Authentication     | Supabase Auth          | User authentication and sessions                            |
 
 **Architecture Notes:**
 
-- The Next.js web frontend and API/backend are part of the same Next.js project.
-- The Expo mobile application is maintained as a separate application.
-- Both applications use the Next.js backend for application data operations.
+- The Next.js web application and API/backend are part of the same project.
+- The Expo mobile application is a separate project.
+- Both applications use the Next.js API/backend for application data.
 - Supabase Auth handles user authentication.
-- Protected API requests require server-side authorization.
-- Tenants must not be able to access another tenant's billing information.
+- Protected API requests must validate authentication and authorization on the server.
 
 ---
 
@@ -169,87 +160,65 @@ flowchart TD
 
 ### Frontend
 
-| Technology   | Purpose                      |
-| ------------ | ---------------------------- |
-| Next.js      | Admin web application        |
-| React Native | Mobile application framework |
-| Expo         | Mobile development platform  |
+- **Next.js** — Admin web application.
+- **React Native** — Mobile application framework.
+- **Expo** — Mobile development platform.
 
 ### Backend and Database
 
-| Technology             | Purpose             |
-| ---------------------- | ------------------- |
-| Next.js Route Handlers | Backend API         |
-| Supabase               | Backend services    |
-| PostgreSQL             | Relational database |
-| Supabase Auth          | Authentication      |
+- **Next.js Route Handlers** — Backend API.
+- **Supabase** — Backend services.
+- **PostgreSQL** — Relational database.
+- **Supabase Auth** — Authentication.
 
 ### Development and Collaboration
 
-| Technology | Purpose                              |
-| ---------- | ------------------------------------ |
-| Figma      | UI/UX design                         |
-| Git        | Version control                      |
-| GitHub     | Repository hosting and collaboration |
-| Jira       | Project and sprint management        |
+- **Figma** — UI/UX design.
+- **Git** — Version control.
+- **GitHub** — Repository hosting and collaboration.
+- **Jira** — Project and sprint management.
 
 ---
 
 ## 📋 Business Rules
 
-### 1. Tenant Registration
+### 1. Account Registration and Access
 
-Tenants can register their own accounts through the mobile application.
+**Admin**
 
-Registration information includes:
+- Admin accounts are provided by the system owner or authorized project administrator.
+- Admins cannot publicly register through the application.
 
-- First name
-- Last name
-- Email
-- Password
-- Contact number
+**Tenant**
 
-After registration, the Admin can assign a tenant to a room.
-
-Registration alone must not grant access to another tenant's records. Accounts must be securely linked to the correct tenant information.
+- Tenants can register through the mobile application.
+- Registration requires first name, last name, email, password, and contact number.
+- The Admin can assign registered tenants to rooms.
+- Tenant accounts must be securely linked to their corresponding tenant records.
 
 ### 2. Room Occupancy
 
-A room can accommodate one or multiple tenants.
+- A room can accommodate one or multiple tenants.
+- Each room has a maximum occupancy configured by the Admin.
+- The system must prevent assignments that exceed the room's maximum occupancy.
 
-Each room has a maximum occupancy value configured by the Admin.
-
-**Example:**
-
-A room with a maximum occupancy of three tenants can accommodate Tenant A, Tenant B, and Tenant C.
-
-A fourth tenant cannot be assigned while the room is at full capacity.
+**Example:** A room with a maximum occupancy of three cannot accept a fourth tenant while all three spaces are occupied.
 
 ### 3. Rent Management
 
-Each room has a default monthly rental rate.
-
-For shared rooms, the Admin can assign different rental amounts to individual tenants.
-
-BoardEase does not automatically divide the room's rent equally.
-
-**Example:**
-
-| Tenant   | Monthly Rent |
-| -------- | -----------: |
-| Tenant A |       ₱2,000 |
-| Tenant B |       ₱2,500 |
-| Tenant C |       ₱1,500 |
+- Each room has a default monthly rent.
+- For shared rooms, the Admin can assign different rental amounts to individual tenants.
+- Rent is not automatically divided equally.
 
 ### 4. Electricity and Water Charges
 
-The Admin manually enters electricity and water charges for each monthly bill.
-
-BoardEase does not calculate utility charges from meter readings.
+- The Admin manually enters monthly electricity charges.
+- The Admin manually enters monthly water charges.
+- Charges are not calculated using meter readings.
 
 ### 5. Monthly Bill Calculation
 
-The total bill is calculated using:
+The system calculates the total bill using:
 
 ```text
 Total Bill = Rent + Electricity + Water
@@ -268,43 +237,37 @@ The Admin can edit a bill when corrections are required.
 
 ### 6. Payment Recording
 
-Payments are made directly to the boarding-house owner outside the BoardEase application.
+- Tenants pay the owner directly outside BoardEase.
+- BoardEase does not process or receive online payments.
+- After receiving payment, the Admin records it in BoardEase.
+- A bill can have multiple payment records.
+- Partial payments are supported.
+- The Admin can edit or delete incorrect payment records.
 
-The Admin records received payments in the system.
+### 7. Payment Status and Outstanding Balance
 
-A bill can have multiple payment records, allowing partial payments.
+Payment status is determined by the payments recorded against a bill.
 
-Incorrect payment records can be edited or deleted by the Admin.
+| Status    | Condition                                                   |
+| --------- | ----------------------------------------------------------- |
+| `UNPAID`  | No payment has been recorded.                               |
+| `PARTIAL` | Payments have been recorded but do not cover the full bill. |
+| `PAID`    | Total recorded payments cover the full bill.                |
 
-### 7. Payment Status
-
-Payment status is determined by the total payments recorded against a bill.
-
-| Status    | Condition                                                  |
-| --------- | ---------------------------------------------------------- |
-| `UNPAID`  | No payment has been recorded                               |
-| `PARTIAL` | Payments have been recorded but do not cover the full bill |
-| `PAID`    | Total payments cover the full bill                         |
-
-The outstanding balance is calculated as:
+The outstanding balance is calculated using:
 
 ```text
 Outstanding Balance = Total Bill - Total Payments
 ```
 
-Payment status is calculated from payment records rather than manually changed by the Admin.
+Payment status is derived from payment records rather than manually selected by the Admin.
 
 ### 8. Database Security
 
-BoardEase uses role-based authorization to separate Admin and Tenant access.
-
-Security requirements include:
-
-- Only authorized Admin accounts can access management operations.
-- Tenants can access only their own authorized records.
+- Admin and Tenant permissions are enforced through role-based access control.
+- Tenants can only access their own authorized records.
 - Protected API requests must validate authentication and permissions.
-- Client-side access must not allow users to change their own roles.
-- RLS policies on `profiles` must not permit client-side `INSERT` or `UPDATE`, following the project's database security rule.
+- Users must not be able to change their own roles through client-side operations.
 
 ---
 
@@ -312,19 +275,13 @@ Security requirements include:
 
 ### Business Process Flowchart
 
-The business process diagram illustrates the planned workflow for tenant management, billing, and payment recording.
-
 ![BoardEase Business Process Flowchart](docs_images/flowchart.png)
 
 ### System Architecture Diagram
 
-The system architecture diagram illustrates the relationships between the web application, mobile application, backend, and Supabase services.
-
-![BoardEase System Architecture Diagram](docs_images/systemarchitecture.png)
+![BoardEase System Architecture](docs_images/systemarchitecture.png)
 
 ### Entity Relationship Diagram
-
-The ERD illustrates the planned database tables and relationships.
 
 ![BoardEase Entity Relationship Diagram](docs_images/image_erd.png)
 
@@ -332,151 +289,47 @@ The ERD illustrates the planned database tables and relationships.
 
 ## 🚀 Development Status
 
-### Planned Development Modules
+BoardEase is currently under development.
 
-| Module                         | Description                                 |
-| ------------------------------ | ------------------------------------------- |
-| Authentication & Authorization | User authentication and role-based access   |
-| API & Backend Services         | Shared backend API and Supabase integration |
-| Admin Dashboard                | Management overview                         |
-| Room Management                | Room information and occupancy              |
-| Tenant Management              | Tenant records                              |
-| Tenant-Room Assignment         | Room assignment operations                  |
-| Billing                        | Monthly rent and utility billing            |
-| Payment                        | Payment recording and balances              |
-| Billing History                | Historical billing records                  |
-| Tenant Mobile App              | Tenant-facing billing interface             |
-| Testing & Integration          | Application testing and integration         |
+The project is organized into the following development modules:
 
-### Demo / Simulated Functionality
+| Module                         | Description                                  |
+| ------------------------------ | -------------------------------------------- |
+| Authentication & Authorization | Account authentication and role-based access |
+| API & Backend Services         | Shared backend API and Supabase integration  |
+| Admin Dashboard                | Administrative overview                      |
+| Room Management                | Room information and occupancy               |
+| Tenant Management              | Tenant records                               |
+| Tenant-Room Assignment         | Assigning tenants to rooms                   |
+| Billing                        | Monthly rent and utility billing             |
+| Payment                        | Payment recording and balance tracking       |
+| Billing History                | Historical billing records                   |
+| Tenant Mobile App              | Tenant-facing application                    |
+| Testing & Integration          | Application testing and integration          |
 
-No simulated functionality has been verified from the repository.
+### Known Project Limitations
 
-### Known Limitations
-
-- No online payment processing.
-- Utility charges require manual entry.
-- The system is scoped to boarding-house billing and management.
-- Automated test coverage has not yet been verified.
-- Production deployment status has not yet been verified.
-
----
-
-## ⚙️ Getting Started
-
-> The following setup requirements are based on the selected technology stack. Exact commands and environment-variable names must be confirmed against the repository before use.
-
-### Prerequisites
-
-- Node.js
-- Git
-- A compatible Node.js package manager
-- A Supabase project
-- An environment capable of running Next.js and Expo applications
-
-### Installation
-
-Repository-specific installation instructions are pending verification.
-
-Before running the project:
-
-1. Clone the correct repository.
-2. Install dependencies using the package manager specified by the project.
-3. Configure the required Supabase environment variables.
-4. Start the Next.js application using its documented script.
-5. Start the Expo application using its documented script.
-
-### Environment Configuration
-
-Environment variables must match the names expected by the actual application source code.
-
-Never commit real credentials, service-role keys, or `.env` files containing secrets.
-
-### Development Commands
-
-Exact commands will be documented after verifying the project's `package.json` files and repository structure.
-
----
-
-## 🧪 Testing and Validation
-
-The following are the intended testing areas for BoardEase:
-
-### Authentication and Authorization
-
-- Admin login and logout
-- Tenant login and logout
-- Invalid login handling
-- Role-based route restrictions
-- Unauthorized API request handling
-- Tenant data ownership
-
-### Room and Tenant Management
-
-- Room creation and editing
-- Maximum occupancy validation
-- Tenant assignment restrictions
-
-### Billing and Payments
-
-- Monthly bill calculation
-- Electricity and water charge handling
-- Partial payment recording
-- Payment status calculation
-- Outstanding balance calculation
-
-**Test results:** Automated test commands and passing results have not yet been verified against the repository.
-
----
-
-## 🎬 Manual Demonstration
-
-The following is the intended demonstration workflow. Use only the steps supported by the currently implemented application.
-
-1. Launch the Admin web application.
-2. Sign in using an authorized Admin account.
-3. Demonstrate the available Admin features.
-4. Verify that Admin-only access is protected.
-5. Log out.
-6. Launch the Tenant mobile application.
-7. Sign in using an authorized Tenant account.
-8. Demonstrate the available Tenant features.
-9. Verify that the Tenant cannot access Admin-only functionality.
-10. Log out and confirm the session has ended.
-
----
-
-## 🔧 Troubleshooting
-
-### Supabase Connection Issues
-
-Verify that the application has the correct Supabase configuration and required environment variables.
-
-### Authentication Problems
-
-Verify the Supabase Auth configuration, user session, and assigned role.
-
-### Application Startup Problems
-
-Ensure dependencies are installed and the correct development scripts are being used.
+- No online payment processing or third-party payment gateway integration.
+- Electricity and water charges are manually entered.
+- The current scope focuses on boarding-house billing and management.
 
 ---
 
 ## 🚫 Out of Scope
 
-The following features are not part of the current BoardEase project:
+The following features are not included in the current project scope:
 
-- Online payment processing
-- GCash, Maya, or bank payment integration
-- Chat and messaging
-- Artificial intelligence features
-- SMS integration
-- Complex notifications
-- Multiple boarding-house branches
-- Advanced accounting
-- Maintenance management
-- Inventory management
-- Booking and reservations
+- GCash, Maya, or bank payment integration.
+- Online payment processing.
+- Chat and messaging.
+- Artificial intelligence features.
+- SMS integration.
+- Complex notification systems.
+- Multiple boarding-house branches.
+- Advanced accounting.
+- Maintenance management.
+- Inventory management.
+- Booking and reservations.
 
 ---
 
@@ -488,31 +341,6 @@ The following features are not part of the current BoardEase project:
 | Fullstack Developer       | Kendall Bryant Maputi  |
 | Fullstack Developer       | Joachim Ray Chiong     |
 | Fullstack Developer       | Elijah Bes             |
-
----
-
-## 📊 Project Evidence Checklist
-
-The following categories are provisional and can be adjusted if an official evaluation rubric is provided.
-
-| Category           | Supporting Evidence                                   |
-| ------------------ | ----------------------------------------------------- |
-| Problem and Impact | Overview and Project Objectives                       |
-| Technical Design   | System Architecture and Technical Diagrams            |
-| Functionality      | Features and Development Status                       |
-| Technical Quality  | Evidence needed: code review and test results         |
-| Collaboration      | Team Roles, GitHub commits, issues, and pull requests |
-| Documentation      | README and technical diagrams                         |
-| Demonstration      | Evidence needed: working demo or video                |
-| Originality        | Evidence needed: project-specific design decisions    |
-
----
-
-## 📄 License
-
-A repository license has not yet been confirmed.
-
-Add the appropriate license information once the team has selected and committed a license file.
 
 ---
 
