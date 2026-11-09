@@ -78,13 +78,6 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <Link
-        href="/register"
-        className="block w-full rounded-lg border border-[#613d2b] py-3 text-center text-sm font-medium text-[#613d2b] transition hover:bg-[#efe3d5]"
-      >
-        Create an account
-      </Link>
-
       <p className="text-xs text-[#8a817a]">
         Need an account? Ask your boarding-house owner for your sign-in details.
       </p>
