@@ -38,24 +38,9 @@ export default function RoomDetails({
   const chipClass = `${styles.chip} ${occupied ? "" : styles.chipAvailable}`;
   const statusLabel = occupied ? "Occupied" : "Available";
   const assignHref = `/tenants?room=${room.id}`;
-  const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
 
   return (
     <div className={styles.root}>
-      <header className={styles.topbar}>
-        <nav className={styles.crumbs} aria-label="Breadcrumb">
-          <span>OWNER / WEB</span>
-          <span>ROOMS</span>
-        </nav>
-        <div className={styles.topRight}>
-          <span>{today}</span>
-          <svg className={styles.icon} viewBox="0 0 24 24" aria-label="Notifications">
-            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.7 21a2 2 0 0 1-3.4 0" />
-          </svg>
-        </div>
-      </header>
-
       <main className={styles.main}>
         <Link className={styles.back} href="/rooms">← Back to rooms</Link>
 
@@ -158,10 +143,6 @@ export default function RoomDetails({
         </div>
       </main>
 
-      <footer className={styles.footer}>
-        <span>BoardEase · {property.name} · All amounts in Philippine pesos (PHP)</span>
-        <span>Owner workspace</span>
-      </footer>
     </div>
   );
 }
