@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Room = {
   roomId: string;
@@ -33,6 +34,7 @@ const money = (value: string | number) =>
   );
 
 export default function RoomsClient() {
+  const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [summary, setSummary] = useState<Summary>({
     total: 0,
@@ -87,13 +89,7 @@ export default function RoomsClient() {
   );
 
   function openCreate() {
-    setForm({
-      roomNumber: "",
-      monthlyRent: "",
-      maxOccupancy: "1",
-    });
-    setFormError("");
-    setShowForm(true);
+    router.push("/room_management/add");
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -302,64 +298,7 @@ export default function RoomsClient() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={submit} className="room-form">
-              <label>
-                Room number
-                <input
-                  value={form.roomNumber}
-                  onChange={(event) =>
-                    setForm({ ...form, roomNumber: event.target.value })
-                  }
-                  placeholder="e.g. 101"
-                  autoFocus
-                />
-              </label>
-              <label>
-                Monthly rent
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.monthlyRent}
-                  onChange={(event) =>
-                    setForm({ ...form, monthlyRent: event.target.value })
-                  }
-                  placeholder="0.00"
-                />
-              </label>
-              <label>
-                Maximum occupancy
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={form.maxOccupancy}
-                  onChange={(event) =>
-                    setForm({ ...form, maxOccupancy: event.target.value })
-                  }
-                />
-              </label>
-              {formError && (
-                <p className="form-error" role="alert">
-                  {formError}
-                </p>
-              )}
-              <button
-                className="primary-action form-submit"
-                type="submit"
-                disabled={saving}
-              >
-                {saving ? (
-                  <>
-                    <LoaderCircle className="spin" size={15} /> Saving…
-                  </>
-                ) : (
-                  <>
-                    <Plus size={15} /> Save room
-                  </>
-                )}
-              </button>
-            </form>
+    
           </div>
         </div>
       )}
