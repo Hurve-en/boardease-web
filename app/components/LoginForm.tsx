@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -16,12 +16,30 @@ const initialState: LoginState = {
 export default function LoginForm() {
   const router = useRouter();
   const [state, action, pending] = useActionState(signIn, initialState);
+  const [email, setEmail] = useState(
+    () =>
+      typeof window === "undefined"
+        ? initialState.email
+        : window.localStorage.getItem("boardease-remembered-email") ?? "",
+  );
+  const [rememberMe, setRememberMe] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      Boolean(window.localStorage.getItem("boardease-remembered-email")),
+  );
 
   useEffect(() => {
     if (!state.success) return;
+
+    if (rememberMe && state.email) {
+      window.localStorage.setItem("boardease-remembered-email", state.email);
+    } else {
+      window.localStorage.removeItem("boardease-remembered-email");
+    }
+
     const t = setTimeout(() => router.push("/dashboard"), 1200);
     return () => clearTimeout(t);
-  }, [state.success, router]);
+  }, [state.success, state.email, rememberMe, router]);
 
   return (
     <div className="w-full max-w-md space-y-6">
@@ -42,7 +60,9 @@ export default function LoginForm() {
           label="Email address"
           type="email"
           placeholder="you@email.com"
-          defaultValue={state.email}
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          autoComplete="email"
           required
         />
         <TextField
@@ -54,8 +74,18 @@ export default function LoginForm() {
           required
         />
 
+        <label className="flex items-center gap-2 text-xs text-[#8a817a]">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(event) => setRememberMe(event.target.checked)}
+            className="h-4 w-4 accent-[#613d2b]"
+          />
+          Remember me
+        </label>
+
         <Link
-          href="/forgot-password"
+          href="/forget-password"
           className="block text-xs font-medium text-[#613d2b]"
         >
           Forgot password?
