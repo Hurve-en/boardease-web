@@ -8,12 +8,64 @@
   --line: #e8dfd5;
   --brown: #65412e;
   --card: #fff;
+
+    /* Surfaces */
+  --be-canvas: #F7F4EE;
+  --be-surface: #FFFFFF;
+  --be-surface-subtle: #EEE7DD;
+  --be-surface-selected: #EDE1D3;
+  --be-nav-sidebar: #38271F;
+
+  /* Action + text */
+  --be-action-primary: #603E2B;
+  --be-text-primary: #302A25;
+  --be-text-muted: #80766D;
+
+  /* Borders */
+  --be-border-subtle: #E5DED5;
+  --be-border-strong: #D5C3B3;
+
+  /* Status pairs (text / surface) */
+  --be-success-text: #38674B;  --be-success-surface: #E8F0E9;
+  --be-warning-text: #8D6127;  --be-warning-surface: #FAEED7;
+  --be-danger-text:  #9B493B;  --be-danger-surface:  #F7E6E0;
+
+  /* Shape */
+  --be-radius-control: 8px;
+  --be-radius-inset: 10px;
+  --be-radius-table: 12px;
+  --be-radius-card: 16px;
+  --be-radius-pill: 999px;
+
+  /* Elevation: flat by default, raised only for menus */
+  --be-shadow-raised: 0 4px 16px rgba(56, 39, 31, 0.08);
+
+  /* Focus: 2px primary ring with a 3px clear gap */
+  --be-focus-width: 2px;
+  --be-focus-gap: 3px;
 }
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+    --color-be-canvas: var(--be-canvas);
+  --color-be-surface: var(--be-surface);
+  --color-be-subtle: var(--be-surface-subtle);
+  --color-be-selected: var(--be-surface-selected);
+  --color-be-sidebar: var(--be-nav-sidebar);
+  --color-be-primary: var(--be-action-primary);
+  --color-be-ink: var(--be-text-primary);
+  --color-be-muted: var(--be-text-muted);
+  --color-be-line: var(--be-border-subtle);
+  --color-be-line-strong: var(--be-border-strong);
+  --color-be-success: var(--be-success-text);
+  --color-be-success-bg: var(--be-success-surface);
+  --color-be-warning: var(--be-warning-text);
+  --color-be-warning-bg: var(--be-warning-surface);
+  --color-be-danger: var(--be-danger-text);
+  --color-be-danger-bg: var(--be-danger-surface);
 }
 * {
   box-sizing: border-box;
