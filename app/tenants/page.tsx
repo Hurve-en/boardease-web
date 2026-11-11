@@ -1,7 +1,22 @@
 
 import DashboardShell from "@/app/components/dashboard/DashboardShell";
 import { verifyAdmin } from "@/lib/dal";
-import {getTenantData} from "@/lib/tenants";
+import {AssignRoom, getTenantData} from "@/lib/tenants";
+
+async function assignRoomAction(formData: FormData) {
+  "use server";
+
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "");
+  const roomId = String(formData.get("roomId") ?? "");
+  const hasRecord = formData.get("hasRecord") === "true";
+
+  if (!id || !name || !roomId) {
+    throw new Error("Select a tenant and a room before assigning.");
+  }
+
+  await AssignRoom({id, name, roomId, hasRecord});
+}
 
 export default async function TenantsPage() {
   const data = await getTenantData();
@@ -27,27 +42,52 @@ export default async function TenantsPage() {
      
             <div className="pt-50"/>
 
-            <h1 className = "text-3xl">Tenants</h1>
-                {data.tenants.map((t) => (
-            <tr key={t.id}>
-                <td className = "px-6 py-4 whitespace-nowrap font-bold">{t.name}</td>
-                <td>{t.roomNumber || "Unassigned"}</td>
-                <td>{t.status}</td>
-            </tr>
-        ))}
-
-
-
-
-
-
-
-
-
-
-
-
-        
+            <h1 className="text-3xl">Tenants</h1>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Room</th>
+                  <th>Status</th>
+                  <th>Assignment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.tenants.map((tenant) => (
+                  <tr key={tenant.id}>
+                    <td className="px-6 py-4 whitespace-nowrap font-bold">
+                      {tenant.name}
+                    </td>
+                    <td>{tenant.roomNumber || "Unassigned"}</td>
+                    <td>{tenant.status}</td>
+                    <td>
+                      <form action={assignRoomAction}>
+                        <input type="hidden" name="id" value={tenant.id} />
+                        <input type="hidden" name="name" value={tenant.name} />
+                        <input
+                          type="hidden"
+                          name="hasRecord"
+                          value={String(tenant.hasRecord)}
+                        />
+                        <select name="roomId" defaultValue="" required>
+                          <option value="" disabled>
+                            Select room
+                          </option>
+                          {data.AvailableRooms.map((room) => (
+                            <option key={room.roomId} value={room.roomId}>
+                              {room.roomNumber} ({room.monthlyRent}/month)
+                            </option>
+                          ))}
+                        </select>
+                        <button type="submit" disabled={!data.AvailableRooms.length}>
+                          Assign room
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
             <div className="pt-50"/>
 

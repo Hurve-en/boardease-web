@@ -1,11 +1,11 @@
 import "server-only";
 
 import {and, eq, isNull, sql} from "drizzle-orm";
+import {revalidatePath} from "next/cache";
 import {db} from "@/db";
 
-import {tenants, tenantRoomAssignment, rooms} from "@/db/schema";
 
-import {userRoles, profiles} from "@/drizzle/schema";
+import {userRoles, profiles,tenants, tenantRoomAssignment, rooms} from "@/drizzle/schema";
 
 export type TenantData = {
 
@@ -15,6 +15,7 @@ export type TenantData = {
         status: "active" | "inactive";
         roomId: string | null;
         startDate: string;
+        hasRecord: boolean;
         roomNumber: string;
         endDate: string | null;
     }[];
@@ -102,6 +103,7 @@ export async function getTenantData(): Promise<TenantData> {
             name: String(t.name ?? ""),
             roomNumber: String(t.assignedRoom ?? ""),
             status: String(t.status ?? "inactive") as "active" | "inactive",
+            hasRecord: true,
             roomId: t.roomId,
             startDate: String(t.startDate ?? ""),
             endDate: t.endDate ? String(t.endDate) : null,
@@ -111,6 +113,7 @@ export async function getTenantData(): Promise<TenantData> {
             name: String(p.name ?? ""),
             roomNumber: "",
             status: "inactive" as const,
+            hasRecord: false,
             roomId: null,
             startDate: "",
             endDate: null,
@@ -139,3 +142,21 @@ export async function getTenantData(): Promise<TenantData> {
 }
 
 
+export async function AssignRoom(input:{
+    id: string;
+    name: string;
+    contactNumber?: string;
+    hasRecord: boolean;
+    roomId: string;
+}){
+
+
+await db.transaction(async (tx) => {
+
+  
+
+revalidatePath("/tenants");
+
+
+});
+}
