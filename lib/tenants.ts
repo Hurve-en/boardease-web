@@ -3,7 +3,8 @@ import "server-only";
 import {and, eq, isNull, sql} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
 import {db} from "@/db";
-
+import {createClient} from "@/lib/supabase/server";
+import { date } from 'drizzle-orm/pg-core'
 
 import {userRoles, profiles,tenants, tenantRoomAssignment, rooms} from "@/drizzle/schema";
 
@@ -142,21 +143,60 @@ export async function getTenantData(): Promise<TenantData> {
 }
 
 
-export async function AssignRoom(input:{
-    id: string;
-    name: string;
-    contactNumber?: string;
-    hasRecord: boolean;
+
+export async function AssignRoom(input: {
+    tenant_Id: string;
     roomId: string;
-}){
+    hasRecord: boolean;
+    start_date: string;
+    end_date: string;
+    status: "active" | "inactive";
+}) {
+
+    const supabase = await createClient()
+    const{data:{user}} = await supabase.auth.getUser()
+
+    if(!user) throw new Error("User not authenticated")
+
+        try{
+            const assignment = await db.transaction(async(tx) => {
+                await tx
+                    .update(tenantRoomAssignment)
+                    .set({status: "inactive"})
+                    .where(and(
+                        eq(tenantRoomAssignment.tenantId, input.tenant_Id),
+                        eq(tenantRoomAssignment.status, "active"),
+                    ));
+
+                await tx
+                    .update(tenantRoomAssignment)
+                    .set({status: "inactive"})
+                    .where(and(
+                        eq(tenantRoomAssignment.roomId, input.roomId),
+                        eq(tenantRoomAssignment.status, "active"),
+                    ));
+
+                const[created] = await tx 
+                .insert(tenantRoomAssignment)
+                .values({
+                    tenantId: input.tenant_Id,
+                    roomId: input.roomId,
+                    startDate: input.start_date,
+                    endDate: input.end_date,
+                    status: input.status,
+                })
+                .returning()
+
+                return created
+
+                })
+
+                return{ok: true, assignment}
+
+            }catch (error) {
+                console.error("Error assigning room:", error);
+                throw new Error("Failed to assign room. Please try again.");
+            }
 
 
-await db.transaction(async (tx) => {
-
-  
-
-revalidatePath("/tenants");
-
-
-});
-}
+        }
