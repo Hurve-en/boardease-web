@@ -22,6 +22,7 @@ export default async function RoomPage({
           id: details.room.roomId,
           identifier: details.room.roomNumber,
           monthly_rent: details.room.monthlyRent,
+          max_occupancy: details.room.maxOccupancy,
         }}
         property={{ name: "Maple House" }}
         tenant={

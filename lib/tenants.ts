@@ -160,11 +160,48 @@ export async function AssignRoom(input: {
 
         try{
             const assignment = await db.transaction(async(tx) => {
+                let tenantId = input.tenant_Id;
+                const [existingTenant] = await tx
+                    .select({ tenantId: tenants.tenantId })
+                    .from(tenants)
+                    .where(eq(tenants.tenantId, input.tenant_Id))
+                    .limit(1);
+
+                if (!existingTenant) {
+                    const [profile] = await tx
+                        .select({
+                            id: profiles.id,
+                            name: profiles.name,
+                        })
+                        .from(profiles)
+                        .where(eq(profiles.id, input.tenant_Id))
+                        .limit(1);
+
+                    if (!profile) {
+                        throw new Error("Tenant not found");
+                    }
+
+                    const nameParts = profile.name.trim().split(/\s+/);
+                    const firstName = nameParts.shift() || "Tenant";
+                    const lastName = nameParts.join(" ") || firstName;
+                    const [createdTenant] = await tx
+                        .insert(tenants)
+                        .values({
+                            userId: profile.id,
+                            firstName,
+                            lastName,
+                            contactNumber: "",
+                        })
+                        .returning({ tenantId: tenants.tenantId });
+
+                    tenantId = createdTenant.tenantId;
+                }
+
                 await tx
                     .update(tenantRoomAssignment)
                     .set({status: "inactive"})
                     .where(and(
-                        eq(tenantRoomAssignment.tenantId, input.tenant_Id),
+                        eq(tenantRoomAssignment.tenantId, tenantId),
                         eq(tenantRoomAssignment.status, "active"),
                     ));
 
@@ -179,7 +216,7 @@ export async function AssignRoom(input: {
                 const[created] = await tx 
                 .insert(tenantRoomAssignment)
                 .values({
-                    tenantId: input.tenant_Id,
+                    tenantId,
                     roomId: input.roomId,
                     startDate: input.start_date,
                     endDate: input.end_date,

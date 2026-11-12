@@ -1,5 +1,6 @@
-import "server-only";
 
+
+import "server-only";
 import {and, eq, gte, lte, or, isNull} from "drizzle-orm";
 import {db} from "@/db";
 import {
@@ -9,12 +10,15 @@ import {
 	profiles,
 	tenantRoomAssignment,
 } from "@/db/schema";
+import { createClient } from "./supabase/server";
+import { revalidatePath } from "next/cache";
 
 export type RoomDetails = {
   room: {
     roomId: string;
     roomNumber: string;
     monthlyRent: number;
+    maxOccupancy: number;
     status: string;
   };
 
@@ -65,6 +69,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 			roomId: rooms.roomId,
 			roomNumber: rooms.roomNumber,
 			monthlyRent: rooms.monthlyRent,
+			maxOccupancy: rooms.maxOccupancy,
 			roomStatus: rooms.status,
 			tenantId: tenants.tenantId,
 			firstName: tenants.firstName,
@@ -111,6 +116,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 			roomId: row.roomId,
 			roomNumber: row.roomNumber,
 			monthlyRent: Number(row.monthlyRent),
+			maxOccupancy: Number(row.maxOccupancy),
 			status: row.roomStatus,
 		},
 		tenant: row.tenantId
@@ -134,4 +140,51 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 				}
 			: null,
 	};
+}
+
+
+export type UpdateActionState = {
+  success: boolean;
+  error?: string;
+  message?: string;
+};
+
+export async function EditRoomDetails(
+  _prev: UpdateActionState,
+  formData: FormData,
+): Promise<UpdateActionState> {
+
+	const roomId = String(formData.get("roomId"));
+	const RoomName = formData.get("roomName")?.toString();
+	const NewMaxOccupancy = Number(formData.get("maxOccupancy"));
+	const NewMonthlyRent = formData.get("monthlyRent")?.toString();
+
+
+	try{ 
+	
+		const[room] = await db
+		.select()
+		.from(rooms)
+		.where(eq(rooms.roomId, roomId))
+
+		if(!room) throw new Error("Room not found");
+
+	const[updateRoom] = await db
+	.update(rooms)
+	.set({ 
+		roomNumber: RoomName,
+		monthlyRent: NewMonthlyRent,
+		maxOccupancy: NewMaxOccupancy,
+	})
+	.where(eq(rooms.roomId, roomId))
+	.returning();
+
+	
+}catch(error){ 
+	throw new Error("Failed to update room details: " + (error as Error).message);
+}
+
+ revalidatePath(`/rooms/${roomId}`);
+  return { success: true, message: "Room updated" };
+
 }

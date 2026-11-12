@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const ROOMS_PATH = "/rooms";
@@ -101,14 +100,7 @@ export default function RoomsClient() {
 
   return (
     <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-12 pt-8">
-        <Link
-          href={ROOMS_PATH}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5e3d2b] hover:underline"
-        >
-          <span aria-hidden="true">←</span> Back to rooms
-        </Link>
-
-        <h1 className="mt-6 text-[32px] font-semibold tracking-tight text-[#2f2520]">
+        <h1 className="text-[32px] font-semibold tracking-tight text-[#2f2520]">
           Add room
         </h1>
         <p className="mt-1 text-sm text-[#7d7269]">
