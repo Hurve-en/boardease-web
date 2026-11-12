@@ -29,4 +29,33 @@ export const CreateRoomSchema = z.object({
 		.default(1),
 });
 
+export const CreateTenantSchema = z.object({
+	userId: z.uuid({error: "Enter a valid user ID."}),
+
+	firstName: z
+		.string({error: "First name is required."})
+		.trim()
+		.min(1, {error: "First name is required."})
+		.max(100, {error: "First name is too long."}),
+
+	lastName: z
+		.string({error: "Last name is required."})
+		.trim()
+		.min(1, {error: "Last name is required."})
+		.max(100, {error: "Last name is too long."}),
+
+	contactNumber: z
+		.string({error: "Contact number is required."})
+		.trim()
+		.regex(/^09\d{9}$/, {error: "Enter a valid contact number (09XXXXXXXXX)."}),
+});
+
+export const UpdateTenantSchema = CreateTenantSchema.omit({userId: true})
+	.partial()
+	.refine((data) => Object.keys(data).length > 0, {
+		error: "Send at least one field to update.",
+	});
+
 export type CreateRoomInput = z.infer<typeof CreateRoomSchema>;
+export type CreateTenantInput = z.infer<typeof CreateTenantSchema>;
+export type UpdateTenantInput = z.infer<typeof UpdateTenantSchema>;
