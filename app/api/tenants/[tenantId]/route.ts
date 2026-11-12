@@ -13,7 +13,7 @@ export async function PATCH(
 
 	const {tenantId} = await ctx.params;
 	if (!z.uuid().safeParse(tenantId).success) {
-		return NextResponse.json({error: "Tenant not found"}, {status: 404});
+		return NextResponse.json({error: "Tenant not found."}, {status: 404});
 	}
 
 	const body = await request.json().catch(() => null);
