@@ -2,7 +2,30 @@ import {NextResponse} from "next/server";
 import {z} from "zod";
 import {authorize} from "@/lib/api-auth";
 import {UpdateTenantSchema} from "@/lib/definitions";
-import {updateTenant} from "@/lib/tenant-info";
+import {getTenantById, updateTenant} from "@/lib/tenant-info";
+
+export async function GET(
+	request: Request,
+	ctx: RouteContext<"/api/tenants/[tenantId]">,
+) {
+	const auth = await authorize(request, ["admin"]);
+	if (auth.response) return auth.response;
+
+	const {tenantId} = await ctx.params;
+	if (!z.uuid().safeParse(tenantId).success) {
+		return NextResponse.json({error: "Tenant not found."}, {status: 404});
+	}
+
+	try {
+		const tenant = await getTenantById(tenantId);
+		if (!tenant) {
+			return NextResponse.json({error: "Tenant not found."}, {status: 404});
+		}
+		return NextResponse.json(tenant);
+	} catch {
+		return NextResponse.json({error: "Failed to load tenant."}, {status: 500});
+	}
+}
 
 export async function PATCH(
 	request: Request,

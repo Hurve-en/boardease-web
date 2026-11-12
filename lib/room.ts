@@ -5,6 +5,7 @@ import type {CreateRoomInput} from "@/lib/definitions";
 import {and, eq, sql} from "drizzle-orm";
 import {rooms, tenantRoomAssignment, tenants} from "@/db/schema";
 import {db} from "@/db";
+import {isUniqueViolation} from "./db-errors";
 
 export type RoomSummary = {
 	total: number;
@@ -40,29 +41,33 @@ export async function getRoomSummary(): Promise<RoomSummary> {
 }
 
 export async function getRooms(): Promise<RoomListItem[]> {
-	return db
-		.select({
-			roomId: rooms.roomId,
-			roomNumber: rooms.roomNumber,
-			monthlyRent: rooms.monthlyRent,
-			maxOccupancy: rooms.maxOccupancy,
-			status: rooms.status,
-			createdAt: rooms.createdAt,
-			currentTenant: sql<
-				string | null
-			>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
-			assignmentStart: tenantRoomAssignment.startDate,
-		})
-		.from(rooms)
-		.leftJoin(
-			tenantRoomAssignment,
-			and(
-				eq(tenantRoomAssignment.roomId, rooms.roomId),
-				eq(tenantRoomAssignment.status, "active"),
-			),
-		) // first join is for the frontend to determine if it has an active tenant or not
-		.leftJoin(tenants, eq(tenants.tenantId, tenantRoomAssignment.tenantId))
-		.orderBy(rooms.roomNumber); // second join is for the tenant's name
+	return (
+		db
+			.select({
+				roomId: rooms.roomId,
+				roomNumber: rooms.roomNumber,
+				monthlyRent: rooms.monthlyRent,
+				maxOccupancy: rooms.maxOccupancy,
+				status: rooms.status,
+				createdAt: rooms.createdAt,
+				currentTenant: sql<
+					string | null
+				>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+				assignmentStart: tenantRoomAssignment.startDate,
+			})
+			.from(rooms)
+			// first join is for the frontend to determine if it has an active tenant or not
+			.leftJoin(
+				tenantRoomAssignment,
+				and(
+					eq(tenantRoomAssignment.roomId, rooms.roomId),
+					eq(tenantRoomAssignment.status, "active"),
+				),
+			)
+			// second join is for the tenant's name
+			.leftJoin(tenants, eq(tenants.tenantId, tenantRoomAssignment.tenantId))
+			.orderBy(rooms.roomNumber)
+	);
 }
 
 export async function createRoom(input: CreateRoomInput) {
@@ -79,8 +84,5 @@ export async function createRoom(input: CreateRoomInput) {
 }
 
 export function isDuplicateRoomNumber(error: unknown): boolean {
-	return (
-		error instanceof Error &&
-		(error.cause as {code?: string} | undefined)?.code === "23505"
-	);
+	return isUniqueViolation(error);
 }
