@@ -28,7 +28,18 @@ export function TenantTable({tenants, rooms}: {tenants: Tenant[], rooms: Room[]}
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function handleAssignRoom() {
-      if (!selectedId || !roomId || !startDate || !endDate) return;
+      if (!selectedId) {
+        setMessage("Select a tenant first.");
+        return;
+      }
+      if (!roomId) {
+        setMessage("Select a room first.");
+        return;
+      }
+      if (!startDate || !endDate) {
+        setMessage("Select both a start date and an end date.");
+        return;
+      }
 
       setIsSubmitting(true);
       setMessage(null);
@@ -63,40 +74,94 @@ export function TenantTable({tenants, rooms}: {tenants: Tenant[], rooms: Room[]}
       </thead>
       <tbody>
         {tenants.map((tenant) => (
-          <tr key={tenant.id} onClick={() => setSelectedId(tenant.id)} 
-          className={selectedId === tenant.id ? 'bg-blue-100' : 'hover:bg-gray-100'} >
+          <tr
+            key={tenant.id}
+            onClick={() => setSelectedId(tenant.id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setSelectedId(tenant.id);
+              }
+            }}
+            tabIndex={0}
+            aria-selected={selectedId === tenant.id}
+            className="cursor-pointer hover:bg-gray-100"
+            style={{
+              backgroundColor:
+                selectedId === tenant.id
+                  ? "var(--be-surface-selected)"
+                  : undefined,
+            }}
+          >
             <td className="px-6 py-4 whitespace-nowrap font-bold">
-              {tenant.name}
+              <button
+                type="button"
+                onClick={() => setSelectedId(tenant.id)}
+                aria-pressed={selectedId === tenant.id}
+                className="cursor-pointer border-0 bg-transparent p-0 text-left font-bold"
+              >
+                {tenant.name}
+              </button>
             </td>
             <td>{tenant.roomNumber || "Unassigned"}</td>
             <td>{tenant.status}</td>
+            <td>
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="selected-tenant"
+                  value={tenant.id}
+                  checked={selectedId === tenant.id}
+                  onChange={() => setSelectedId(tenant.id)}
+                  aria-label={`Select ${tenant.name}`}
+                />
+                <span>{selectedId === tenant.id ? "Selected" : "Select"}</span>
+              </label>
+            </td>
           </tr>
         ))}
       </tbody>
-      <tfoot></tfoot>
-
-
-      <select value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-        <option value="">Select Room</option>
-        {rooms.map((r) => (
-          <option key={r.roomId} value={r.roomId}>
-            {r.roomNumber}
-          </option>
-        ))}
-      </select>
-
-
-        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-      <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-
-      {/* only enabled once everything is filled in */}
-      <button
-        disabled={isSubmitting || !selectedId || !roomId || !startDate || !endDate}
-        onClick={() => void handleAssignRoom()}
-      >
-        {isSubmitting ? "Assigning..." : "Assign"}
-      </button>
       </table>
+
+      <div className="mt-4 flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1">
+          <span>Room</span>
+          <select value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+            <option value="">Select Room</option>
+            {rooms.map((r) => (
+              <option key={r.roomId} value={r.roomId}>
+                {r.roomNumber}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span>Start date</span>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span>End date</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </label>
+
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => void handleAssignRoom()}
+        >
+          {isSubmitting ? "Assigning..." : "Assign"}
+        </button>
+      </div>
       {message && <p role="status">{message}</p>}
     </>
   );

@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, eq, isNull, sql} from "drizzle-orm";
+import {and, eq, isNull, notExists, sql} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
 import {db} from "@/db";
 import {createClient} from "@/lib/supabase/server";
@@ -80,7 +80,14 @@ export async function getTenantData(): Promise<TenantData> {
             monthlyRent: rooms.monthlyRent,
         })
         .from(rooms)
-        .where(eq(rooms.status, "unoccupied")),
+        .where(notExists(
+            db.select({assignmentId: tenantRoomAssignment.assignmentId})
+                .from(tenantRoomAssignment)
+                .where(and(
+                    eq(tenantRoomAssignment.roomId, rooms.roomId),
+                    eq(tenantRoomAssignment.status, "active"),
+                )),
+        )),
 
         // 4. profiles with the tenant role that have no tenants row yet
         db.select({

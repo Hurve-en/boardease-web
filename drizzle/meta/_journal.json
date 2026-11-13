@@ -78,6 +78,13 @@
       "when": 1792645559761,
       "tag": "0010_profiles_name",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794543396927,
+      "tag": "0011_sync_room_status",
+      "breakpoints": true
     }
   ]
 }
