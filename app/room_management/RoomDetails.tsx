@@ -2,7 +2,12 @@ import Link from "next/link";
 import styles from "./RoomDetails.module.css";
 
 export type RoomDetailsProps = {
-  room: { id: string; identifier: string; monthly_rent: number };
+  room: {
+    id: string;
+    identifier: string;
+    monthly_rent: number;
+    max_occupancy?: number;
+  };
   property: { name: string };
   tenant?: { full_name: string } | null;
   assignment?: { start_date: string } | null;
@@ -42,14 +47,14 @@ export default function RoomDetails({
   return (
     <div className={styles.root}>
       <main className={styles.main}>
-        <Link className={styles.back} href="/rooms">← Back to rooms</Link>
-
         <div className={styles.head}>
           <div>
             <h1 className={styles.title}>{room.identifier}</h1>
             <div className={styles.sub}>{property.name} · Room details</div>
           </div>
-          <Link className={styles.btn} href={`/rooms/${room.id}/edit`}>Edit room</Link>
+          <Link className={styles.btn} href={`/rooms/${room.id}/edit`}>
+            Edit room
+          </Link>
         </div>
 
         <div className={styles.grid}>
