@@ -121,6 +121,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 				body: JSON.stringify({
 					tenantId,
 					billingMonth: month,
+					dueDate,
 					rentAmount: rentN,
 					electricCharge: electricN,
 					waterCharge: waterN,
