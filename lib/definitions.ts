@@ -73,7 +73,7 @@ export const CreateBillSchema = z
 			.transform((month) => `${month}-01`),
 		dueDate: z.iso.date({error: "Choose a valid due date"}),
 		rentAmount: amount("Rent").optional(),
-		electricalCharge: amount("Electricity charge"),
+		electricCharge: amount("Electricity charge"),
 		waterCharge: amount("Water charge"),
 	})
 	.refine((bill) => bill.dueDate >= bill.billingMonth, {
