@@ -17,7 +17,7 @@ const currentRoomNumber = sql<string | null>`(
     select ${rooms.roomNumber}
     from ${tenantRoomAssignment}
     join ${rooms} on ${rooms.roomId} = ${tenantRoomAssignment.roomId}
-    where ${tenantRoomAssignment.tenantId} = ${bills.tenantId} and $    {tenantRoomAssignment.status} = 'active'
+    where ${tenantRoomAssignment.tenantId} = ${bills.tenantId} and ${tenantRoomAssignment.status} = 'active'
     order by ${tenantRoomAssignment.startDate} desc 
     limit 1
 )`;
