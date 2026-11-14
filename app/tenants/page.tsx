@@ -16,28 +16,15 @@ export default async function TenantsPage() {
   return (
     <DashboardShell section="TENANTS">
       <div className="dashboard-content">
-        <section className="welcome-row">
+        <section className="tenant-page-heading">
           <div>
-            <p className="eyebrow">PEOPLE IN YOUR PROPERTY</p>
             <h1>Tenants</h1>
             <p className="welcome-copy">
-              Keep track of everyone living at Maple House.
+              Keep tenant details and room assignments together.
             </p>
           </div>
         </section>
-
-
-        
-        <div>
-
-     
-            <div className="pt-50"/>
-
-    
-          <TenantTable tenants={data.tenants} rooms={data.AvailableRooms} />
-
-
-        </div>
+        <TenantTable tenants={data.tenants} rooms={data.AvailableRooms} />
       </div>
     </DashboardShell>
   );

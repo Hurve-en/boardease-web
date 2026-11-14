@@ -13,6 +13,7 @@ export type TenantData = {
     tenants: {
         id: string;
         name: string;
+        contactNumber: string;
         status: "active" | "inactive";
         roomId: string | null;
         startDate: string;
@@ -46,6 +47,7 @@ export async function getTenantData(): Promise<TenantData> {
         db.select({
             id: tenants.tenantId,
             name: sql<string>`CONCAT(${tenants.firstName}, ' ', ${tenants.lastName})`,
+            contactNumber: tenants.contactNumber,
             status: sql<string>`case when ${tenantRoomAssignment.assignmentId} is not null then 'active' else 'inactive' end`,
             roomId: tenantRoomAssignment.roomId,
             assignedRoom: rooms.roomNumber,
@@ -109,6 +111,7 @@ export async function getTenantData(): Promise<TenantData> {
         ...tenantSummary.map((t) => ({
             id: t.id,
             name: String(t.name ?? ""),
+            contactNumber: String(t.contactNumber ?? ""),
             roomNumber: String(t.assignedRoom ?? ""),
             status: String(t.status ?? "inactive") as "active" | "inactive",
             hasRecord: true,
@@ -119,6 +122,7 @@ export async function getTenantData(): Promise<TenantData> {
         ...profileOnlyTenants.map((p) => ({
             id: p.id,
             name: String(p.name ?? ""),
+            contactNumber: "",
             roomNumber: "",
             status: "inactive" as const,
             hasRecord: false,
