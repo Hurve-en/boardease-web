@@ -1270,3 +1270,419 @@ a {
   margin: 12px 2px 0;
   font-size: 10px;
 }
+
+.tenant-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 5px 0 23px;
+}
+
+.tenant-page-heading h1 {
+  margin: 0;
+  color: var(--be-text-primary);
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.tenant-page-heading .welcome-copy {
+  margin-top: 7px;
+  font-size: 14px;
+}
+
+.tenants-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.82fr) minmax(320px, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.tenants-directory-column {
+  min-width: 0;
+}
+
+.tenant-list-heading {
+  min-height: 44px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tenant-list-heading h2 {
+  margin: 0;
+  color: var(--be-text-primary);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.tenants-count {
+  flex: none;
+  padding: 12px 17px;
+  border: 1px solid var(--be-border-subtle);
+  border-radius: 9px;
+  background: #fff;
+  color: #70452f;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.tenants-table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--be-border-subtle);
+  border-radius: 12px;
+}
+
+.tenants-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tenants-table th {
+  padding: 14px 19px;
+  background: #eee7de;
+  color: #81766c;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tenants-table td {
+  height: 68px;
+  padding: 11px 19px;
+  border-top: 1px solid #e9e1d8;
+  color: var(--be-text-primary);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.tenant-row {
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+
+.tenant-row:hover {
+  background: #fcfaf7;
+}
+
+.tenant-row[aria-selected="true"] {
+  background: #f9f4ee;
+}
+
+.tenant-row:focus-visible {
+  outline: 2px solid var(--be-action-primary);
+  outline-offset: -2px;
+}
+
+.tenant-select {
+  display: grid;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #3c332d;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tenant-select strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.tenant-select span {
+  color: #92867b;
+  font-size: 11px;
+}
+
+.tenant-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 11px;
+  border-radius: var(--be-radius-pill);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.tenant-status.is-active {
+  color: #38674b;
+}
+
+.tenant-status.is-unassigned {
+  background: #faeed7;
+  color: #946322;
+}
+
+.tenant-empty {
+  height: 110px !important;
+  color: var(--be-text-muted) !important;
+  text-align: center;
+}
+
+.assignment-summary {
+  margin: 19px 0 20px;
+  color: #8c8177;
+  font-size: 12px;
+}
+
+.assignment-records,
+.assignment-panel {
+  background: #fff;
+  border: 1px solid var(--be-border-subtle);
+  border-radius: 16px;
+}
+
+.assignment-records {
+  min-height: 150px;
+  padding: 25px 23px;
+}
+
+.assignment-records h2,
+.assignment-heading h2 {
+  margin: 0;
+  color: #3c332d;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.assignment-records-subtitle {
+  margin: 6px 0 17px !important;
+  color: #8c8177 !important;
+  font-size: 12px !important;
+}
+
+.assignment-records > p:last-child {
+  margin: 0;
+  color: #8c8177;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.assignment-panel {
+  padding: 25px 23px 23px;
+}
+
+.assignment-heading p {
+  margin: 6px 0 18px;
+  color: #8c8177;
+  font-size: 12px;
+}
+
+.assignment-tenant-card {
+  min-height: 66px;
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border-radius: 11px;
+  background: #f7f3ed;
+}
+
+.assignment-person-icon {
+  width: 20px;
+  color: #70452f;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.assignment-tenant-card strong,
+.assignment-tenant-card small {
+  display: block;
+}
+
+.assignment-tenant-card strong {
+  color: #3c332d;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.assignment-tenant-card small {
+  margin-top: 4px;
+  color: #8c8177;
+  font-size: 11px;
+}
+
+.assignment-form {
+  display: grid;
+  gap: 17px;
+}
+
+.assignment-field {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  color: #413832;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.assignment-field input,
+.assignment-field select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid #e2d8cc;
+  border-radius: 9px;
+  background: #fff;
+  color: #403730;
+  font: inherit;
+  font-weight: 400;
+}
+
+.assignment-field input:focus,
+.assignment-field select:focus {
+  border-color: #9c7354;
+  outline: 2px solid rgb(96 62 43 / 15%);
+}
+
+.assignment-field small {
+  margin-top: -2px;
+  color: #8c8177;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.assignment-rent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 17px;
+  border-bottom: 1px solid #e9e1d8;
+  color: #8c8177;
+  font-size: 12px;
+}
+
+.assignment-rent strong {
+  color: #332c27;
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.assignment-notice {
+  margin: -2px 0 0;
+  padding: 13px 14px;
+  border-radius: 9px;
+  background: #faeed7;
+  color: #946322;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.assignment-message {
+  margin: -3px 0 0;
+  color: var(--be-success-text);
+  font-size: 12px;
+}
+
+.assignment-submit,
+.assignment-cancel {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.assignment-submit {
+  margin-top: 1px;
+  border: 0;
+  background: #65412e;
+  color: #fff;
+}
+
+.assignment-submit:hover:not(:disabled) {
+  background: #503322;
+}
+
+.assignment-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.assignment-cancel {
+  margin-top: -1px;
+  border: 1px solid #e2d8cc;
+  background: #fff;
+  color: #70452f;
+}
+
+.assignment-cancel:hover {
+  background: #faf7f3;
+}
+
+@media (max-width: 1050px) {
+  .tenants-layout {
+    grid-template-columns: minmax(0, 1.35fr) minmax(290px, 1fr);
+    gap: 17px;
+  }
+
+  .assignment-panel {
+    padding: 21px 18px;
+  }
+}
+
+@media (max-width: 800px) {
+  .tenants-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-panel {
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .tenant-page-heading {
+    margin-bottom: 18px;
+  }
+
+  .tenant-page-heading h1 {
+    font-size: 24px;
+  }
+
+  .tenant-page-heading .welcome-copy {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .tenant-list-heading {
+    margin-bottom: 12px;
+  }
+
+  .tenants-count {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  .tenants-table {
+    min-width: 590px;
+  }
+
+  .tenants-table th,
+  .tenants-table td {
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .assignment-records {
+    padding: 20px 17px;
+  }
+
+  .assignment-panel {
+    padding: 20px 17px;
+  }
+}
