@@ -59,8 +59,8 @@ export const UpdateTenantSchema = CreateTenantSchema.omit({userId: true})
 const amount = (label: string) =>
 	z
 		.number({error: `${label} must be a number.`})
-		.min(0, {error: `${label} can't be negative`})
-		.max(999999999.99, {error: `${label} is too large.`})
+		.min(0, {error: `${label} can't be negative.`})
+		.max(99999999.99, {error: `${label} is too large.`})
 		.multipleOf(0.01, {error: `${label} can have at most 2 decimals.`});
 
 export const CreateBillSchema = z
@@ -68,10 +68,10 @@ export const CreateBillSchema = z
 		tenantId: z.uuid({error: "Choose a tenant."}),
 		billingMonth: z
 			.string({error: "Choose a billing month."})
-			.regex(/^\d{4}-(0[1-9]|1[0-2])$/, {error: "Choose a billing month"})
+			.regex(/^\d{4}-(0[1-9]|1[0-2])$/, {error: "Choose a billing month."})
 			// 01 since every first day of the month ta mag bill nila
 			.transform((month) => `${month}-01`),
-		dueDate: z.iso.date({error: "Choose a valid due date"}),
+		dueDate: z.iso.date({error: "Choose a valid due date."}),
 		rentAmount: amount("Rent").optional(),
 		electricCharge: amount("Electricity charge"),
 		waterCharge: amount("Water charge"),
