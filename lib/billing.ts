@@ -97,6 +97,47 @@ export async function createBill(input: NewBill) {
 	return bill;
 }
 
+export async function getBillsForMonth(billingMonth: string) {
+	const [list, [totals], [collected]] = await Promise.all([
+		db
+			.select({
+				billId: bills.billId,
+				tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+				roomNumber: currentRoomNumber,
+				billingMonth: bills.billingMonth,
+				totalAmount: bills.totalAmount,
+				outstandingBalance: bills.outstandingBalance,
+				dueDate: bills.dueDate,
+				status: bills.status,
+			})
+			.from(bills)
+			.innerJoin(tenants, eq(tenants.tenantId, bills.tenantId))
+			.where(eq(bills.billingMonth, billingMonth))
+			.orderBy(bills.dueDate, tenants.firstName),
+		db
+			.select({
+				totalBilled: sql<string>`coalesce(sum(${bills.totalAmount}), 0)`,
+				totalOutstanding: sql<string>`coalesce(sum(${bills.outstandingBalance}), 0)`,
+			})
+			.from(bills)
+			.where(eq(bills.billingMonth, billingMonth)),
+		db
+			.select({value: sql<string>`coalesce(sum(${payments.amount}), 0)`})
+			.from(payments)
+			.innerJoin(bills, eq(bills.billId, payments.billId))
+			.where(eq(bills.billingMonth, billingMonth)),
+	]);
+
+	return {
+		summary: {
+			totalBilled: totals?.totalBilled ?? "0",
+			totalCollected: collected?.value ?? "0",
+			totalOutstanding: totals?.totalOutstanding ?? "0",
+		},
+		bills: list,
+	};
+}
+
 export async function getBillDetails(billId: string) {
 	const [bill] = await db
 		.select({
