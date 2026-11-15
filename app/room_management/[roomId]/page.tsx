@@ -25,6 +25,7 @@ export default async function RoomPage({
           max_occupancy: details.room.maxOccupancy,
         }}
         property={{ name: "Maple House" }}
+        occupancy={details.occupancy}
         tenant={
           details.tenant
             ? {
@@ -33,7 +34,12 @@ export default async function RoomPage({
             : null
         }
         assignment={
-          details.tenant ? { start_date: details.tenant.startDate } : null
+          details.tenant
+            ? {
+                start_date: details.tenant.startDate,
+                end_date: details.tenant.endDate,
+              }
+            : null
         }
         currentBill={details.currentBill}
       />

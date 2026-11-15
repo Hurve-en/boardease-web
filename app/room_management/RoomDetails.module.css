@@ -61,6 +61,13 @@
 .row dt { color: var(--muted); }
 .row dd { margin: 0; font-weight: 600; text-align: right; }
 
+.endAssignment {
+  border: 0; border-radius: 8px; background: #f7e6e0; color: #9b493b;
+  padding: 9px 14px; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.endAssignment:hover { background: #efd4ca; color: #7f3930; }
+
 .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 14px; font-size: 10.5px; color: var(--muted); }
 .footText { margin: 0; padding-top: 16px; font-size: 11.5px; color: var(--muted); }
 
@@ -74,6 +81,7 @@
 .rent { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 2px 0 20px; }
 .link { font-size: 11.5px; font-weight: 600; color: var(--accent); }
 .link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.manageLink { display: block; margin-top: 16px; text-align: center; }
 
 .note { background: var(--note-bg); border-radius: 12px; padding: 16px 18px; display: flex; gap: 12px; }
 .note .icon { flex: none; margin-top: 1px; color: var(--accent); }

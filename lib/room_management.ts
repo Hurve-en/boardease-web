@@ -1,7 +1,7 @@
 
 
 import "server-only";
-import {and, eq, gte, lte, or, isNull} from "drizzle-orm";
+import {and, eq, gte, lte, or, isNull, sql} from "drizzle-orm";
 import {db} from "@/db";
 import {
 	rooms,
@@ -21,6 +21,7 @@ export type RoomDetails = {
     maxOccupancy: number;
     status: string;
   };
+  occupancy: number;
 
   tenant: {
     tenantId: string;
@@ -29,6 +30,7 @@ export type RoomDetails = {
     email: string;
     contactNumber: string;
     startDate: string;
+    endDate: string;
   } | null;
 
   currentBill: {
@@ -77,6 +79,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 			email: profiles.email,
 			contactNumber: tenants.contactNumber,
 			startDate: tenantRoomAssignment.startDate,
+			endDate: tenantRoomAssignment.endDate,
 			billId: bills.billId,
 			billingMonth: bills.billingMonth,
 			totalAmount: bills.totalAmount,
@@ -111,6 +114,16 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 
 	if (!row) return null;
 
+	const [occupancyRow] = await db
+		.select({count: sql<number>`count(*)`})
+		.from(tenantRoomAssignment)
+		.where(and(
+			eq(tenantRoomAssignment.roomId, roomId),
+			eq(tenantRoomAssignment.status, "active"),
+			lte(tenantRoomAssignment.startDate, today),
+			gte(tenantRoomAssignment.endDate, today),
+		));
+
 	return {
 		room: {
 			roomId: row.roomId,
@@ -119,6 +132,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 			maxOccupancy: Number(row.maxOccupancy),
 			status: row.roomStatus,
 		},
+		occupancy: Number(occupancyRow?.count ?? 0),
 		tenant: row.tenantId
 			? {
 					tenantId: row.tenantId,
@@ -127,6 +141,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 					email: row.email!,
 					contactNumber: row.contactNumber!,
 					startDate: row.startDate!,
+					endDate: row.endDate!,
 				}
 			: null,
 		currentBill: row.billId
@@ -140,6 +155,45 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 				}
 			: null,
 	};
+}
+
+export async function EndRoomAssignment(roomId: string) {
+	const today = currentDate();
+
+	const [assignment] = await db
+		.select({
+			assignmentId: tenantRoomAssignment.assignmentId,
+			startDate: tenantRoomAssignment.startDate,
+		})
+		.from(tenantRoomAssignment)
+		.where(and(
+			eq(tenantRoomAssignment.roomId, roomId),
+			eq(tenantRoomAssignment.status, "active"),
+		))
+		.limit(1);
+
+	if (!assignment) {
+		throw new Error("No active assignment found for this room.");
+	}
+
+	await db.transaction(async (tx) => {
+		await tx
+			.update(tenantRoomAssignment)
+			.set({
+				status: "inactive",
+				endDate: assignment.startDate < today ? today : assignment.startDate,
+			})
+			.where(eq(tenantRoomAssignment.assignmentId, assignment.assignmentId));
+
+		await tx
+			.update(rooms)
+			.set({status: "unoccupied"})
+			.where(eq(rooms.roomId, roomId));
+	});
+
+	revalidatePath("/tenants");
+	revalidatePath("/rooms");
+	revalidatePath(`/room_management/${roomId}`);
 }
 
 

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import {
   EditRoomDetails as updateRoomDetails,
+  EndRoomAssignment,
   type UpdateActionState,
 } from "@/lib/room_management";
 
@@ -17,4 +18,12 @@ export async function editRoomDetails(
   }
 
   return result;
+}
+
+export async function endRoomAssignment(formData: FormData) {
+  const roomId = String(formData.get("roomId") ?? "");
+  if (!roomId) throw new Error("Room id is required.");
+
+  await EndRoomAssignment(roomId);
+  redirect(`/room_management/${roomId}`);
 }

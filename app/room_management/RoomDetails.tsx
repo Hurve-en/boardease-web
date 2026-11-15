@@ -1,5 +1,6 @@
 import Link from "next/link";
 import styles from "./RoomDetails.module.css";
+import { endRoomAssignment } from "./actions";
 
 export type RoomDetailsProps = {
   room: {
@@ -9,8 +10,9 @@ export type RoomDetailsProps = {
     max_occupancy?: number;
   };
   property: { name: string };
+  occupancy: number;
   tenant?: { full_name: string } | null;
-  assignment?: { start_date: string } | null;
+  assignment?: { start_date: string; end_date: string } | null;
   currentBill?: {
     totalAmount: number;
     outstandingBalance: number;
@@ -35,6 +37,7 @@ const PersonIcon = () => (
 export default function RoomDetails({
   room,
   property,
+  occupancy,
   tenant,
   assignment,
   currentBill,
@@ -42,6 +45,7 @@ export default function RoomDetails({
   const occupied = !!(tenant && assignment);
   const chipClass = `${styles.chip} ${occupied ? "" : styles.chipAvailable}`;
   const statusLabel = occupied ? "Occupied" : "Available";
+  const maxOccupancy = room.max_occupancy ?? 1;
   const assignHref = `/tenants?room=${room.id}`;
 
   return (
@@ -78,14 +82,25 @@ export default function RoomDetails({
                   <dd>{occupied ? day(assignment!.start_date) : "—"}</dd>
                 </div>
                 <div className={styles.row}>
+                  <dt>Assignment ends</dt>
+                  <dd>{occupied ? day(assignment!.end_date) : "—"}</dd>
+                </div>
+                <div className={styles.row}>
                   <dt>Occupancy</dt>
-                  <dd>{occupied ? "Occupied · tenant assigned" : "Available · no tenant"}</dd>
+                  <dd>{occupancy} / {maxOccupancy} occupants</dd>
                 </div>
               </dl>
 
               <div className={styles.foot}>
-                <span>Managed in Tenants and room assignment.</span>
-                <Link className={`${styles.btn} ${styles.btnLg}`} href={assignHref}>Manage assignment →</Link>
+                <span>Capacity: {maxOccupancy} {maxOccupancy === 1 ? "person" : "people"}.</span>
+                {occupied && (
+                  <form action={endRoomAssignment}>
+                    <input type="hidden" name="roomId" value={room.id} />
+                    <button className={styles.endAssignment} type="submit">
+                      End assignment
+                    </button>
+                  </form>
+                )}
               </div>
             </section>
 
@@ -128,10 +143,14 @@ export default function RoomDetails({
               <span className={chipClass}>{statusLabel}</span>
               <div className={styles.who}>{occupied ? tenant!.full_name : "No tenant assigned"}</div>
               {occupied && <div className={styles.since}>Since {day(assignment!.start_date)}</div>}
+              <div className={styles.lbl}>Occupancy</div>
+              <div className={styles.rent}>{occupancy} / {maxOccupancy}</div>
               <hr />
               <div className={styles.lbl}>Monthly rent</div>
               <div className={styles.rent}>{php(room.monthly_rent)}</div>
-              <Link className={styles.link} href={assignHref}>Manage assignment →</Link>
+              <Link className={`${styles.btn} ${styles.btnLg} ${styles.manageLink}`} href={assignHref}>
+                Manage assignment →
+              </Link>
             </div>
 
             <div className={styles.note} role="note">

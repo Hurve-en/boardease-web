@@ -208,6 +208,14 @@ export async function AssignRoom(input: {
                     tenantId = createdTenant.tenantId;
                 }
 
+                const previousTenantAssignments = await tx
+                    .select({ roomId: tenantRoomAssignment.roomId })
+                    .from(tenantRoomAssignment)
+                    .where(and(
+                        eq(tenantRoomAssignment.tenantId, tenantId),
+                        eq(tenantRoomAssignment.status, "active"),
+                    ));
+
                 await tx
                     .update(tenantRoomAssignment)
                     .set({status: "inactive"})
@@ -224,6 +232,15 @@ export async function AssignRoom(input: {
                         eq(tenantRoomAssignment.status, "active"),
                     ));
 
+                for (const previousAssignment of previousTenantAssignments) {
+                    if (previousAssignment.roomId !== input.roomId) {
+                        await tx
+                            .update(rooms)
+                            .set({status: "unoccupied"})
+                            .where(eq(rooms.roomId, previousAssignment.roomId));
+                    }
+                }
+
                 const[created] = await tx 
                 .insert(tenantRoomAssignment)
                 .values({
@@ -235,10 +252,18 @@ export async function AssignRoom(input: {
                 })
                 .returning()
 
+                await tx
+                    .update(rooms)
+                    .set({status: input.status === "active" ? "occupied" : "unoccupied"})
+                    .where(eq(rooms.roomId, input.roomId));
+
                 return created
 
                 })
 
+                revalidatePath("/tenants");
+                revalidatePath("/rooms");
+                revalidatePath(`/room_management/${input.roomId}`);
                 return{ok: true, assignment}
 
             }catch (error) {
