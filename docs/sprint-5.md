@@ -10,12 +10,11 @@ To finish Admin Tenant Management UI design and create tenant api to be able to 
 
 ## Tasks
 
-| Task                                     | Member          | Pull Request | Status |
-| ---------------------------------------- | --------------- | ------------ | ------ |
-| 5.1 Create Tenant API                    | Joachime Chiong | Web:         | Done   |
-| 5.2 Design Tenant Management UI in Figma | Elijah Bes      | in Figma     | Done   |
-| 5.3 Build Tenant Management interface    | Joachim Chiong  | Web:         | Done   |
-| 5.4 Manage Tenant Information            | Kendall Maputi  | Web:         | Done   |
+| Task                                                           | Member          | Pull Request     | Status |
+| -------------------------------------------------------------- | --------------- | ---------------- | ------ |
+| 5.1 Create Tenant API , 5.3 Build Tenant Management interface  | Joachime Chiong | Pushed in main   | Done   |
+| 5.2 Design Tenant Management UI in Figma & Design System Route | Elijah Bes      | Web: #19 & Figma | Done   |
+| 5.4 Manage Tenant Information                                  | Kendall Maputi  | Web: #20 , #21   | Done   |
 
 **Demo result:**
 
