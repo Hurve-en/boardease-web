@@ -6,7 +6,6 @@ import {calculateTotal} from "@/lib/bill-math";
 import {createBill, getBillsForMonth, getTenantRent} from "@/lib/billing";
 import {currentBillingMonth} from "@/lib/dashboard";
 
-// GET /api/bills?month=2026-11 → that month's bills + summary (defaults to this month, Manila time)
 export async function GET(request: Request) {
 	const auth = await authorize(request, ["admin"]);
 	if (auth.response) return auth.response;
@@ -25,7 +24,6 @@ export async function GET(request: Request) {
 	}
 }
 
-// POST /api/bills → create one monthly bill
 export async function POST(request: Request) {
 	const auth = await authorize(request, ["admin"]);
 	if (auth.response) return auth.response;
@@ -49,7 +47,6 @@ export async function POST(request: Request) {
 			return NextResponse.json({error: "Tenant not found."}, {status: 404});
 		}
 
-		// The rent from the form wins; otherwise use the room's rent.
 		const rentAmount =
 			parsed.data.rentAmount ??
 			(tenant.monthlyRent === null ? undefined : Number(tenant.monthlyRent));
@@ -62,8 +59,6 @@ export async function POST(request: Request) {
 				{status: 400},
 			);
 		}
-
-		// The column holds at most 99,999,999.99 — check the total before saving.
 		if (
 			Number(calculateTotal(rentAmount, electricCharge, waterCharge)) >
 			99999999.99
