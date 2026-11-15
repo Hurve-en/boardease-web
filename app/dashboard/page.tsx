@@ -12,6 +12,8 @@ import {
 	Receipt,
 	Wallet,
 } from "lucide-react";
+import Link from "next/link";
+
 
 const peso = (value: string | number) =>
 	new Intl.NumberFormat("en-PH", {
@@ -57,11 +59,11 @@ export default async function DashboardPage() {
 						<div className="progress-track" role="progressbar" aria-label="Monthly collection progress" aria-valuenow={Math.round(collectionRate)} aria-valuemin={0} aria-valuemax={100}><div className="progress-fill" style={{ width: `${collectionRate}%` }} /></div>
 						<div className="legend"><span><i className="legend-dot paid-dot" />{dashboardData.billing.paidCount} paid</span><span><i className="legend-dot partial-dot" />{dashboardData.billing.partialCount} partial</span><span><i className="legend-dot unpaid-dot" />{dashboardData.billing.unpaidCount} unpaid</span></div>
 					</article>
-					<aside className="panel next-steps"><div className="panel-title"><div><h2>Your next steps</h2><p>Keep your ledger up to date</p></div><span className="steps-icon"><ArrowDownRight size={18} /></span></div><p className="steps-copy">{dashboardData.overdue.count ? `${dashboardData.overdue.count} bills are overdue, with ${peso(dashboardData.overdue.amount)} outstanding.` : "Review outstanding balances and keep this month’s bills up to date."}</p><a className="primary-action" href="#monthly-bills"><ArrowRight size={16} /> View monthly bills</a><p className="helper-copy">Record each payment once it comes in.</p></aside>
+					<aside className="panel next-steps"><div className="panel-title"><div><h2>Your next steps</h2><p>Keep your ledger up to date</p></div><span className="steps-icon"><ArrowDownRight size={18} /></span></div><p className="steps-copy">{dashboardData.overdue.count ? `${dashboardData.overdue.count} bills are overdue, with ${peso(dashboardData.overdue.amount)} outstanding.` : "Review outstanding balances and keep this month’s bills up to date."}</p><Link className="primary-action" href="/monthly-bills"><ArrowRight size={16} /> View monthly bills</Link><p className="helper-copy">Record each payment once it comes in.</p></aside>
 				</section>
 
 				<section className="bills-section" id="monthly-bills">
-					<div className="section-heading"><div><p className="eyebrow">LEDGER</p><h2>{currentMonth} bills</h2></div><a className="create-action" href="#monthly-bills"><FilePlus2 size={16} /> Create monthly bill</a></div>
+					<div className="section-heading"><div><p className="eyebrow">LEDGER</p><h2>{currentMonth} bills</h2></div><Link className="create-action" href="/monthly-bills/new"><FilePlus2 size={16} /> Create monthly bill</Link></div>
 					<div className="bills-table-wrap"><table className="bills-table"><thead><tr><th>Tenant / bill</th><th>Room</th><th>Total bill</th><th>Outstanding</th><th>Status</th></tr></thead>
 					<tbody>
 						{dashboardData.ledger.length === 0 ? (
