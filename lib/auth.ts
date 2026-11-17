@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { getUserRole } from "@/lib/tenant-info";
 
 export type Role = "admin" | "tenant";
 
@@ -26,26 +27,19 @@ export async function getCurrentUser(
     }
 
     const supabase = await createClient();
-    const { data, error } = await supabase.auth.getClaims(token);
-    const claims = data?.claims as
-      | {
-          sub?: string;
-          email?: string;
-          role?: string;
-          user_role?: string | null;
-        }
-      | undefined;
+    const { data, error } = token
+      ? await supabase.auth.getUser(token)
+      : await supabase.auth.getUser();
+    const user = data.user;
 
-    // Must be a real logged-in user, not the public anon key
-    if (error || !claims?.sub || claims.role !== "authenticated") {
+    if (error || !user) {
       return null;
     }
 
-    // Role comes from the signed JWT (put there by the auth hook)
-    const role = claims.user_role;
+    const role = await getUserRole(user.id);
     if (role !== "admin" && role !== "tenant") return null;
 
-    return { id: claims.sub, email: claims.email ?? "", role };
+    return { id: user.id, email: user.email ?? "", role };
   } catch {
     return null; // any error = not logged in (fails closed)
   }

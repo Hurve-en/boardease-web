@@ -3,6 +3,7 @@ import {sql} from "drizzle-orm";
 import {
 	check,
 	date,
+	bigint,
 	integer,
 	numeric,
 	pgEnum,
@@ -25,6 +26,20 @@ export const billStatusEnum = pgEnum("bill_status", [
 	"partial",
 	"unpaid",
 ]);
+
+export const appRoleEnum = pgEnum("app_role", ["admin", "tenant"]);
+
+export const userRoles = pgTable(
+	"user_roles",
+	{
+		id: bigint("id", {mode: "number"})
+			.primaryKey()
+			.generatedByDefaultAsIdentity(),
+		userId: uuid("user_id").notNull(),
+		role: appRoleEnum("role").notNull(),
+	},
+	(table) => [unique("user_roles_user_id_key").on(table.userId)],
+).enableRLS();
 
 export const profiles = pgTable("profiles", {
 	id: uuid("id").primaryKey(),

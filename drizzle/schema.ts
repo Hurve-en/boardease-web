@@ -1,5 +1,10 @@
-import { pgTable, foreignKey, unique, pgPolicy, bigint, uuid, text, timestamp, check, numeric, integer, date, pgEnum } from "drizzle-orm/pg-core"
+import { pgSchema, pgTable, foreignKey, unique, pgPolicy, bigint, uuid, text, timestamp, check, numeric, integer, date, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
+
+const auth = pgSchema("auth")
+export const usersInAuth = auth.table("users", {
+	id: uuid().primaryKey(),
+})
 
 export const appPermission = pgEnum("app_permission", ['dashboard.view', 'rooms.manage', 'tenants.manage', 'assignments.manage', 'bills.manage', 'payments.manage', 'billing.view_all', 'billing.view_own'])
 export const appRole = pgEnum("app_role", ['admin', 'tenant'])
@@ -16,7 +21,7 @@ export const userRoles = pgTable("user_roles", {
 }, (table) => [
 	foreignKey({
 			columns: [table.userId],
-			foreignColumns: [users.id],
+			foreignColumns: [usersInAuth.id],
 			name: "user_roles_user_id_fkey"
 		}).onDelete("cascade"),
 	unique("user_roles_user_id_key").on(table.userId),
@@ -40,7 +45,7 @@ export const profiles = pgTable("profiles", {
 }, (table) => [
 	foreignKey({
 			columns: [table.id],
-			foreignColumns: [users.id],
+			foreignColumns: [usersInAuth.id],
 			name: "profiles_id_auth_users_id_fk"
 		}).onDelete("cascade"),
 ]);

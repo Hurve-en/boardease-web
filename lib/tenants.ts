@@ -4,9 +4,13 @@ import {and, eq, isNull, notExists, sql} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
 import {db} from "@/db";
 import {createClient} from "@/lib/supabase/server";
-import { date } from 'drizzle-orm/pg-core'
-
-import {userRoles, profiles,tenants, tenantRoomAssignment, rooms} from "@/drizzle/schema";
+import {
+	userRoles,
+	profiles,
+	tenants,
+	tenantRoomAssignment,
+	rooms,
+} from "@/db/schema";
 
 export type TenantData = {
 

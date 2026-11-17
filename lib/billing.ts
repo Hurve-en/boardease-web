@@ -138,6 +138,30 @@ export async function getBillsForMonth(billingMonth: string) {
 	};
 }
 
+export async function getBillsForTenant(
+	userId: string,
+	billingMonth: string,
+) {
+	return db
+		.select({
+			id: bills.billId,
+			name: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+			amount: bills.totalAmount,
+			dueDate: bills.dueDate,
+			status: bills.status,
+			outstandingBalance: bills.outstandingBalance,
+		})
+		.from(bills)
+		.innerJoin(tenants, eq(tenants.tenantId, bills.tenantId))
+		.where(
+			and(
+				eq(tenants.userId, userId),
+				eq(bills.billingMonth, billingMonth),
+			),
+		)
+		.orderBy(bills.dueDate);
+}
+
 export async function getBillDetails(billId: string) {
 	const [bill] = await db
 		.select({
