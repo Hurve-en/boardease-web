@@ -10,11 +10,12 @@ To Finish Web Features and App
 
 ## Tasks
 
-| Task                                                           | Member          | Pull Request     | Status |
-| -------------------------------------------------------------- | --------------- | ---------------- | ------ |
-| 5.1 Create Tenant API , 5.3 Build Tenant Management interface  | Joachime Chiong | Pushed in main   | Done   |
-| 5.2 Design Tenant Management UI in Figma & Design System Route | Elijah Bes      | Web: #19 & Figma | Done   |
-| 5.4 Manage Tenant Information                                  | Kendall Maputi  | Web: #20 , #21   | Done   |
+| Epic                                       | Member          | Pull Request | Status |
+| ------------------------------------------ | --------------- | ------------ | ------ |
+| 6. Tenant-Room Assignment, Billing History | Joachime Chiong |              | Done   |
+| 6. Payment                                 | Elijah Bes      | Web:         | Done   |
+| 6. Billing                                 | Kendall Maputi  | Web:         | Done   |
+| 6. Tenant Mobile App                       | Hurveen Veloso  | App:         | Done   |
 
 **Demo result:**
 
@@ -22,26 +23,26 @@ To Finish Web Features and App
 
 ### Hurveen Veloso
 
-- **Merged:** None
-- **Next:** Epic : Tenant Room Assignment
+- **Merged:** Tenant Mobile App
+- **Next:** Testing and Finalizing the Project
 - **Blocked by:** None
 
 ### Kendall Maputi
 
-- **Merged:** 5.4 Manage Tenant Information
-- **Next:** Epic : Billing
+- **Merged:** Billing
+- **Next:** Testing and Finalizing the Project
 - **Blocked by:** None
 
 ### Joachim Chiong
 
-- **Merged:** 5.1 Create Tenant API, 5.3 Build Tenant Management Interface
-- **Next:** Epic : Billing History
+- **Merged:** Tenant-Room Assignment, Billing History
+- **Next:** Testing and Finalizing the Project
 - **Blocked by:** None
 
 ### Elijah Bes
 
-- **Merged:** 5.2 Design Tenant Management UI in Figma
-- **Next:** Epic : Payment
+- **Merged:** Payment
+- **Next:** Testing and Finalizing the Project
 - **Blocked by:** None
 
 ## Product Owner
@@ -50,19 +51,19 @@ To Finish Web Features and App
 - **Sent Back:**
 - **Comments:**
 
-## Sprint 6
+## Sprint 7
 
 **Proposed Goal:**
 
-Implement Tenant Management
+Projecrt Finalization
 
 ### Proposed Tasks
 
-| EPIC                   | Member         | GitHub Issue |
-| ---------------------- | -------------- | ------------ |
-| Tenant Room Assignment | Hurveen Veloso | None         |
-| Billing                | Kendall Maputi | None         |
-| Paymemnt               | Elijah Bes     | None         |
-| Billing History        | Joachim Chiong | None         |
+| EPIC                  | Member         | GitHub Issue |
+| --------------------- | -------------- | ------------ |
+| Projecrt Finalization | Hurveen Veloso | None         |
+| Projecrt Finalization | Kendall Maputi | None         |
+| Projecrt Finalization | Elijah Bes     | None         |
+| Projecrt Finalization | Joachim Chiong | None         |
 
 [Sprint 5 timeline](https://hurve-en.atlassian.net/jira/software/projects/BE/boards/3/timeline?rangeMode=WEEKS)
