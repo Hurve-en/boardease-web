@@ -1,8 +1,8 @@
 import "server-only";
 
-import {and, desc, eq, gt, max, sql} from "drizzle-orm";
+import {and, desc, eq, gt, inArray, max, sql} from "drizzle-orm";
 import {db} from "@/db";
-import {bills, payments, rooms, tenantRoomAssignment, tenants} from "@/db/schema";
+import {bills, payments, profiles, rooms, tenantRoomAssignment, tenants} from "@/db/schema";
 
 // Build correlated subqueries with the query builder so table qualifiers are
 // preserved when Drizzle renders the outer single-table selection.
@@ -56,6 +56,28 @@ export async function getTenantBillingHistory(userId: string) {
     .where(eq(bills.tenantId, tenant.tenantId))
     .orderBy(desc(bills.billingMonth));
 
+  const billIds = history.map((bill) => bill.billId);
+  const paymentRows = billIds.length
+    ? await db
+        .select({
+          billId: payments.billId,
+          paymentId: payments.paymentId,
+          amount: payments.amount,
+          paymentDate: payments.paymentDate,
+          recordedBy: profiles.name,
+        })
+        .from(payments)
+        .leftJoin(profiles, eq(profiles.id, payments.recordedBy))
+        .where(inArray(payments.billId, billIds))
+        .orderBy(desc(payments.paymentDate), desc(payments.createdAt))
+    : [];
+  const paymentByBill = new Map<string, typeof paymentRows>();
+  for (const payment of paymentRows) {
+    const rows = paymentByBill.get(payment.billId) ?? [];
+    rows.push(payment);
+    paymentByBill.set(payment.billId, rows);
+  }
+
   return {
     tenant: {
       name: tenant.name,
@@ -63,6 +85,14 @@ export async function getTenantBillingHistory(userId: string) {
       boardingHouseName: null,
       roomNumber: tenant.roomNumber,
     },
-    bills: history,
+    bills: history.map((bill) => ({
+      ...bill,
+      payments: (paymentByBill.get(bill.billId) ?? []).map(({paymentId, amount, paymentDate, recordedBy}) => ({
+        paymentId,
+        amount,
+        paymentDate,
+        recordedBy,
+      })),
+    })),
   };
 }

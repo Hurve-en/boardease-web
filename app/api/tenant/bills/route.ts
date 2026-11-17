@@ -2,13 +2,24 @@ import {NextResponse} from "next/server";
 import {authorize} from "@/lib/api-auth";
 import {getTenantBillingHistory} from "@/lib/tenant-billing-history";
 
-const headers = {"Cache-Control": "private, no-store"};
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, Accept, Content-Type",
+};
+
+const headers = {"Cache-Control": "private, no-store", ...corsHeaders};
+
+export function OPTIONS() {
+  return new NextResponse(null, {status: 204, headers: corsHeaders});
+}
 
 export async function GET(request: Request) {
   const auth = await authorize(request, ["tenant"]);
   if (auth.response) {
-    auth.response.headers.set("Cache-Control", headers["Cache-Control"]);
-    return auth.response;
+    const response = auth.response;
+    Object.entries(headers).forEach(([name, value]) => response.headers.set(name, value));
+    return response;
   }
 
   try {
