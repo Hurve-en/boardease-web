@@ -86,7 +86,7 @@ export default async function BillDetailPage(
 					<div className="flex flex-wrap gap-2">
 						<Link
 							href={`/monthly-bills/${bill.billId}/edit`}
-							className="inline-flex h-[42px] items-center gap-2 rounded-lg bg-[#5e3d2b] px-4 text-[13px] font-semibold text-white hover:bg-[#4d3123]">
+							className="inline-flex h-[42px] items-center gap-2 rounded-lg bg-[#5e3d2b] px-4 text-[13px] font-semibold text-white! hover:bg-[#4d3123]">
 							<Pencil size={15} /> Edit bill
 						</Link>
 						<Link
