@@ -29,6 +29,11 @@ export const billStatusEnum = pgEnum("bill_status", [
 
 export const appRoleEnum = pgEnum("app_role", ["admin", "tenant"]);
 
+export const paymentSubmissionStatusEnum = pgEnum(
+	"payment_submission_status",
+	["pending", "approved", "needs_update"],
+);
+
 export const userRoles = pgTable(
 	"user_roles",
 	{
@@ -227,3 +232,17 @@ export const payments = pgTable(
 	},
 	(table) => [check("amount_nonnegative", sql`${table.amount} >= 0`)],
 ).enableRLS();
+
+export const paymentSubmissions = pgTable("payment_submissions", {
+	submissionId: uuid("submission_id").primaryKey().defaultRandom(),
+	billId: uuid("bill_id").notNull().references(() => bills.billId),
+	submittedBy: uuid("submitted_by").notNull().references(() => profiles.id),
+	amount: numeric("amount", { precision: 10, scale: 2}).notNull(),
+	referenceNumber: text("reference_number").notNull(),
+	receiptPath: text("receipt_path").notNull(),
+	status: paymentSubmissionStatusEnum("status").notNull().default("pending"),
+	reviewedBy: uuid("reviewed_by").references(() => profiles.id),
+	reviewNote: text("review_note"),
+	submittedAt: timestamp("submitted_at", { withTimezone: true}).notNull().defaultNow(),
+	reviewedAt: timestamp("reviewed_at", { withTimezone: true}),
+}).enableRLS();
