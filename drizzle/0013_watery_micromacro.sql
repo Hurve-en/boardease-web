@@ -1,0 +1,1 @@
+ALTER TABLE "payment_submissions" ALTER COLUMN "receipt_path" SET NOT NULL;

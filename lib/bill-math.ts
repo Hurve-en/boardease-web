@@ -1,6 +1,6 @@
 // Shared billing form and billing API para ang preview otal and save total kay dili mag lahi
 
-function toCents(value: number): number {
+export function toCents(value: number): number {
 	return Math.round(value * 100);
 }
 

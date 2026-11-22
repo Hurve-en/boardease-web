@@ -81,6 +81,19 @@ export const CreateBillSchema = z
 		path: ["dueDate"],
 	});
 
+	export const CreatePaymentSubmissionSchema = z.object({
+		billId: z.uuid(),
+		amount: z.number().positive().multipleOf(0.01),
+		referenceNumber: z.string().trim().min(1).max(100),
+		receiptPath: z.string().trim().min(1, { error: "Upload your receipt screenshot."}),
+	});
+
+	export const CreatePaymentSchema = z.object({
+		billId: z.uuid(),
+		amount: z.number().positive().multipleOf(0.01),
+		paymentDate: z.iso.date(),
+		submissionId: z.uuid().optional(),
+	});
 export const UpdateBillSchema = z.object({
 	dueDate: z.iso.date({error: "Choose a valid due date."}),
 	rentAmount: amount("Rent"),
