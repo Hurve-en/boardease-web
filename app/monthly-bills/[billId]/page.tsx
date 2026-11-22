@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {notFound} from "next/navigation";
-import {ArrowLeft, Info} from "lucide-react";
+import {ArrowLeft, Info, Pencil} from "lucide-react";
 import {z} from "zod";
 import DashboardShell from "@/app/components/dashboard/DashboardShell";
 import {verifyAdmin} from "@/lib/dal";
@@ -83,11 +83,18 @@ export default async function BillDetailPage(
 							{monthLabel(bill.billingMonth)}
 						</p>
 					</div>
-					<Link
-						href="/monthly-bills"
-						className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[#e0d8cb] bg-white px-4 text-[13px] font-semibold text-[#5e3d2b] hover:bg-[#f7f3ec]">
-						<ArrowLeft size={15} /> Back to monthly bills
-					</Link>
+					<div className="flex flex-wrap gap-2">
+						<Link
+							href={`/monthly-bills/${bill.billId}/edit`}
+							className="inline-flex h-[42px] items-center gap-2 rounded-lg bg-[#5e3d2b] px-4 text-[13px] font-semibold text-white hover:bg-[#4d3123]">
+							<Pencil size={15} /> Edit bill
+						</Link>
+						<Link
+							href="/monthly-bills"
+							className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[#e0d8cb] bg-white px-4 text-[13px] font-semibold text-[#5e3d2b] hover:bg-[#f7f3ec]">
+							<ArrowLeft size={15} /> Back to monthly bills
+						</Link>
+					</div>
 				</div>
 
 				<div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">

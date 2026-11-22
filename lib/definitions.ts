@@ -81,7 +81,15 @@ export const CreateBillSchema = z
 		path: ["dueDate"],
 	});
 
+export const UpdateBillSchema = z.object({
+	dueDate: z.iso.date({error: "Choose a valid due date."}),
+	rentAmount: amount("Rent"),
+	electricCharge: amount("Electricity charge"),
+	waterCharge: amount("Water charge"),
+});
+
 export type CreateRoomInput = z.infer<typeof CreateRoomSchema>;
 export type CreateTenantInput = z.infer<typeof CreateTenantSchema>;
 export type UpdateTenantInput = z.infer<typeof UpdateTenantSchema>;
 export type CreateBillInput = z.infer<typeof CreateBillSchema>;
+export type UpdateBillInput = z.infer<typeof UpdateBillSchema>;
