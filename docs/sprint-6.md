@@ -10,12 +10,12 @@ To Finish Web Features and App
 
 ## Tasks
 
-| Epic                                       | Member          | Pull Request | Status |
-| ------------------------------------------ | --------------- | ------------ | ------ |
-| 6. Tenant-Room Assignment, Billing History | Joachime Chiong |              | Done   |
-| 6. Payment                                 | Elijah Bes      | Web:         | Done   |
-| 6. Billing                                 | Kendall Maputi  | Web:         | Done   |
-| 6. Tenant Mobile App                       | Hurveen Veloso  | App:         | Done   |
+| Epic                                       | Member          | Pull Request               | Status      |
+| ------------------------------------------ | --------------- | -------------------------- | ----------- |
+| 6. Tenant-Room Assignment, Billing History | Joachime Chiong | App: Pushed in main        | Done        |
+| 6. Payment                                 | Elijah Bes      | Web: #23                   | in Progress |
+| 6. Billing                                 | Kendall Maputi  | Web: #24, #22              | Done        |
+| 6. Tenant Mobile App                       | Hurveen Veloso  | App: #10, #11 Web:#26, #25 | Done        |
 
 **Demo result:**
 
@@ -55,15 +55,15 @@ To Finish Web Features and App
 
 **Proposed Goal:**
 
-Projecrt Finalization
+Project Refactoring
 
 ### Proposed Tasks
 
-| EPIC                  | Member         | GitHub Issue |
-| --------------------- | -------------- | ------------ |
-| Projecrt Finalization | Hurveen Veloso | None         |
-| Projecrt Finalization | Kendall Maputi | None         |
-| Projecrt Finalization | Elijah Bes     | None         |
-| Projecrt Finalization | Joachim Chiong | None         |
+| EPIC                | Member         | GitHub Issue |
+| ------------------- | -------------- | ------------ |
+| Project Refactoring | Hurveen Veloso | None         |
+| Project Refactoring | Kendall Maputi | None         |
+| Project Refactoring | Elijah Bes     | None         |
+| Project Refactoring | Joachim Chiong | None         |
 
 [Sprint 5 timeline](https://hurve-en.atlassian.net/jira/software/projects/BE/boards/3/timeline?rangeMode=WEEKS)
