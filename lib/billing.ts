@@ -11,6 +11,7 @@ import {
 	tenants,
 } from "@/db/schema";
 import {calculateTotal} from "@/lib/bill-math";
+import type {UpdateBillInput} from "@/lib/definitions";
 
 // tenant current room
 const currentRoomNumber = sql<string | null>`(
@@ -138,10 +139,7 @@ export async function getBillsForMonth(billingMonth: string) {
 	};
 }
 
-export async function getBillsForTenant(
-	userId: string,
-	billingMonth: string,
-) {
+export async function getBillsForTenant(userId: string, billingMonth: string) {
 	return db
 		.select({
 			id: bills.billId,
@@ -154,10 +152,7 @@ export async function getBillsForTenant(
 		.from(bills)
 		.innerJoin(tenants, eq(tenants.tenantId, bills.tenantId))
 		.where(
-			and(
-				eq(tenants.userId, userId),
-				eq(bills.billingMonth, billingMonth),
-			),
+			and(eq(tenants.userId, userId), eq(bills.billingMonth, billingMonth)),
 		)
 		.orderBy(bills.dueDate);
 }
@@ -199,4 +194,55 @@ export async function getBillDetails(billId: string) {
 		.orderBy(payments.paymentDate, payments.createdAt);
 
 	return {bill, payments: billPayments};
+}
+
+export async function updateBill(billId: string, input: UpdateBillInput) {
+	return db.transaction(async (tx) => {
+		const [bill] = await tx
+			.select({billingMonth: bills.billingMonth})
+			.from(bills)
+			.where(eq(bills.billId, billId))
+			.for("update");
+		if (!bill) return {result: "not-found"} as const;
+		if (input.dueDate < bill.billingMonth)
+			return {result: "due-before-month"} as const;
+
+		const [sum] = await tx
+			.select({paid: sql<string>`coalesce(sum(${payments.amount}), 0)`})
+			.from(payments)
+			.where(eq(payments.billId, billId));
+
+		const total = calculateTotal(
+			input.rentAmount,
+			input.electricCharge,
+			input.waterCharge,
+		);
+		const totalCents = Math.round(Number(total) * 100);
+		const paidCents = Math.round(Number(sum?.paid ?? 0) * 100);
+		if (totalCents < paidCents)
+			return {
+				result: "below-paid",
+				paid: (paidCents / 100).toFixed(2),
+			} as const;
+
+		const balanceCents = totalCents - paidCents;
+		const status =
+			balanceCents === 0 ? "paid" : paidCents > 0 ? "partial" : "unpaid";
+
+		const [updated] = await tx
+			.update(bills)
+			.set({
+				dueDate: input.dueDate,
+				rentAmount: input.rentAmount.toFixed(2),
+				electricCharge: input.electricCharge.toFixed(2),
+				waterCharge: input.waterCharge.toFixed(2),
+				totalAmount: total,
+				outstandingBalance: (balanceCents / 100).toFixed(2),
+				status,
+			})
+			.where(eq(bills.billId, billId))
+			.returning();
+
+		return {result: "updated", bill: updated} as const;
+	});
 }
