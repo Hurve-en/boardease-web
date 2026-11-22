@@ -55,6 +55,8 @@ const currentMonth = () =>
 		.format(new Date())
 		.slice(0, 7);
 
+const isMonth = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+
 const STATUS_STYLE: Record<BillStatus, string> = {
 	unpaid: "bg-[#f7e4dd] text-[#9b3a2e]",
 	partial: "bg-[#f9eeda] text-[#8a5a12]",
@@ -138,7 +140,7 @@ export default function BillsClient() {
 					<p className="eyebrow">BILLING</p>
 					<h1>Monthly bills</h1>
 					<p className="welcome-copy">
-						Rent, utilities and payment status — one monthly record.
+						Rent, utilities and payment status - one monthly record.
 					</p>
 				</div>
 				<Link className="create-action" href="/monthly-bills/new">
@@ -208,8 +210,9 @@ export default function BillsClient() {
 						<input
 							type="month"
 							value={month}
+							max="9999-12"
 							onChange={(event) =>
-								event.target.value && setMonth(event.target.value)
+								isMonth(event.target.value) && setMonth(event.target.value)
 							}
 							aria-label="Billing month"
 							className="h-[38px] rounded-lg border border-[#e0d8cb] bg-white px-3 text-[13px] font-semibold text-[#4a3f38]"

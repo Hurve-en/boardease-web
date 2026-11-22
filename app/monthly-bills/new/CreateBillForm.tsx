@@ -47,10 +47,21 @@ const currentMonth = () =>
 		.format(new Date())
 		.slice(0, 7);
 
+const isMonth = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+const isDate = (value: string) =>
+	/^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value));
+
 const toAmount = (value: string) =>
 	value.trim() === "" ? Number.NaN : Number(value.replace(/,/g, ""));
 const isMoney = (n: number) =>
 	Number.isFinite(n) && n >= 0 && Math.round(n * 100) === n * 100;
+
+const AMOUNT_PATTERN = /^\d{0,8}(\.\d{0,2})?$/;
+const amountInput =
+	(set: (value: string) => void) =>
+	(e: React.ChangeEvent<HTMLInputElement>) => {
+		if (AMOUNT_PATTERN.test(e.target.value)) set(e.target.value);
+	};
 
 const inputBase =
 	"mt-2 h-[42px] w-full rounded-lg bg-white px-3.5 text-sm text-[#2f2520] outline-none transition";
@@ -84,7 +95,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 	}
 
 	function chooseMonth(value: string) {
-		if (!value) return;
+		if (!isMonth(value)) return;
 		setMonth(value);
 		setDueDate(`${value}-10`);
 	}
@@ -100,7 +111,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 
 		if (!tenant) next.tenant = "Choose a tenant.";
 		if (!month) next.month = "Choose a billing month.";
-		if (!dueDate) next.dueDate = "Choose a due date.";
+		if (!isDate(dueDate)) next.dueDate = "Choose a due date.";
 		else if (dueDate < `${month}-01`)
 			next.dueDate = "The due date can’t be before the billing month.";
 		if (!isMoney(rentN))
@@ -230,6 +241,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 									id="month"
 									type="month"
 									value={month}
+									max="9999-12"
 									onChange={(e) => chooseMonth(e.target.value)}
 									aria-invalid={Boolean(errors.month)}
 									className={`${inputBase} ${errors.month ? inputBad : inputOk}`}
@@ -241,6 +253,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 									type="date"
 									value={dueDate}
 									min={`${month}-01`}
+									max="9999-12-31"
 									onChange={(e) => setDueDate(e.target.value)}
 									aria-invalid={Boolean(errors.dueDate)}
 									className={`${inputBase} ${errors.dueDate ? inputBad : inputOk}`}
@@ -263,8 +276,9 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 								type="text"
 								inputMode="decimal"
 								placeholder="0.00"
+								maxLength={11}
 								value={rent}
-								onChange={(e) => setRent(e.target.value)}
+								onChange={amountInput(setRent)}
 								aria-invalid={Boolean(errors.rent)}
 								className={`${inputBase} ${errors.rent ? inputBad : inputOk}`}
 							/>
@@ -285,8 +299,9 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 									type="text"
 									inputMode="decimal"
 									placeholder="0.00"
+									maxLength={11}
 									value={electric}
-									onChange={(e) => setElectric(e.target.value)}
+									onChange={amountInput(setElectric)}
 									aria-invalid={Boolean(errors.electric)}
 									className={`${inputBase} ${errors.electric ? inputBad : inputOk}`}
 								/>
@@ -297,8 +312,9 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 									type="text"
 									inputMode="decimal"
 									placeholder="0.00"
+									maxLength={11}
 									value={water}
-									onChange={(e) => setWater(e.target.value)}
+									onChange={amountInput(setWater)}
 									aria-invalid={Boolean(errors.water)}
 									className={`${inputBase} ${errors.water ? inputBad : inputOk}`}
 								/>
@@ -342,13 +358,13 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 						<div className="mt-4 space-y-3 border-t border-[#ebe4d8] pt-4">
 							<div className="flex items-baseline justify-between">
 								<span className="text-sm text-[#5a4a3f]">Total amount</span>
-								<strong className="text-2xl font-semibold text-[#2f2520]">
+								<strong className="min-w-0 break-all text-right text-2xl font-semibold text-[#2f2520]">
 									{money(preview)}
 								</strong>
 							</div>
 							<PreviewLine
 								label="Due date"
-								value={dueDate ? longDate(dueDate) : "—"}
+								value={isDate(dueDate) ? longDate(dueDate) : "—"}
 							/>
 							<div className="flex items-center justify-between text-[13px]">
 								<span className="text-[#7d7269]">Status after saving</span>
