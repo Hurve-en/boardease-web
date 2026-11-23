@@ -29,16 +29,16 @@ export function OPTIONS() {
 
 export async function POST(request: Request){
     const auth = await authorize(request, ["tenant"]);
-    if (auth.response) return auth.response;
+    if (auth.response) return withCors(auth.response);
 
     const body = await request.json().catch(() => null);
     const parsed = CreatePaymentSubmissionSchema.safeParse(body);
 
     if(!parsed.success){
-        return NextResponse.json(
+        return withCors(NextResponse.json(
             { error: parsed.error.issues[0].message },
             { status: 400 },
-        );
+        ));
     }
 
     // The receipt must live in this tenant's own storage folder
@@ -48,10 +48,10 @@ export async function POST(request: Request){
         !receiptPath.startsWith(`${auth.user.id}/`) ||
         receiptPath.includes("..")
     ){
-        return NextResponse.json(
+        return withCors(NextResponse.json(
             { error: "Invalid receipt path." },
             { status: 400 },
-        );
+        ));
     }
 
     try{
@@ -73,7 +73,7 @@ export async function POST(request: Request){
             .limit(1);
 
         if(!bill){
-            return NextResponse.json({ error: "Bill not found." }, { status: 404 });
+            return withCors(NextResponse.json({ error: "Bill not found." }, { status: 404 }));
         }
 
         // Compare whole cents to avoid floating-point money comparisons.
@@ -81,10 +81,10 @@ export async function POST(request: Request){
         const balanceCents = Math.round(Number(bill.outstandingBalance) * 100);
 
         if(amountCents > balanceCents){
-            return NextResponse.json(
+            return withCors(NextResponse.json(
                 { error: "Amount exceeds the bill balance." },
                 { status: 400 },
-            );
+            ));
         }
 
         const [submission] = await db
@@ -101,12 +101,12 @@ export async function POST(request: Request){
                 status: paymentSubmissions.status,
             });
 
-        return NextResponse.json(submission, { status: 201 });
+        return withCors(NextResponse.json(submission, { status: 201 }));
     }catch{
-        return NextResponse.json(
+        return withCors(NextResponse.json(
             { error: "Failed to submit payment." },
             { status: 500 },
-        );
+        ));
     }
 }
 
