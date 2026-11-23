@@ -86,6 +86,7 @@ export const CreateBillSchema = z
 		amount: z.number().positive().multipleOf(0.01),
 		referenceNumber: z.string().trim().min(1).max(100),
 		receiptPath: z.string().trim().min(1, { error: "Upload your receipt screenshot."}),
+		paymentDate: z.iso.date(),
 	});
 
 	export const CreatePaymentSchema = z.object({
