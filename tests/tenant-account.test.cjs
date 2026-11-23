@@ -23,8 +23,8 @@ Module._load = function(id,parent,isMain) {
   if (resolved === authPath) return {createClient:async()=>({auth:{getUser:async()=>({data:{user:claims ? {id:claims.sub,email:claims.email} : null},error:null})}})};
   return originalLoad.call(this,id,parent,isMain);
 };
-let GET;
-try { ({GET} = require('../app/api/tenant/account/route')); }
+let GET, PATCH;
+try { ({GET, PATCH} = require('../app/api/tenant/account/route')); }
 finally { Module._load = originalLoad; }
 const request = () => new Request(`http://localhost/api/tenant/account?userId=${OTHER}&tenantId=${OTHER}`, {headers:{Authorization:'Bearer mock-token'}});
 beforeEach(()=> {
@@ -63,4 +63,28 @@ test('missing profile is distinct from database failure and does not expose inte
   assert.equal(response.status,500);
   assert.equal(response.headers.get('Cache-Control'),'private, no-store');
   assert.deepEqual(await response.json(),{error:'Failed to load account information.'});
+});
+
+function edit(body) {
+  return PATCH(new Request(request().url, {
+    method: 'PATCH', headers: request().headers, body: JSON.stringify(body),
+  }));
+}
+test('saves a trimmed display name on the authenticated profile', async () => {
+  rows = [['New name']];
+  const response = await edit({name: ' New name '});
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {name: 'New name'});
+  assert.match(queries[0].sql, /update "profiles" set "name" = \$1 where "profiles"\."id" = \$2/);
+  assert.deepEqual(queries[0].params, ['New name', USER]);
+});
+test('rejects invalid names, other fields and unauthorized edits before writing', async () => {
+  for (const body of [{name:' '}, {name:'a'.repeat(121)}, {name:'A', email:'other@example.test'}]) {
+    assert.equal((await edit(body)).status, 400);
+  }
+  claims.user_role = 'admin';
+  assert.equal((await edit({name:'A'})).status, 403);
+  claims = undefined;
+  assert.equal((await edit({name:'A'})).status, 401);
+  assert.equal(queries.length, 0);
 });
