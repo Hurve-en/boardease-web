@@ -80,10 +80,17 @@ export const tenants = pgTable(
 	(table) => [unique("tenants_user_id_unique").on(table.userId)],
 ).enableRLS();
 
+export const boardingHouses = pgTable("boarding_houses", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	name: text("name").notNull().unique(),
+}).enableRLS();
+
 export const rooms = pgTable(
 	"rooms",
 	{
 		roomId: uuid("room_id").primaryKey().defaultRandom(),
+
+		boardingHouseId: uuid("boarding_house_id").references(() => boardingHouses.id),
 
 		roomNumber: text("room_number").notNull(),
 
@@ -101,7 +108,7 @@ export const rooms = pgTable(
 			.defaultNow(),
 	},
 	(table) => [
-		unique("rooms_room_number_unique").on(table.roomNumber),
+		unique("rooms_house_room_unique").on(table.boardingHouseId, table.roomNumber).nullsNotDistinct(),
 		check("rooms_capacity_positive", sql`${table.maxOccupancy} >= 1`),
 		check("rooms_monthly_rent_nonnegative", sql`${table.monthlyRent} >= 0`),
 	],

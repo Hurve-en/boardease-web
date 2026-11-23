@@ -10,7 +10,10 @@ export const CredentialsSchema = z.object({
 	}),
 });
 
+export const HouseNameSchema = z.string().trim().min(1, "Enter a boarding-house name.").max(120);
+
 export const CreateRoomSchema = z.object({
+	boardingHouseName: HouseNameSchema.optional(),
 	roomNumber: z
 		.string({error: "Room number is required."})
 		.trim()

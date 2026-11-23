@@ -3,7 +3,7 @@ import "server-only";
 import type {CreateRoomInput} from "@/lib/definitions";
 
 import {and, eq, sql} from "drizzle-orm";
-import {rooms, tenantRoomAssignment, tenants} from "@/db/schema";
+import {boardingHouses, rooms, tenantRoomAssignment, tenants} from "@/db/schema";
 import {db} from "@/db";
 import {isUniqueViolation} from "./db-errors";
 
@@ -14,6 +14,7 @@ export type RoomSummary = {
 };
 
 export type RoomListItem = {
+	boardingHouseName: string | null;
 	roomId: string;
 	roomNumber: string;
 	monthlyRent: string;
@@ -44,6 +45,7 @@ export async function getRooms(): Promise<RoomListItem[]> {
 	return (
 		db
 			.select({
+				boardingHouseName: boardingHouses.name,
 				roomId: rooms.roomId,
 				roomNumber: rooms.roomNumber,
 				monthlyRent: rooms.monthlyRent,
@@ -56,6 +58,7 @@ export async function getRooms(): Promise<RoomListItem[]> {
 				assignmentStart: tenantRoomAssignment.startDate,
 			})
 			.from(rooms)
+			.leftJoin(boardingHouses, eq(rooms.boardingHouseId, boardingHouses.id))
 			// first join is for the frontend to determine if it has an active tenant or not
 			.leftJoin(
 				tenantRoomAssignment,
@@ -70,17 +73,30 @@ export async function getRooms(): Promise<RoomListItem[]> {
 	);
 }
 
+export function getBoardingHouses() {
+	return db.select({name: boardingHouses.name}).from(boardingHouses).orderBy(boardingHouses.name);
+}
+
+type RoomTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export async function resolveHouseId(tx: RoomTransaction, name: string) {
+	const [house] = await tx.insert(boardingHouses).values({name})
+		.onConflictDoUpdate({target: boardingHouses.name, set: {name}})
+		.returning({id: boardingHouses.id});
+	return house.id;
+}
+
 export async function createRoom(input: CreateRoomInput) {
-	const [room] = await db
-		.insert(rooms)
-		.values({
+	return db.transaction(async (tx) => {
+		const boardingHouseId = input.boardingHouseName ? await resolveHouseId(tx, input.boardingHouseName) : null;
+		const [room] = await tx.insert(rooms).values({
+			boardingHouseId,
 			roomNumber: input.roomNumber,
 			monthlyRent: input.monthlyRent.toFixed(2),
 			maxOccupancy: input.maxOccupancy,
-		})
-		.returning();
-
-	return room;
+		}).returning();
+		return room;
+	});
 }
 
 export function isDuplicateRoomNumber(error: unknown): boolean {

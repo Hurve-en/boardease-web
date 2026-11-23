@@ -1,5 +1,6 @@
 "use server";
 
+import { verifyAdmin } from "@/lib/dal";
 import { redirect } from "next/navigation";
 import {
   EditRoomDetails as updateRoomDetails,
@@ -11,6 +12,7 @@ export async function editRoomDetails(
   previousState: UpdateActionState,
   formData: FormData,
 ): Promise<UpdateActionState> {
+  await verifyAdmin();
   const result = await updateRoomDetails(previousState, formData);
 
   if (result.success) {

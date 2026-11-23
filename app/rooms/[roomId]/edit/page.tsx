@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getBoardingHouses } from "@/lib/room";
 import DashboardShell from "@/app/components/dashboard/DashboardShell";
 import EditRoomForm from "@/app/room_management/EditRoom";
 import { verifyAdmin } from "@/lib/dal";
@@ -18,7 +19,9 @@ export default async function EditRoomPage({
   return (
     <DashboardShell section="ROOMS">
       <EditRoomForm
+        houses={await getBoardingHouses()}
         room={{
+          boardingHouseName: details.room.boardingHouseName,
           id: details.room.roomId,
           identifier: details.room.roomNumber,
           monthly_rent: details.room.monthlyRent,

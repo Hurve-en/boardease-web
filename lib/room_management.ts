@@ -4,19 +4,22 @@ import "server-only";
 import {and, eq, gte, lte, or, isNull, sql} from "drizzle-orm";
 import {db} from "@/db";
 import {
+	boardingHouses,
 	rooms,
 	bills,
 	tenants,
 	profiles,
 	tenantRoomAssignment,
 } from "@/db/schema";
-import { createClient } from "./supabase/server";
+import { resolveHouseId, isDuplicateRoomNumber } from "./room";
+import { HouseNameSchema } from "./definitions";
 import { revalidatePath } from "next/cache";
 
 export type RoomDetails = {
   room: {
     roomId: string;
     roomNumber: string;
+    boardingHouseName: string | null;
     monthlyRent: number;
     maxOccupancy: number;
     status: string;
@@ -70,6 +73,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 		.select({
 			roomId: rooms.roomId,
 			roomNumber: rooms.roomNumber,
+			boardingHouseName: boardingHouses.name,
 			monthlyRent: rooms.monthlyRent,
 			maxOccupancy: rooms.maxOccupancy,
 			roomStatus: rooms.status,
@@ -88,6 +92,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 			dueDate: bills.dueDate,
 		})
 		.from(rooms)
+		.leftJoin(boardingHouses, eq(rooms.boardingHouseId, boardingHouses.id))
 		.leftJoin(
 			tenantRoomAssignment,
 			and(
@@ -128,6 +133,7 @@ export async function getRoomDetails(roomId: string): Promise<RoomDetails | null
 		room: {
 			roomId: row.roomId,
 			roomNumber: row.roomNumber,
+			boardingHouseName: row.boardingHouseName,
 			monthlyRent: Number(row.monthlyRent),
 			maxOccupancy: Number(row.maxOccupancy),
 			status: row.roomStatus,
@@ -209,36 +215,26 @@ export async function EditRoomDetails(
 ): Promise<UpdateActionState> {
 
 	const roomId = String(formData.get("roomId"));
-	const RoomName = formData.get("roomName")?.toString();
-	const NewMaxOccupancy = Number(formData.get("maxOccupancy"));
-	const NewMonthlyRent = formData.get("monthlyRent")?.toString();
-
-
-	try{ 
-	
-		const[room] = await db
-		.select()
-		.from(rooms)
-		.where(eq(rooms.roomId, roomId))
-
-		if(!room) throw new Error("Room not found");
-
-	const[updateRoom] = await db
-	.update(rooms)
-	.set({ 
-		roomNumber: RoomName,
-		monthlyRent: NewMonthlyRent,
-		maxOccupancy: NewMaxOccupancy,
-	})
-	.where(eq(rooms.roomId, roomId))
-	.returning();
-
-	
-}catch(error){ 
-	throw new Error("Failed to update room details: " + (error as Error).message);
-}
-
- revalidatePath(`/rooms/${roomId}`);
-  return { success: true, message: "Room updated" };
-
+	const rawName = formData.get("boardingHouseName");
+	const house = rawName ? HouseNameSchema.safeParse(rawName) : undefined;
+	if (house && !house.success) return {success: false, error: house.error.issues[0].message};
+	try {
+		await db.transaction(async (tx) => {
+			const boardingHouseId = house?.success ? await resolveHouseId(tx, house.data) : undefined;
+			const [room] = await tx.update(rooms).set({
+				boardingHouseId,
+				roomNumber: formData.get("roomName")?.toString(),
+				monthlyRent: formData.get("monthlyRent")?.toString(),
+				maxOccupancy: Number(formData.get("maxOccupancy")),
+			}).where(eq(rooms.roomId, roomId)).returning({id: rooms.roomId});
+			if (!room) throw new Error("Room not found");
+		});
+	} catch (error) {
+		return {success: false, error: isDuplicateRoomNumber(error)
+			? "This room identifier already exists in that house." : "Could not update the room."};
+	}
+	revalidatePath("/rooms");
+	revalidatePath("/tenants");
+	revalidatePath(`/room_management/${roomId}`);
+	return {success: true};
 }

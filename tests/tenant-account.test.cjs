@@ -28,7 +28,7 @@ try { ({GET} = require('../app/api/tenant/account/route')); }
 finally { Module._load = originalLoad; }
 const request = () => new Request(`http://localhost/api/tenant/account?userId=${OTHER}&tenantId=${OTHER}`, {headers:{Authorization:'Bearer mock-token'}});
 beforeEach(()=> {
-  rows = [['Maya Santos','maya@example.test',OTHER,'101']];
+  rows = [['Maya Santos','maya@example.test',OTHER,'101','Cedar House']];
   claims = {sub:USER,email:'maya@example.test',role:'authenticated',user_role:'tenant'};
   queries=[]; fail=false;
 });
@@ -36,15 +36,16 @@ test('account is scoped to authenticated identity and selects only its active ro
   const response=await GET(request());
   assert.equal(response.status,200);
   assert.equal(response.headers.get('Cache-Control'),'private, no-store');
-  assert.deepEqual(await response.json(), {profile:{name:'Maya Santos',email:'maya@example.test'},tenancy:{roomNumber:'101',boardingHouseName:null},owner:null});
+  assert.deepEqual(await response.json(), {profile:{name:'Maya Santos',email:'maya@example.test'},tenancy:{roomNumber:'101',boardingHouseName:'Cedar House'},owner:null});
   assert.match(queries[0].sql,/where "profiles"\."id" = \$/);
   assert.ok(queries[0].params.includes(USER));
   assert.ok(!queries[0].params.includes(OTHER));
   assert.match(queries[0].sql,/"tenant_room_assignment"\."tenant_id" = "tenants"\."tenant_id"/);
+  assert.match(queries[0].sql, /"rooms"\."boarding_house_id" = "boarding_houses"\."id"/);
   assert.ok(queries[0].params.includes('active'));
 });
 test('unlinked account can still see its profile without invented tenancy or owner', async()=> {
-  rows=[['Maya Santos','maya@example.test',null,null]];
+  rows=[['Maya Santos','maya@example.test',null,null,null]];
   assert.deepEqual(await (await GET(request())).json(),{profile:{name:'Maya Santos',email:'maya@example.test'},tenancy:null,owner:null});
 });
 test('rejects missing authentication and non-tenant roles before querying', async()=> {

@@ -1,5 +1,7 @@
 "use client";
 
+import HouseField from "./HouseField";
+
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -25,7 +27,7 @@ const inputOk =
 const inputBad =
   "border border-[#9b3a2e] ring-1 ring-[#9b3a2e] focus:ring-2 focus:ring-[#9b3a2e]";
 
-export default function RoomsClient() {
+export default function RoomsClient({houses}: {houses: {name: string}[]}) {
   const router = useRouter();
   const [form, setForm] = useState<FormValues>({
     roomNumber: "",
@@ -46,6 +48,8 @@ export default function RoomsClient() {
     if (saving) return;
 
     const next: Errors = {};
+    const boardingHouseName = String(new FormData(event.currentTarget).get("boardingHouseName") ?? "").trim();
+    if (!boardingHouseName) next.form = "Enter a boarding-house name.";
     const rent = Number(form.monthlyRent.replace(/,/g, ""));
     const capacity = Number(form.maxOccupancy);
 
@@ -68,6 +72,7 @@ export default function RoomsClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          boardingHouseName,
           roomNumber: form.roomNumber.trim(),
           monthlyRent: rent,
           maxOccupancy: capacity,
@@ -104,7 +109,7 @@ export default function RoomsClient() {
           Add room
         </h1>
         <p className="mt-1 text-sm text-[#7d7269]">
-          Create a room for Maple House. Assign a tenant after saving.
+          Create a room and choose its boarding house. Assign a tenant after saving.
         </p>
 
         <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -155,6 +160,8 @@ export default function RoomsClient() {
                 </div>
               </div>
             )}
+
+            <HouseField houses={houses} className={`${inputBase} ${inputOk}`} />
 
             {/* Room identifier */}
             <label

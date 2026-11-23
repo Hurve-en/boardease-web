@@ -9,6 +9,7 @@ import {
 	profiles,
 	tenants,
 	tenantRoomAssignment,
+	boardingHouses,
 	rooms,
 } from "@/db/schema";
 
@@ -35,6 +36,7 @@ export type TenantData = {
     }[];
 
     AvailableRooms: {
+        boardingHouseName: string | null;
         roomId: string;
         roomNumber: string;
         monthlyRent: number;
@@ -81,11 +83,13 @@ export async function getTenantData(): Promise<TenantData> {
 
         // 3. available rooms
         db.select({
+            boardingHouseName: boardingHouses.name,
             roomId: rooms.roomId,
             roomNumber: rooms.roomNumber,
             monthlyRent: rooms.monthlyRent,
         })
         .from(rooms)
+        .leftJoin(boardingHouses, eq(rooms.boardingHouseId, boardingHouses.id))
         .where(notExists(
             db.select({assignmentId: tenantRoomAssignment.assignmentId})
                 .from(tenantRoomAssignment)
@@ -148,6 +152,7 @@ export async function getTenantData(): Promise<TenantData> {
         })),
 
         AvailableRooms: availableRooms.map((a) => ({
+            boardingHouseName: a.boardingHouseName,
             roomId: String(a.roomId ?? ""),
             roomNumber: String(a.roomNumber ?? ""),
             monthlyRent: Number(a.monthlyRent ?? 0),
