@@ -30,3 +30,9 @@ export async function getTenantAccount(userId: string) {
     owner: null,
   };
 }
+
+export async function updateProfileName(userId: string, name: string) {
+  const [profile] = await db.update(profiles).set({name})
+    .where(eq(profiles.id, userId)).returning({name: profiles.name});
+  return profile;
+}
