@@ -1,9 +1,16 @@
 import "server-only";
 
-import {and, eq} from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
+import { createClient } from "@supabase/supabase-js";
 import { db } from "@/db";
 import { bills, payments, paymentSubmissions } from "@/db/schema";
 import { toCents } from "./bill-math";
+
+// Drizzle can't sign storage URLs, so the Supabase client is only used for that.
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
 export type PaymentErrorCode =
     | "BILL_NOT_FOUND"
@@ -84,29 +91,65 @@ export async function recordPayment(input: NewPayment){
                 status: bills.status,
             });
 
-            if(input.submissionId){
-                const approved = await tx
-                    .update(paymentSubmissions)
-                    .set({
-                        status: "approved",
-                        reviewedBy: input.recordedBy,
-                        reviewedAt: new Date(),
-                    })
-                    .where(
-                        and(
-                            eq(paymentSubmissions.submissionId, input.submissionId),
-                            eq(paymentSubmissions.billId, bill.billId),
-                            eq(paymentSubmissions.status, "pending"),
-                        ),
-                    )
-                    .returning({id: paymentSubmissions.submissionId});
+        if(input.submissionId){
+            const approved = await tx
+                .update(paymentSubmissions)
+                .set({
+                    status: "approved",
+                    reviewedBy: input.recordedBy,
+                    reviewedAt: new Date(),
+                })
+                .where(
+                    and(
+                        eq(paymentSubmissions.submissionId, input.submissionId),
+                        eq(paymentSubmissions.billId, bill.billId),
+                        eq(paymentSubmissions.status, "pending"),
+                    ),
+                )
+                .returning({id: paymentSubmissions.submissionId});
 
-                // Throwing rolls back the payment insert and bill update too.
-                if(approved.length === 0){
-                    throw new PaymentError("SUBMISSION_NOT_FOUND", "Pending submission not found for this bill.");
-                }
+            // Throwing rolls back the payment insert and bill update too.
+            if(approved.length === 0){
+                throw new PaymentError("SUBMISSION_NOT_FOUND", "Pending submission not found for this bill.");
             }
+        }
 
-            return {payment, bill: updatedBill};
+        return {payment, bill: updatedBill};
     });
+}
+
+export type PaymentReceipt = {
+    id: string;
+    status: string;
+    receiptUrl: string | null;
+};
+
+export async function getReceiptsForBill(billId: string): Promise<PaymentReceipt[]> {
+    const rows = await db
+        .select({
+            id: paymentSubmissions.submissionId,
+            status: paymentSubmissions.status,
+            receiptPath: paymentSubmissions.receiptPath,
+        })
+        .from(paymentSubmissions)
+        .where(
+            and(
+                eq(paymentSubmissions.billId, billId),
+                isNotNull(paymentSubmissions.receiptPath),
+            ),
+        );
+
+    return Promise.all(
+        rows.map(async (row) => {
+            const { data } = await supabase.storage
+                .from("payment_reference")
+                .createSignedUrl(row.receiptPath!, 3600); // valid for 1 hour
+
+            return {
+                id: row.id,
+                status: row.status,
+                receiptUrl: data?.signedUrl ?? null,
+            };
+        }),
+    );
 }
