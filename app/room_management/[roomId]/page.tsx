@@ -24,7 +24,7 @@ export default async function RoomPage({
           monthly_rent: details.room.monthlyRent,
           max_occupancy: details.room.maxOccupancy,
         }}
-        property={{ name: "Maple House" }}
+        property={{ name: details.room.boardingHouseName ?? "Boarding house unassigned" }}
         occupancy={details.occupancy}
         tenant={
           details.tenant

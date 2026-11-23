@@ -1,5 +1,7 @@
 "use client";
 
+import HouseField from "./HouseField";
+
 import { editRoomDetails } from "./actions";
 import type { UpdateActionState } from "@/lib/room_management";
 import Link from "next/link";
@@ -18,9 +20,11 @@ const inputClass =
   "mt-2 h-[42px] w-full rounded-lg border border-[#e5ded5] bg-white px-3.5 text-sm text-[#302a25] outline-none transition focus:border-[#603e2b] focus:ring-2 focus:ring-[#603e2b]/20";
 
 export default function EditRoomForm({
-  room,
+  room, houses,
 }: {
+  houses: {name: string}[];
   room: {
+    boardingHouseName: string | null;
     id: string;
     identifier: string;
     monthly_rent: number;
@@ -62,6 +66,7 @@ export default function EditRoomForm({
           </div>
 
           <div className="space-y-5 border-t border-[#e5ded5] px-6 py-6">
+            <HouseField houses={houses} value={room.boardingHouseName} className={inputClass} />
             <div>
               <label htmlFor="roomName" className={labelClass}>Room identifier</label>
               <input

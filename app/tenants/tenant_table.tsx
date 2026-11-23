@@ -14,6 +14,7 @@ type Tenant = {
 };
 
 type Room = {
+  boardingHouseName: string | null;
   roomId: string;
   roomNumber: string;
   monthlyRent: number;
@@ -73,7 +74,7 @@ export function TenantTable({
     () =>
       rooms.map((room) => ({
         ...room,
-        label: `Room ${room.roomNumber}`,
+        label: [room.boardingHouseName, `Room ${room.roomNumber}`].filter(Boolean).join(" · "),
       })),
     [rooms],
   );
