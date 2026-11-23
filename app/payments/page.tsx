@@ -1,13 +1,19 @@
 import DashboardShell from "../components/dashboard/DashboardShell";
 import { verifyAdmin } from "@/lib/dal";
-import RecordPaymentForm from "./record-payment-form";
+import PaymentRoomList from "./record-payment-form";
 
-export default async function PaymentPage(){
+
+export default async function PaymentPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ month?: string }>;
+}){
     await verifyAdmin();
+    const { month } = await searchParams;
 
     return(
         <DashboardShell section="PAYMENTS">
-            <RecordPaymentForm/>
+            <PaymentRoomList initialMonth={month} />
         </DashboardShell>
     );
 }

@@ -10,12 +10,12 @@ To Finish Web Features and App
 
 ## Tasks
 
-| Epic                                       | Member          | Pull Request               | Status      |
-| ------------------------------------------ | --------------- | -------------------------- | ----------- |
-| 6. Tenant-Room Assignment, Billing History | Joachime Chiong | App: Pushed in main        | Done        |
-| 6. Payment                                 | Elijah Bes      | Web: #23                   | in Progress |
-| 6. Billing                                 | Kendall Maputi  | Web: #24, #22              | Done        |
-| 6. Tenant Mobile App                       | Hurveen Veloso  | App: #10, #11 Web:#26, #25 | Done        |
+| Epic                                       | Member          | Pull Request                     | Status |
+| ------------------------------------------ | --------------- | -------------------------------- | ------ |
+| 6. Tenant-Room Assignment, Billing History | Joachime Chiong | App: Pushed in main              | Done   |
+| 6. Payment                                 | Elijah Bes      | Web: #23, #29, #30 App: #12, #13 | Done   |
+| 6. Billing                                 | Kendall Maputi  | Web: #22, #24, ,#27, #28, #31    | Done   |
+| 6. Tenant Mobile App                       | Hurveen Veloso  | App: #10, #11 Web:#26, #25       | Done   |
 
 **Demo result:**
 
