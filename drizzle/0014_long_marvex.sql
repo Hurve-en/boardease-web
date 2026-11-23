@@ -1,0 +1,1 @@
+ALTER TABLE "payment_submissions" ADD COLUMN "payment_date" date;

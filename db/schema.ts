@@ -236,7 +236,7 @@ export const payments = pgTable(
 export const paymentSubmissions = pgTable("payment_submissions", {
 	submissionId: uuid("submission_id").primaryKey().defaultRandom(),
 	billId: uuid("bill_id").notNull().references(() => bills.billId),
-	submittedBy: uuid("submitted_by").notNull().references(() => profiles.id),
+	submittedBy: uuid("submitted_by").notNull().references(() => tenants.tenantId),
 	amount: numeric("amount", { precision: 10, scale: 2}).notNull(),
 	referenceNumber: text("reference_number").notNull(),
 	receiptPath: text("receipt_path").notNull(),
@@ -245,4 +245,5 @@ export const paymentSubmissions = pgTable("payment_submissions", {
 	reviewNote: text("review_note"),
 	submittedAt: timestamp("submitted_at", { withTimezone: true}).notNull().defaultNow(),
 	reviewedAt: timestamp("reviewed_at", { withTimezone: true}),
+	paymentDate: date("payment_date"),
 }).enableRLS();

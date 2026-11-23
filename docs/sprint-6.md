@@ -14,7 +14,7 @@ To Finish Web Features and App
 | ------------------------------------------ | --------------- | -------------------------------- | ------ |
 | 6. Tenant-Room Assignment, Billing History | Joachime Chiong | App: Pushed in main              | Done   |
 | 6. Payment                                 | Elijah Bes      | Web: #23, #29, #30 App: #12, #13 | Done   |
-| 6. Billing                                 | Kendall Maputi  | Web: #22, #24, ,#27, #28         | Done   |
+| 6. Billing                                 | Kendall Maputi  | Web: #22, #24, ,#27, #28, #31    | Done   |
 | 6. Tenant Mobile App                       | Hurveen Veloso  | App: #10, #11 Web:#26, #25       | Done   |
 
 **Demo result:**
