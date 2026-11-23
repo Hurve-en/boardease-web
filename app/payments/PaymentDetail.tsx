@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { billNumber } from "@/lib/bill-math";
 import {
@@ -9,10 +9,50 @@ import {
     resolveMonth,
     money,
     monthLabel,
+    dateTime,
     statusClass,
+    submissionStatusClass,
     type Bill,
     type Receipt,
 } from "@/lib/payment-ui";
+
+function Detail({ label, children }: { label: string; children: ReactNode }){
+    return (
+        <div>
+            <dt className="text-[10px] font-bold uppercase tracking-wider text-[#8a8077]">
+                {label}
+            </dt>
+            <dd className="m-0 mt-1 text-sm text-[#322d29]">{children}</dd>
+        </div>
+    );
+}
+
+function ReceiptDetails({ receipt }: { receipt: Receipt }){
+    const submittedBy =
+        `${receipt.tenantFirstName ?? ""} ${receipt.tenantLastName ?? ""}`.trim() || "—";
+
+    return (
+        <dl className="m-0 grid gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${submissionStatusClass(receipt.status)}`}>
+                    {receipt.status}
+                </span>
+                <strong className="text-xl text-[#322d29]">{money(receipt.amount)}</strong>
+            </div>
+
+            <Detail label="Reference number">{receipt.referenceNumber || "—"}</Detail>
+            <Detail label="Date submitted">{dateTime(receipt.submittedAt)}</Detail>
+            <Detail label="Submitted by">{submittedBy}</Detail>
+
+            {receipt.reviewedAt && (
+                <Detail label="Date reviewed">{dateTime(receipt.reviewedAt)}</Detail>
+            )}
+            {receipt.reviewNote && (
+                <Detail label="Review note">{receipt.reviewNote}</Detail>
+            )}
+        </dl>
+    );
+}
 
 export default function PaymentDetail({
     billId,
@@ -34,7 +74,7 @@ export default function PaymentDetail({
     const [success, setSuccess] = useState("");
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [receiptsLoading, setReceiptsLoading] = useState(true);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [previewReceipt, setPreviewReceipt] = useState<Receipt | null>(null);
 
     // Load this bill (the list endpoint is reused and filtered by id).
     useEffect(() => {
@@ -75,7 +115,7 @@ export default function PaymentDetail({
         };
     }, [billId, month, reloadKey]);
 
-    // Load the submitted receipt images for this bill.
+    // Load the submitted receipts for this bill.
     useEffect(() => {
         let cancelled = false;
         setReceiptsLoading(true);
@@ -99,15 +139,15 @@ export default function PaymentDetail({
 
     // Close the image pop-up with the Escape key.
     useEffect(() => {
-        if(!previewUrl) return;
+        if(!previewReceipt) return;
 
         function onKeyDown(event: KeyboardEvent){
-            if(event.key === "Escape") setPreviewUrl(null);
+            if(event.key === "Escape") setPreviewReceipt(null);
         }
 
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [previewUrl]);
+    }, [previewReceipt]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>){
         event.preventDefault();
@@ -286,39 +326,52 @@ export default function PaymentDetail({
                     </section>
 
                     <section className="mt-5">
-                        <h2 className="mb-3 text-base font-semibold text-[#322d29]">Receipt images</h2>
+                        <h2 className="mb-3 text-base font-semibold text-[#322d29]">
+                            Receipt images
+                            {receipts.length > 0 && (
+                                <span className="ml-2 text-xs font-normal text-[#8a8077]">
+                                    {receipts.length} submitted
+                                </span>
+                            )}
+                        </h2>
 
                         {receiptsLoading ? (
                             <div className="panel text-sm text-[#8a8077]">Loading receipts…</div>
-                        ) : receipts.some((receipt) => receipt.receiptUrl) ? (
-                            <div className="panel grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                {receipts.map(
-                                    (receipt) =>
-                                        receipt.receiptUrl && (
+                        ) : receipts.length > 0 ? (
+                            <div className="grid gap-4">
+                                {receipts.map((receipt) => (
+                                    <article
+                                        key={receipt.submissionId}
+                                        className="panel flex flex-col gap-5 sm:flex-row"
+                                    >
+                                        {receipt.receiptUrl ? (
                                             <button
-                                                key={receipt.submissionId}
                                                 type="button"
-                                                onClick={() => setPreviewUrl(receipt.receiptUrl)}
-                                                className="group text-left"
+                                                onClick={() => setPreviewReceipt(receipt)}
+                                                className="group relative block h-80 w-full shrink-0 overflow-hidden rounded-xl border border-[#e0d8cb] bg-[#f4ede5] sm:w-72"
                                                 aria-label="View full receipt image"
                                             >
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img
                                                     src={receipt.receiptUrl}
                                                     alt="Payment receipt"
-                                                    className="h-40 w-full rounded-lg border border-[#e0d8cb] object-cover transition group-hover:opacity-90 group-hover:ring-2 group-hover:ring-[#704b34]/30"
+                                                    className="h-full w-full object-contain"
                                                 />
-                                                <span className="mt-2 block text-[11px] font-semibold uppercase text-[#8a8077]">
-                                                    {receipt.status} · {money(receipt.amount)}
+                                                <span className="absolute inset-x-0 bottom-0 bg-black/55 py-2 text-center text-[11px] font-semibold text-white opacity-0 transition group-hover:opacity-100">
+                                                    Click to enlarge
                                                 </span>
-                                                {receipt.referenceNumber && (
-                                                    <span className="block text-[11px] text-[#8a8077]">
-                                                        Ref {receipt.referenceNumber}
-                                                    </span>
-                                                )}
                                             </button>
-                                        ),
-                                )}
+                                        ) : (
+                                            <div className="flex h-80 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-[#e0d8cb] bg-[#f4ede5] text-xs text-[#8a8077] sm:w-72">
+                                                Image unavailable
+                                            </div>
+                                        )}
+
+                                        <div className="min-w-0 flex-1">
+                                            <ReceiptDetails receipt={receipt} />
+                                        </div>
+                                    </article>
+                                ))}
                             </div>
                         ) : (
                             <div className="panel flex items-center gap-4">
@@ -409,33 +462,43 @@ export default function PaymentDetail({
                 </section>
             </div>
 
-            {/* Full image pop-up */}
-            {previewUrl && (
+            {/* Full receipt pop-up */}
+            {previewReceipt?.receiptUrl && (
                 <div
                     role="dialog"
                     aria-modal="true"
-                    aria-label="Receipt image"
+                    aria-label="Receipt details"
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-                    onClick={() => setPreviewUrl(null)}
+                    onClick={() => setPreviewReceipt(null)}
                 >
                     <div
-                        className="relative max-h-full max-w-4xl"
+                        className="relative flex max-h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white lg:flex-row"
                         onClick={(event) => event.stopPropagation()}
                     >
                         <button
                             type="button"
                             aria-label="Close image"
-                            onClick={() => setPreviewUrl(null)}
-                            className="absolute -right-3 -top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-base font-semibold text-[#322d29] shadow-lg hover:bg-[#f7f3ec]"
+                            onClick={() => setPreviewReceipt(null)}
+                            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-base font-semibold text-[#322d29] shadow-lg hover:bg-[#f7f3ec]"
                         >
                             ✕
                         </button>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={previewUrl}
-                            alt="Payment receipt, full size"
-                            className="max-h-[85vh] w-auto max-w-full rounded-lg bg-white object-contain"
-                        />
+
+                        <div className="flex min-h-0 flex-1 items-center justify-center bg-[#1f1b18] p-3">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={previewReceipt.receiptUrl}
+                                alt="Payment receipt, full size"
+                                className="max-h-[80vh] w-auto max-w-full object-contain"
+                            />
+                        </div>
+
+                        <aside className="w-full shrink-0 overflow-y-auto p-6 lg:w-80">
+                            <h2 className="mb-5 mt-0 text-base font-semibold text-[#322d29]">
+                                Receipt details
+                            </h2>
+                            <ReceiptDetails receipt={previewReceipt} />
+                        </aside>
                     </div>
                 </div>
             )}
