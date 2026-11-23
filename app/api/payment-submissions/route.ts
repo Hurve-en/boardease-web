@@ -27,11 +27,6 @@ export function OPTIONS() {
     });
 }
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
-
 export async function POST(request: Request){
     const auth = await authorize(request, ["tenant"]);
     if (auth.response) return withCors(auth.response);
@@ -121,6 +116,11 @@ export async function POST(request: Request){
         if(auth.response) return withCors(auth.response);
 
         try{
+            const supabaseAdmin = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            );
+            
             const rows = await db
                 .select({
                     submissionId: paymentSubmissions.submissionId,
