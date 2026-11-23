@@ -110,56 +110,18 @@ export async function POST(request: Request){
     }
 }
 
-    export async function GET(request: Request){
-        const auth = await authorize(request, ["admin"]);
-        if(auth.response) return withCors(auth.response);
+    export async function GET(request: Request) {
+    const auth = await authorize(request, ["admin"]);
+    if (auth.response) return withCors(auth.response);
 
-        try{
-            const supabaseAdmin = createClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            );
-            
-            const rows = await db
-                .select({
-                    submissionId: paymentSubmissions.submissionId,
-                    billId: paymentSubmissions.billId,
-                    submittedBy: paymentSubmissions.submittedBy,
-                    amount: paymentSubmissions.amount,
-                    referenceNumber: paymentSubmissions.referenceNumber,
-                    receiptPath: paymentSubmissions.receiptPath,
-                    status: paymentSubmissions.status,
-                    reviewedBy: paymentSubmissions.reviewedBy,
-                    reviewNote: paymentSubmissions.reviewNote,
-                    submittedAt: paymentSubmissions.submittedAt,
-                    reviewedAt: paymentSubmissions.reviewedAt,
-                    tenantFirstName: tenants.firstName,
-                    tenantLastName: tenants.lastName,
-                    billingMonth: bills.billingMonth,
-                    outstandingBalance: bills.outstandingBalance,
-                })
-                .from(paymentSubmissions)
-                .leftJoin(bills, eq(paymentSubmissions.billId, bills.billId))
-                .leftJoin(tenants, eq(paymentSubmissions.submittedBy, tenants.tenantId))
-                .orderBy(desc(paymentSubmissions.submittedAt));
-
-            const submissions = await Promise.all(
-                rows.map(async (row) => {
-                    const { data } = await supabaseAdmin.storage
-                        .from("payment_reference")
-                        .createSignedUrl(row.receiptPath, 60 * 60);
-
-                    return{
-                        ...row,
-                        receiptUrl: data?.signedUrl ?? null,
-                    };
-                }),
-            );
-
-    // Optional filter: /api/payment-submissions?billId=...
     const billId = new URL(request.url).searchParams.get("billId");
 
-    try{
+    try {
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        );
+
         const rows = await db
             .select({
                 submissionId: paymentSubmissions.submissionId,
@@ -197,12 +159,14 @@ export async function POST(request: Request){
             }),
         );
 
-        return NextResponse.json(submissions, { status: 200 });
-    }catch(err){
-        console.error("GET PAYMENT SUBMISSION ERROR: ", err);
-        return NextResponse.json(
-            { error: "Failed to load payment submissions." },
-            { status: 500 },
+        return withCors(NextResponse.json(submissions, { status: 200 }));
+    } catch (error) {
+        console.error("GET PAYMENT SUBMISSION ERROR:", error);
+        return withCors(
+            NextResponse.json(
+                { error: "Failed to load payment submissions." },
+                { status: 500 },
+            ),
         );
     }
 }
