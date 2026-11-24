@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {createClient} from "@supabase/supabase-js";
+import {createClient} from "@/lib/supabase/server";
 import {CredentialsSchema} from "@/lib/definitions";
 
 export async function POST(request: Request) {
@@ -13,15 +13,20 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const supabase = createClient(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-		{auth: {persistSession: false, autoRefreshToken: false}},
-	);
+	const supabase = await createClient();
 
 	const {data, error} = await supabase.auth.signInWithPassword(parsed.data);
 
 	if (error || !data.session) {
+		return NextResponse.json(
+			{error: "Wrong email or password."},
+			{status: 401},
+		);
+	}
+	const {data: userData, error: userError} = await supabase.auth.getUser(
+		data.session.access_token,
+	);
+	if (userError || !userData.user) {
 		return NextResponse.json(
 			{error: "Wrong email or password."},
 			{status: 401},
@@ -38,6 +43,6 @@ export async function POST(request: Request) {
 	return NextResponse.json({
 		accessToken: data.session.access_token,
 		refreshToken: data.session.refresh_token,
-		user: {id: data.user.id, email: data.user.email, role},
+		user: {id: userData.user.id, email: userData.user.email, role},
 	});
 }

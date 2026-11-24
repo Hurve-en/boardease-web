@@ -4,11 +4,18 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Inter } from "next/font/google";
-import { createBrowserClient } from "@supabase/ssr";
+import ResetLinkErrorNotice from "./ResetLinkErrorNotice";
+import { createClient as createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function ForgotPasswordPage() {
+export default function ForgotPasswordForm({
+  linkError = "",
+  linkReason = "",
+}: {
+  linkError?: string;
+  linkReason?: string;
+}) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
@@ -19,22 +26,34 @@ export default function ForgotPasswordPage() {
     setError("");
     setLoading(true);
 
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createBrowserSupabaseClient();
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+    const origin = new URL(window.location.origin);
+    // 0.0.0.0 is useful as a server bind address, but browsers cannot use it
+    // as the destination after following an email link.
+    if (origin.hostname === "0.0.0.0") {
+      origin.hostname = "localhost";
     }
-    setSent(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${origin.origin}/auth/confirm?next=/reset-password`,
+      });
+
+      if (error) {
+        setError(
+          error.status === 429 || /rate limit|too many requests/i.test(error.message)
+            ? "Too many reset requests. Please wait a little while before trying again."
+            : "We couldn’t send the reset email right now. Please try again later.",
+        );
+        return;
+      }
+      setSent(true);
+    } catch {
+      setError("We couldn’t connect to send the reset email. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -138,9 +157,8 @@ export default function ForgotPasswordPage() {
                 Check your email
               </h2>
               <p className="mt-1 text-sm leading-relaxed text-[#8a7f76]">
-                If an account exists for{" "}
-                <span className="font-semibold text-[#2f2520]">{email}</span>,
-                we sent a link to reset your password.
+                If an account exists for that email, we sent a link to reset your
+                password.
               </p>
 
               <button
@@ -159,6 +177,7 @@ export default function ForgotPasswordPage() {
               <p className="mt-1 text-sm leading-relaxed text-[#8a7f76]">
                 Enter your email and we&apos;ll send you a link to reset it.
               </p>
+              <ResetLinkErrorNotice queryError={linkError} queryReason={linkReason} />
 
               <form onSubmit={handleSubmit} className="mt-8">
                 <label

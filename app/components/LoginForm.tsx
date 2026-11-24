@@ -13,7 +13,11 @@ const initialState: LoginState = {
   email: "",
 };
 
-export default function LoginForm() {
+export default function LoginForm({
+  passwordResetSuccess = false,
+}: {
+  passwordResetSuccess?: boolean;
+}) {
   const router = useRouter();
   const [state, action, pending] = useActionState(signIn, initialState);
   const [email, setEmail] = useState(
@@ -53,6 +57,13 @@ export default function LoginForm() {
         </p>
       </div>
 
+      {passwordResetSuccess && (
+        <AuthMessage
+          type="success"
+          message="Your password was reset. Sign in with your new password."
+        />
+      )}
+
       <form action={action} className="space-y-5">
         <TextField
           id="email"
@@ -85,7 +96,7 @@ export default function LoginForm() {
         </label>
 
         <Link
-          href="/forget-password"
+          href="/forgot-password"
           className="block text-xs font-medium text-[#613d2b]"
         >
           Forgot password?
