@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import ResetLinkErrorNotice from "./ResetLinkErrorNotice";
-import { createClient as createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,31 +25,31 @@ export default function ForgotPasswordForm({
     setError("");
     setLoading(true);
 
-    const supabase = createBrowserSupabaseClient();
-
-    const origin = new URL(window.location.origin);
-    // 0.0.0.0 is useful as a server bind address, but browsers cannot use it
-    // as the destination after following an email link.
-    if (origin.hostname === "0.0.0.0") {
-      origin.hostname = "localhost";
-    }
-
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin.origin}/auth/confirm?next=/reset-password`,
+      const response = await fetch("/api/auth/password-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
+      const result = await response.json();
 
-      if (error) {
+      if (!response.ok || !result.ok) {
         setError(
-          error.status === 429 || /rate limit|too many requests/i.test(error.message)
+          result.rateLimited
             ? "Too many reset requests. Please wait a little while before trying again."
             : "We couldn’t send the reset email right now. Please try again later.",
         );
         return;
       }
       setSent(true);
-    } catch {
-      setError("We couldn’t connect to send the reset email. Please try again.");
+    } catch (cause) {
+      console.error("PASSWORD RESET ACTION CALL FAILED:", cause);
+      const reason = cause instanceof Error ? cause.message : String(cause);
+      setError(
+        process.env.NODE_ENV === "development"
+          ? `We couldn’t connect to send the reset email. ${reason}`
+          : "We couldn’t connect to send the reset email. Please try again.",
+      );
     } finally {
       setLoading(false);
     }

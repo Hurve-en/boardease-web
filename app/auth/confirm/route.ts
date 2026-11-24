@@ -70,12 +70,14 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    // PKCE verifier cookies are browser-owned. Complete this exchange in the
-    // browser so Supabase can read the verifier created by the reset request.
-    const destination = new URL("/auth/complete", ORIGIN);
-    destination.searchParams.set("code", code);
-    destination.searchParams.set("next", next);
-    return NextResponse.redirect(destination);
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    console.error("EXCHANGE CODE ERROR:", {
+      name: error?.name ?? null,
+      message: error?.message ?? null,
+    });
+    if (error) return failure("verify_failed", error.message);
+    return NextResponse.redirect(new URL(next, ORIGIN));
   }
 
   console.error("CONFIRM ERROR:", {
