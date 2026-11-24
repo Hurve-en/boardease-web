@@ -1,16 +1,10 @@
 import "server-only";
 
 import { and, eq, isNotNull } from "drizzle-orm";
-import { createClient } from "@supabase/supabase-js";
 import { db } from "@/db";
 import { bills, payments, paymentSubmissions } from "@/db/schema";
+import {createSupabaseAdminClient} from "@/lib/supabase/admin";
 import { toCents } from "./bill-math";
-
-// Drizzle can't sign storage URLs, so the Supabase client is only used for that.
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
 
 export type PaymentErrorCode =
     | "BILL_NOT_FOUND"
@@ -98,6 +92,7 @@ export async function recordPayment(input: NewPayment){
                     status: "approved",
                     reviewedBy: input.recordedBy,
                     reviewedAt: new Date(),
+                    paymentDate: input.paymentDate,
                 })
                 .where(
                     and(
@@ -125,6 +120,9 @@ export type PaymentReceipt = {
 };
 
 export async function getReceiptsForBill(billId: string): Promise<PaymentReceipt[]> {
+    // Create this only when signing is requested so payment recording does not
+    // depend on storage credentials during module initialization.
+    const supabase = createSupabaseAdminClient();
     const rows = await db
         .select({
             id: paymentSubmissions.submissionId,

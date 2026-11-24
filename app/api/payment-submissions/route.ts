@@ -1,15 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { authorize } from "@/lib/api-auth";
 import { CreatePaymentSubmissionSchema } from "@/lib/definitions";
+import {createSupabaseAdminClient} from "@/lib/supabase/admin";
 import { db } from "@/db";
 import { bills, paymentSubmissions, tenants } from "@/db/schema";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
@@ -95,6 +96,7 @@ export async function POST(request: Request){
                 amount: parsed.data.amount.toFixed(2),
                 referenceNumber: parsed.data.referenceNumber,
                 receiptPath: parsed.data.receiptPath,
+                paymentDate: parsed.data.paymentDate,
             })
             .returning({
                 submissionId: paymentSubmissions.submissionId,
@@ -117,10 +119,7 @@ export async function POST(request: Request){
     const billId = new URL(request.url).searchParams.get("billId");
 
     try {
-        const supabaseAdmin = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        );
+        const supabaseAdmin = createSupabaseAdminClient();
 
         const rows = await db
             .select({
@@ -135,6 +134,7 @@ export async function POST(request: Request){
                 reviewNote: paymentSubmissions.reviewNote,
                 submittedAt: paymentSubmissions.submittedAt,
                 reviewedAt: paymentSubmissions.reviewedAt,
+                paymentDate: paymentSubmissions.paymentDate,
                 tenantFirstName: tenants.firstName,
                 tenantLastName: tenants.lastName,
                 billingMonth: bills.billingMonth,
@@ -162,11 +162,78 @@ export async function POST(request: Request){
         return withCors(NextResponse.json(submissions, { status: 200 }));
     } catch (error) {
         console.error("GET PAYMENT SUBMISSION ERROR:", error);
+        const missingStorageKey =
+            error instanceof Error &&
+            /Missing (SUPABASE_SECRET_KEY|SUPABASE_SECRET|NEXT_PUBLIC_SUPABASE_URL)/.test(error.message);
         return withCors(
             NextResponse.json(
-                { error: "Failed to load payment submissions." },
-                { status: 500 },
+                {
+                    error: missingStorageKey
+                        ? "Receipt image signing is not configured. Add the Supabase server secret to the web server environment and restart it."
+                        : "Failed to load payment submissions.",
+                },
+                { status: missingStorageKey ? 503 : 500 },
             ),
         );
+    }
+}
+
+const ReviewSubmissionSchema = z.object({
+    submissionId: z.uuid(),
+    status: z.enum(["pending", "needs_update"]),
+    reviewNote: z.string().trim().max(500).optional(),
+});
+
+export async function PATCH(request: Request) {
+    const auth = await authorize(request, ["admin"]);
+    if (auth.response) return withCors(auth.response);
+
+    const body = await request.json().catch(() => null);
+    const parsed = ReviewSubmissionSchema.safeParse(body);
+    if (!parsed.success) {
+        return withCors(NextResponse.json(
+            {error: "Provide a valid submission status and review note."},
+            {status: 400},
+        ));
+    }
+
+    try {
+        const {submissionId, status, reviewNote} = parsed.data;
+        const [updated] = await db
+            .update(paymentSubmissions)
+            .set({
+                status,
+                reviewedBy: status === "needs_update" ? auth.user.id : null,
+                reviewedAt: status === "needs_update" ? new Date() : null,
+                reviewNote: status === "needs_update" ? reviewNote || null : null,
+            })
+            .where(and(
+                eq(paymentSubmissions.submissionId, submissionId),
+                or(
+                    eq(paymentSubmissions.status, "pending"),
+                    eq(paymentSubmissions.status, "needs_update"),
+                ),
+            ))
+            .returning({
+                submissionId: paymentSubmissions.submissionId,
+                status: paymentSubmissions.status,
+                reviewNote: paymentSubmissions.reviewNote,
+                reviewedAt: paymentSubmissions.reviewedAt,
+            });
+
+        if (!updated) {
+            return withCors(NextResponse.json(
+                {error: "This submission is unavailable or has already been approved."},
+                {status: 409},
+            ));
+        }
+
+        return withCors(NextResponse.json(updated));
+    } catch (error) {
+        console.error("PATCH PAYMENT SUBMISSION ERROR:", error);
+        return withCors(NextResponse.json(
+            {error: "Failed to update the payment submission."},
+            {status: 500},
+        ));
     }
 }
