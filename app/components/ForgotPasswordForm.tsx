@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, MailCheck } from "lucide-react";
-import AuthBrand from "./auth/AuthBrand";
 import AuthMessage from "./auth/AuthMessage";
 import { authInputClass, authPrimaryButtonClass, authSecondaryButtonClass } from "./auth/authStyles";
 import ResetLinkErrorNotice from "./ResetLinkErrorNotice";
@@ -57,7 +56,6 @@ export default function ForgotPasswordForm({
 
   return (
     <div className="w-full max-w-[340px]">
-      <AuthBrand />
 
       {sent ? (
         <div className="text-center">

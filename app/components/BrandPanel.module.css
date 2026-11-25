@@ -15,6 +15,25 @@
 	}
 }
 
+@media (max-width: 899px) {
+	.panel {
+		display: block;
+		position: fixed;
+		inset: 0 0 auto;
+		height: 62svh;
+	}
+
+	.stage {
+		inset: auto;
+		top: calc(-162px * 0.54);
+		left: calc(-158px * 0.54);
+		width: 926px;
+		height: 1287px;
+		transform: scale(0.54);
+		transform-origin: top left;
+	}
+}
+
 .logo {
 	position: absolute;
 	top: 32px;
@@ -29,6 +48,14 @@
 	letter-spacing: -0.02em;
 }
 
+@media (max-width: 899px) {
+	.logo {
+		top: calc(20px + env(safe-area-inset-top));
+		left: 24px;
+		font-size: 18px;
+	}
+}
+
 .logoMark {
 	display: block;
 	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
@@ -39,7 +66,6 @@
 	position: absolute;
 	inset: -18% -30% -25% -22%;
 	z-index: 1;
-	perspective: 1800px;
 }
 
 .plane {
@@ -50,8 +76,7 @@
 	justify-content: center;
 	align-content: center;
 	height: 100%;
-	transform: rotateX(16deg) rotateZ(-16deg) translateY(2%) scale(var(--zoom));
-	transform-style: preserve-3d;
+	transform: scaleY(0.961) rotate(-16deg) translateY(2%) scale(var(--zoom));
 }
 
 .column {
@@ -337,19 +362,4 @@
 	height: 120px;
 	background: linear-gradient(to bottom, color-mix(in srgb, var(--be-brand-deep) 70%, transparent), transparent);
 	pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.plane {
-		animation: drift 18s ease-in-out infinite alternate;
-	}
-}
-
-@keyframes drift {
-	from {
-		transform: rotateX(16deg) rotateZ(-16deg) translateY(2%) scale(var(--zoom));
-	}
-	to {
-		transform: rotateX(16deg) rotateZ(-16deg) translateY(-2%) scale(var(--zoom));
-	}
 }

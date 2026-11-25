@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check } from "lucide-react";
 import { createClient as createBrowserSupabaseClient } from "@/lib/supabase/client";
-import AuthBrand from "@/app/components/auth/AuthBrand";
 import AuthMessage from "@/app/components/auth/AuthMessage";
 import PasswordField from "@/app/components/auth/PasswordField";
 import { authPrimaryButtonClass } from "@/app/components/auth/authStyles";
@@ -55,7 +54,6 @@ export default function ResetPasswordForm() {
 
   return (
     <div className="w-full max-w-[340px]">
-      <AuthBrand />
 
       <h1 className="text-center text-[26px] font-semibold tracking-[-0.02em] text-(--be-text-primary)">
         Choose a new password

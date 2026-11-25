@@ -2,7 +2,7 @@
 
 :root {
   /* Surfaces */
-  --be-canvas: #f3f3f1;
+  --be-canvas: #f4f2ef;
   --be-surface: #ffffff;
   --be-surface-hover: #fafaf8;
   --be-surface-subtle: #f7f6f4;
@@ -91,8 +91,6 @@
 html {
   min-height: 100%;
   background: var(--background);
-  /* Match the site's intended reading size without requiring browser zoom. */
-  zoom: 1.2;
 }
 body {
   min-height: 100%;
@@ -131,6 +129,20 @@ a {
 .app-shell {
   min-height: 100vh;
   display: flex;
+}
+.app-shell.is-zoomed {
+  zoom: 1.2;
+  min-height: calc(100vh / 1.2);
+}
+@media (min-width: 901px) {
+  .app-shell.is-zoomed .app-sidebar {
+    height: calc(100vh / 1.2);
+  }
+}
+.app-zoom-toggle[aria-pressed="true"] {
+  border-color: var(--be-brand-light);
+  background: var(--be-surface-selected);
+  color: var(--be-action-primary);
 }
 .app-sidebar {
   position: sticky;
@@ -1494,27 +1506,27 @@ a {
 }
 
 .tenant-status.is-unassigned {
-  background: #faeed7;
-  color: #946322;
+  background: var(--be-warning-surface);
+  color: var(--be-warning-text);
 }
 
 .tenant-status.is-archived {
-  background: #eee9e3;
-  color: #74685d;
+  background: var(--be-surface-muted);
+  color: var(--be-text-muted);
 }
 
 .tenant-action-feedback {
   margin: 0 0 16px;
-  border-radius: 12px;
-  background: #e8f1e8;
+  border-radius: var(--be-radius-card);
+  background: var(--be-success-surface);
   padding: 12px 16px;
-  color: #38674b;
+  color: var(--be-success-text);
   font-size: 14px;
 }
 
 .tenant-action-feedback.is-error {
-  background: #fbebeb;
-  color: #a43d3d;
+  background: var(--be-danger-surface);
+  color: var(--be-danger-text);
 }
 
 .tenant-empty {
@@ -2344,6 +2356,9 @@ body {
   .app-content .tenants-table-wrap {
     max-height: max(240px, calc(100dvh - 210px));
     overflow: auto;
+  }
+  .app-shell.is-zoomed .app-content .tenants-table-wrap {
+    max-height: max(240px, calc(100dvh / 1.2 - 210px));
   }
   .app-content .tenants-table thead th {
     position: sticky;

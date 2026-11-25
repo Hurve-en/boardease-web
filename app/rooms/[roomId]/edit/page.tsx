@@ -21,7 +21,7 @@ export default async function EditRoomPage({
   return (
     <DashboardShell section="ROOMS">
       {query.delete_error ? (
-        <p role="alert" className="mx-auto mt-6 w-full max-w-[1200px] px-8 text-sm text-red-700">
+        <p role="alert" className="mx-auto mt-6 w-full max-w-[1200px] px-8 text-sm text-(--be-danger-text)">
           This room could not be deleted while it has linked records.
         </p>
       ) : null}
