@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
     bills,
@@ -182,6 +182,15 @@ export type PendingProof = {
     submittedAt: string;
 };
 
+export type PaidBillHistoryItem = {
+    billId: string;
+    billingMonth: string;
+    tenantName: string;
+    roomNumber: string | null;
+    totalAmount: string;
+    settledAt: string | null;
+};
+
 const tenantName = sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`;
 
 export async function getPaymentsOverview(month: string): Promise<{
@@ -209,7 +218,10 @@ export async function getPaymentsOverview(month: string): Promise<{
             .innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
             .leftJoin(tenantRoomAssignment, activeRoom)
             .leftJoin(rooms, eq(tenantRoomAssignment.roomId, rooms.roomId))
-            .where(eq(bills.billingMonth, `${month}-01`))
+            .where(and(
+                eq(bills.billingMonth, `${month}-01`),
+                ne(bills.status, "paid"),
+            ))
             .orderBy(desc(payments.paymentDate), desc(payments.createdAt)),
         db
             .select({
@@ -232,4 +244,35 @@ export async function getPaymentsOverview(month: string): Promise<{
     ]);
 
     return { received, pending };
+}
+
+export async function getPaidBillHistory(month: string): Promise<PaidBillHistoryItem[]> {
+    const activeRoom = and(
+        eq(tenants.tenantId, tenantRoomAssignment.tenantId),
+        eq(tenantRoomAssignment.status, "active"),
+    );
+    const settledAt = sql<string | null>`(
+        select max(${payments.paymentDate})::text
+        from ${payments}
+        where ${payments.billId} = ${bills.billId}
+    )`;
+
+    return db
+        .select({
+            billId: bills.billId,
+            billingMonth: bills.billingMonth,
+            tenantName,
+            roomNumber: rooms.roomNumber,
+            totalAmount: bills.totalAmount,
+            settledAt,
+        })
+        .from(bills)
+        .innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
+        .leftJoin(tenantRoomAssignment, activeRoom)
+        .leftJoin(rooms, eq(tenantRoomAssignment.roomId, rooms.roomId))
+        .where(and(
+            eq(bills.billingMonth, `${month}-01`),
+            eq(bills.status, "paid"),
+        ))
+        .orderBy(desc(settledAt), tenants.firstName);
 }

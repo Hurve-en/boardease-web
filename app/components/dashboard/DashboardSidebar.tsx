@@ -3,6 +3,7 @@
 import {
   CreditCard,
   DoorOpen,
+  History,
   LayoutDashboard,
   ReceiptText,
   UsersRound,
@@ -31,6 +32,7 @@ const groups: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Monthly bills", icon: ReceiptText, href: "/monthly-bills" },
       { label: "Payments", icon: CreditCard, href: "/payments" },
+      { label: "Bill history", icon: History, href: "/bill-history" },
     ],
   },
 ];

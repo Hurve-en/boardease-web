@@ -77,6 +77,11 @@ export function TenantTable({
   // If the chosen room is no longer available (e.g. just assigned), treat it as unselected.
   const selectedRoom = rooms.find((room) => room.roomId === roomId);
   const activeRoomId = selectedRoom?.roomId ?? "";
+  const blockedReason = !selectedTenant
+    ? "Select a tenant before assigning a room."
+    : rooms.length === 0
+      ? "There are no available rooms to assign."
+      : null;
 
   const activeTenants = tenants.filter((tenant) => tenant.status !== "archived");
   const activeAssignments = activeTenants.filter((tenant) => tenant.roomNumber).length;

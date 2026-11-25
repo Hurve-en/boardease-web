@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Banknote, FileCheck2, ReceiptText } from "lucide-react";
+import { ArrowRight, Banknote, FileCheck2, History, ReceiptText } from "lucide-react";
 import { billNumber } from "@/lib/bill-math";
 import type { PendingProof, ReceivedPayment } from "@/lib/payment";
 import { PAYMENTS_PATH, dateTime, money, monthLabel } from "@/lib/payment-ui";
@@ -27,6 +27,11 @@ export default function PaymentsOverview({ month, received, pending, children }:
       <section className="rooms-heading">
         <div>
           <h1>Payments</h1>
+          <Link className="payments-history-link" href={`/bill-history?month=${month}`}>
+            <History size={15} aria-hidden="true" />
+            View bill history
+            <ArrowRight size={14} aria-hidden="true" />
+          </Link>
         </div>
         <MonthPicker month={month} />
       </section>
@@ -110,7 +115,7 @@ export default function PaymentsOverview({ month, received, pending, children }:
       <section className="room-list-panel panel payments-section" aria-labelledby="received-title">
         <div className="room-list-header">
           <div>
-            <h2 id="received-title">Payments received</h2>
+            <h2 id="received-title">Payments received on open bills</h2>
           </div>
           <span className="be-badge is-neutral">{label}</span>
         </div>
@@ -130,7 +135,7 @@ export default function PaymentsOverview({ month, received, pending, children }:
               {received.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="payments-empty">
-                    No payments recorded for {label} yet.
+                    No payments recorded for open bills in {label}.
                   </td>
                 </tr>
               ) : (

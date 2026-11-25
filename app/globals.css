@@ -780,6 +780,25 @@ a {
 .rooms-heading .welcome-copy {
   margin-top: 7px;
 }
+.payments-history-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  color: var(--be-action-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.payments-history-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bill-history-heading {
+  align-items: flex-start;
+}
+.bill-history-stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .room-stat-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2306,6 +2325,9 @@ body {
   .app-content .room-stat-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
+  }
+  .app-content .bill-history-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .app-content .room-stat-card {
     padding: 10px;

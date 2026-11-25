@@ -14,6 +14,7 @@ const SECTION_LABEL: Record<string, string> = {
   TENANTS: "Tenants",
   MONTHLY: "Monthly bills",
   PAYMENTS: "Payments",
+  BILL_HISTORY: "Bill history",
 };
 
 function displayNameFromEmail(email: string) {
