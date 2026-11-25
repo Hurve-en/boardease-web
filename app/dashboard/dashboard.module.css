@@ -967,6 +967,10 @@
 		min-height: 0;
 	}
 
+	:global(.is-zoomed) .page {
+		height: calc(100dvh / 1.2 - 48px);
+	}
+
 	.rowWide,
 	.rowWideRight {
 		min-height: 0;

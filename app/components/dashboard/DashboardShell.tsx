@@ -1,7 +1,10 @@
 import { signOut } from "@/app/login/actions";
 import { verifyAdmin } from "@/lib/dal";
 import { LogOut } from "lucide-react";
+import { cookies } from "next/headers";
 import DashboardSidebar from "./DashboardSidebar";
+import ZoomToggle from "./ZoomToggle";
+import { ZOOM_COOKIE } from "./zoom";
 
 type DashboardShellProps = {
   section: string;
@@ -36,6 +39,7 @@ const initialsOf = (name: string) =>
 export default async function DashboardShell({ section, children }: DashboardShellProps) {
   const admin = await verifyAdmin();
   const name = displayNameFromEmail(admin.email);
+  const zoomed = (await cookies()).get(ZOOM_COOKIE)?.value === "1";
 
   const today = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
@@ -46,7 +50,7 @@ export default async function DashboardShell({ section, children }: DashboardShe
   }).format(new Date());
 
   return (
-    <div className="app-shell">
+    <div className={zoomed ? "app-shell is-zoomed" : "app-shell"}>
       <DashboardSidebar />
       <div className="app-main">
         <header className="app-topbar">
@@ -60,6 +64,7 @@ export default async function DashboardShell({ section, children }: DashboardShe
               <span>Owner</span>
             </span>
             <span className="app-topbar-divider" aria-hidden="true" />
+            <ZoomToggle initialZoomed={zoomed} />
             <form action={signOut}>
               <button className="app-signout" type="submit">
                 <LogOut size={14} aria-hidden="true" />
