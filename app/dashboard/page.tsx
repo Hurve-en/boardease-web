@@ -1,97 +1,20 @@
 import { verifyAdmin } from "@/lib/dal";
 import { getDashboardData } from "@/lib/dashboard";
+import { resolveMonth } from "@/lib/payment-ui";
 import DashboardShell from "@/app/components/dashboard/DashboardShell";
-import {
-	ArrowDownRight,
-	ArrowRight,
-	CalendarDays,
-	Clock3,
-	DoorOpen,
-	FilePlus2,
-	HandCoins,
-	Receipt,
-	Wallet,
-} from "lucide-react";
-import Link from "next/link";
+import DashboardView from "./DashboardView";
 
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
+	const admin = await verifyAdmin();
+	const month = resolveMonth((await searchParams).month);
+	const data = await getDashboardData(`${month}-01`);
 
-const peso = (value: string | number) =>
-	new Intl.NumberFormat("en-PH", {
-		style: "currency",
-		currency: "PHP",
-		minimumFractionDigits: 2,
-	}).format(Number(value) || 0);
+	const firstName = admin.email.split("@")[0].split(/[._-]/)[0];
+	const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
-const monthLabel = (value: string) =>
-	new Intl.DateTimeFormat("en", { month: "long", year: "numeric", timeZone: "Asia/Manila" }).format(
-		new Date(`${value}T00:00:00+08:00`),
-	);
-
-export default async function DashboardPage() {
-  const admin = await verifyAdmin();
-  const dashboardData = await getDashboardData();
-  const firstName = admin.email.split("@")[0].split(/[._-]/)[0];
-	const collectionRate = Number(dashboardData.billing.totalBilled)
-		? Math.min(100, (Number(dashboardData.billing.totalCollected) / Number(dashboardData.billing.totalBilled)) * 100)
-		: 0;
-	const currentMonth = monthLabel(dashboardData.billing.month);
-	const latestPayment = dashboardData.recentPayments[0];
-
-  return (
+	return (
 		<DashboardShell section="DASHBOARD">
-			<div className="dashboard-content">
-				<section className="welcome-row">
-					<div><p className="eyebrow">YOUR PROPERTY AT A GLANCE</p><h1>Good morning, {firstName}</h1><p className="welcome-copy">Here&apos;s where Maple House stands this month.</p></div>
-					<div className="month-pill"><CalendarDays size={16} /><span>{currentMonth}</span></div>
-				</section>
-
-				<section className="stat-grid" aria-label="Monthly overview">
-					<article className="stat-card"><div className="stat-heading"><span>Total billed</span><Receipt size={17} /></div><strong>{peso(dashboardData.billing.totalBilled)}</strong><p>{dashboardData.billing.paidCount + dashboardData.billing.partialCount + dashboardData.billing.unpaidCount} bills · {currentMonth}</p></article>
-					<article className="stat-card"><div className="stat-heading"><span>Collected</span><Wallet size={17} /></div><strong>{peso(dashboardData.billing.totalCollected)}</strong><p>{collectionRate.toFixed(1)}% of this month&apos;s bills</p></article>
-					<article className="stat-card"><div className="stat-heading"><span>Outstanding</span><Clock3 size={17} /></div><strong>{peso(dashboardData.billing.totalOutstanding)}</strong><p>{dashboardData.billing.partialCount + dashboardData.billing.unpaidCount} bills with a balance</p></article>
-					<article className="stat-card"><div className="stat-heading"><span>Room occupancy</span><DoorOpen size={17} /></div><strong>{dashboardData.rooms.occupied} <span className="stat-total">/ {dashboardData.rooms.total}</span></strong><p>{dashboardData.rooms.total ? `${dashboardData.rooms.unoccupied} rooms available · ${Math.round((dashboardData.rooms.occupied / dashboardData.rooms.total) * 100)}% occupied` : "No room data yet"}</p></article>
-				</section>
-
-				<section className="insight-grid">
-					<article className="panel collection-panel">
-						<div className="panel-title"><div><h2>Monthly collection</h2><p>{currentMonth} · billing overview</p></div><span className="collection-icon"><HandCoins size={18} /></span></div>
-						<div className="collection-amount-row"><strong>{peso(dashboardData.billing.totalCollected)}</strong><span>of {peso(dashboardData.billing.totalBilled)} billed</span></div>
-						<div className="progress-track" role="progressbar" aria-label="Monthly collection progress" aria-valuenow={Math.round(collectionRate)} aria-valuemin={0} aria-valuemax={100}><div className="progress-fill" style={{ width: `${collectionRate}%` }} /></div>
-						<div className="legend"><span><i className="legend-dot paid-dot" />{dashboardData.billing.paidCount} paid</span><span><i className="legend-dot partial-dot" />{dashboardData.billing.partialCount} partial</span><span><i className="legend-dot unpaid-dot" />{dashboardData.billing.unpaidCount} unpaid</span></div>
-					</article>
-					<aside className="panel next-steps"><div className="panel-title"><div><h2>Your next steps</h2><p>Keep your ledger up to date</p></div><span className="steps-icon"><ArrowDownRight size={18} /></span></div><p className="steps-copy">{dashboardData.overdue.count ? `${dashboardData.overdue.count} bills are overdue, with ${peso(dashboardData.overdue.amount)} outstanding.` : "Review outstanding balances and keep this month’s bills up to date."}</p><Link className="primary-action" href="/monthly-bills"><ArrowRight size={16} /> View monthly bills</Link><p className="helper-copy">Record each payment once it comes in.</p></aside>
-				</section>
-
-				<section className="bills-section" id="monthly-bills">
-					<div className="section-heading"><div><p className="eyebrow">LEDGER</p><h2>{currentMonth} bills</h2></div><Link className="create-action" href="/monthly-bills/new"><FilePlus2 size={16} /> Create monthly bill</Link></div>
-					<div className="bills-table-wrap"><table className="bills-table"><thead><tr><th>Tenant / bill</th><th>Room</th><th>Total bill</th><th>Outstanding</th><th>Status</th></tr></thead>
-					<tbody>
-						{dashboardData.ledger.length === 0 ? (
-							<tr>
-							<td colSpan={5}>
-								<div className="empty-state">
-								<span className="empty-icon"><Receipt size={20} /></span>
-								<strong>Monthly bills will appear here</strong>
-								<span>Your bill records will show in this list once connected.</span>
-								</div>
-							</td>
-							</tr>
-						) : (
-							dashboardData.ledger.map((bill) => (
-							<tr key={bill.billId}>
-								<td><div className="ledger-tenant"><span className="ledger-avatar">{bill.tenantName.split(" ").map((part) => part[0]).slice(0, 2).join("")}</span><span><strong>{bill.tenantName}</strong><small>Monthly bill</small></span></div></td>
-								<td><span className="room-chip">{bill.roomNumber ?? "Unassigned"}</span></td>
-								<td className="ledger-money">{peso(bill.totalAmount)}</td>
-								<td className="ledger-money ledger-outstanding">{peso(bill.outstandingBalance)}</td>
-								<td><span className={`bill-status bill-status-${bill.status}`}>{bill.status}</span></td>
-							</tr>
-							))
-						)}
-					</tbody></table></div>
-					<p className="ledger-note">{latestPayment ? `Latest payment: ${latestPayment.tenantName} · ${peso(latestPayment.amount)} · ${latestPayment.paymentDate}` : "No payments recorded this month yet."}</p>
-				</section>
-			</div>
+			<DashboardView data={data} displayName={displayName} />
 		</DashboardShell>
-  );
+	);
 }
-
