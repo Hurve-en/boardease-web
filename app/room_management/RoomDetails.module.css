@@ -1,16 +1,16 @@
 .root {
-  --bg: #f7f3ed;
-  --surface: #fff;
-  --line: #e8dfd5;
-  --text: #342f2b;
-  --muted: #8c8177;
-  --accent: #65412e;
-  --chip-bg: #eee2d5;
-  --chip-text: #39291f;
-  --note-bg: #f4eee7;
-  --avail-bg: #e8f0e8;
-  --avail-text: #4e765b;
-  --radius: 14px;
+  --bg: var(--be-canvas);
+  --surface: var(--be-surface);
+  --line: var(--be-border-subtle);
+  --text: var(--be-text-primary);
+  --muted: var(--be-text-muted);
+  --accent: var(--be-action-primary);
+  --chip-bg: var(--be-surface-selected);
+  --chip-text: var(--be-brand-deep);
+  --note-bg: var(--be-surface-selected);
+  --avail-bg: var(--be-success-surface);
+  --avail-text: var(--be-success-text);
+  --radius: var(--be-radius-card);
 
   background: var(--bg);
   color: var(--text);

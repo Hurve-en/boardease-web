@@ -28,7 +28,7 @@ export default function TenantArchiveForm({
         <button
           type="submit"
           aria-label={`Restore tenant ${tenantName}`}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#e8dfd5] bg-white px-4 py-2 text-sm font-semibold text-[#38674b] transition hover:border-[#b9d2bf] hover:bg-[#f1f7f1]"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-(--be-border-subtle) bg-(--be-surface) px-4 py-2 text-sm font-semibold text-(--be-success-text) transition hover:border-(--be-border-strong) hover:bg-(--be-success-surface)"
         >
           <RotateCcw size={16} /> Restore tenant
         </button>
@@ -50,12 +50,12 @@ export default function TenantArchiveForm({
             setArmed(true);
           }
         }}
-        className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${armed ? "border-[#583e30] bg-[#583e30] text-white" : "border-[#e8dfd5] bg-white text-[#735743] hover:border-[#cdb9a5] hover:bg-[#faf6f0]"}`}
+        className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${armed ? "border-(--be-action-primary) bg-(--be-action-primary) text-(--be-text-inverse) hover:bg-(--be-action-primary-hover)" : "border-(--be-border-subtle) bg-(--be-surface) text-(--be-text-secondary) hover:border-(--be-border-strong) hover:bg-(--be-surface-hover)"}`}
       >
         <Archive size={16} /> {armed ? "Click again to archive" : "Archive tenant"}
       </button>
       {armed ? (
-        <p id="archive-tenant-confirm-hint" role="status" className="mt-2 max-w-64 text-right text-xs leading-5 text-[#80766d]">
+        <p id="archive-tenant-confirm-hint" role="status" className="mt-2 max-w-64 text-right text-xs leading-5 text-(--be-text-muted)">
           Click again within 3.5 seconds. Bills and receipt history will be kept.
         </p>
       ) : null}
