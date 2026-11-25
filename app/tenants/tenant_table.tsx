@@ -67,6 +67,11 @@ export function TenantTable({
 
   const selectedTenant = tenants.find((tenant) => tenant.id === selectedId);
   const selectedRoom = rooms.find((room) => room.roomId === roomId);
+  const blockedReason = !selectedTenant
+    ? "Select a tenant from the list first."
+    : rooms.length === 0
+      ? "No rooms are available. Free up or add a room on the Rooms page first."
+      : null;
   const activeAssignments = tenants.filter((tenant) => tenant.roomNumber).length;
   const readyTenants = tenants.length - activeAssignments;
 
@@ -74,7 +79,7 @@ export function TenantTable({
     () =>
       rooms.map((room) => ({
         ...room,
-        label: [room.boardingHouseName, `Room ${room.roomNumber}`].filter(Boolean).join(" · "),
+        label: [room.boardingHouseName, `Room ${room.roomNumber}`].filter(Boolean).join(", "),
       })),
     [rooms],
   );
@@ -192,17 +197,8 @@ export function TenantTable({
 
         <p className="assignment-summary">
           {activeAssignments} active {activeAssignments === 1 ? "assignment" : "assignments"}
-          {readyTenants > 0 && ` · ${readyTenants} ${readyTenants === 1 ? "tenant" : "tenants"} ready for a room`}
+          {readyTenants > 0 && `, ${readyTenants} ${readyTenants === 1 ? "tenant" : "tenants"} ready for a room`}
         </p>
-
-        <section className="assignment-records">
-          <h2>Assignment records</h2>
-          <p className="assignment-records-subtitle">A dated history of each tenant’s stay</p>
-          <p>
-            When a tenant moves out, end their assignment to make the room available.
-            Previous bills stay linked to that tenant.
-          </p>
-        </section>
       </div>
 
       <aside className="assignment-panel" aria-labelledby="assign-room-title">
@@ -210,7 +206,7 @@ export function TenantTable({
           <h2 id="assign-room-title">Assign a room</h2>
           <p>
             {selectedTenant
-              ? `${selectedTenant.name} · ${selectedTenant.roomNumber ? `currently in Room ${selectedTenant.roomNumber}` : "no current assignment"}`
+              ? selectedTenant.roomNumber ? `${selectedTenant.name} is in Room ${selectedTenant.roomNumber}` : `${selectedTenant.name} has no room yet`
               : "Select a tenant to get started"}
           </p>
         </header>
@@ -278,11 +274,18 @@ export function TenantTable({
           <button
             type="button"
             className="assignment-submit"
-            disabled={isSubmitting || !selectedTenant || rooms.length === 0}
+            disabled={isSubmitting || Boolean(blockedReason)}
+            aria-busy={isSubmitting}
+            aria-describedby={blockedReason ? "assign-blocked" : undefined}
             onClick={() => void handleAssignRoom()}
           >
             {isSubmitting ? "Saving assignment…" : "Save room assignment"}
           </button>
+          {blockedReason && !isSubmitting && (
+            <p id="assign-blocked" className="assignment-blocked">
+              {blockedReason}
+            </p>
+          )}
           <button
             type="button"
             className="assignment-cancel"

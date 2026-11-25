@@ -4,11 +4,14 @@ import {useCallback, useEffect, useMemo, useState} from "react";
 import Link from "next/link";
 import {
 	ArrowRight,
+	Clock3,
 	LoaderCircle,
 	Plus,
 	ReceiptText,
 	RefreshCw,
 	Search,
+	Wallet,
+	type LucideIcon,
 } from "lucide-react";
 import {billNumber} from "@/lib/bill-math";
 
@@ -56,12 +59,6 @@ const currentMonth = () =>
 		.slice(0, 7);
 
 const isMonth = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
-
-const STATUS_STYLE: Record<BillStatus, string> = {
-	unpaid: "bg-[#f7e4dd] text-[#9b3a2e]",
-	partial: "bg-[#f9eeda] text-[#8a5a12]",
-	paid: "bg-[#e4eedf] text-[#3d6b3a]",
-};
 
 export default function BillsClient() {
 	const [month, setMonth] = useState(currentMonth);
@@ -137,76 +134,10 @@ export default function BillsClient() {
 		<div className="dashboard-content rooms-content">
 			<section className="rooms-heading">
 				<div>
-					<p className="eyebrow">BILLING</p>
 					<h1>Monthly bills</h1>
-					<p className="welcome-copy">
-						Rent, utilities and payment status - one monthly record.
-					</p>
 				</div>
-				<Link className="create-action" href="/monthly-bills/new">
-					<Plus size={16} /> Create monthly bill
-				</Link>
-			</section>
-
-			{/* Month summary card */}
-			<section className="panel flex flex-wrap items-center justify-between gap-6 p-6">
-				<div>
-					<h2 className="text-xl font-semibold text-[#2f2520]">
-						{monthLabel(month)}
-					</h2>
-					<p className="mt-1 text-[13px] text-[#7d7269]">
-						{bills.length} bill{bills.length === 1 ? "" : "s"} issued
-						{earliestDue ? ` · Due ${shortDate(earliestDue)}` : ""}
-					</p>
-				</div>
-				<div className="flex flex-wrap gap-10">
-					<SummaryFigure
-						label="Total billed"
-						value={money(summary.totalBilled)}
-					/>
-					<SummaryFigure
-						label="Collected"
-						value={money(summary.totalCollected)}
-					/>
-					<SummaryFigure
-						label="Outstanding"
-						value={money(summary.totalOutstanding)}
-					/>
-				</div>
-			</section>
-
-			<div
-				className="mt-5 flex flex-wrap gap-2"
-				role="tablist"
-				aria-label="Filter by status">
-				{(["all", "unpaid", "partial", "paid"] as const).map((key) => (
-					<button
-						key={key}
-						role="tab"
-						aria-selected={filter === key}
-						onClick={() => setFilter(key)}
-						className={`h-[38px] rounded-lg border px-4 text-[13px] font-semibold transition ${
-							filter === key
-								? "border-[#5e3d2b] bg-[#5e3d2b] text-white"
-								: "border-[#e0d8cb] bg-white text-[#4a3f38] hover:bg-[#f7f3ec]"
-						}`}>
-						{key === "all" ? "All bills" : key.toUpperCase()} · {counts[key]}
-					</button>
-				))}
-			</div>
-
-			<section className="room-list-panel panel mt-5">
-				<div className="room-list-header">
-					<label className="search-field">
-						<Search size={15} />
-						<input
-							value={query}
-							onChange={(event) => setQuery(event.target.value)}
-							placeholder="Search tenant or bill number"
-							aria-label="Search tenant or bill number"
-						/>
-					</label>
-					<div className="room-tools">
+				<div className="heading-actions">
+					<label className="month-picker">
 						<input
 							type="month"
 							value={month}
@@ -215,8 +146,51 @@ export default function BillsClient() {
 								isMonth(event.target.value) && setMonth(event.target.value)
 							}
 							aria-label="Billing month"
-							className="h-[38px] rounded-lg border border-[#e0d8cb] bg-white px-3 text-[13px] font-semibold text-[#4a3f38]"
 						/>
+					</label>
+					<Link className="create-action" href="/monthly-bills/new">
+						<Plus size={16} /> Create monthly bill
+					</Link>
+				</div>
+			</section>
+
+			<section className="room-stat-grid" aria-label={`${monthLabel(month)} summary`}>
+				<SummaryFigure icon={ReceiptText} tone="brown" label="Total billed" value={money(summary.totalBilled)} />
+				<SummaryFigure icon={Wallet} tone="green" label="Collected" value={money(summary.totalCollected)} />
+				<SummaryFigure icon={Clock3} tone="sand" label="Outstanding" value={money(summary.totalOutstanding)} />
+			</section>
+
+			<section className="room-list-panel panel">
+				<div className="room-list-header bills-toolbar">
+					<div className="filter-chips" role="tablist" aria-label="Filter by status">
+						{(["all", "unpaid", "partial", "paid"] as const).map((key) => (
+							<button
+								key={key}
+								type="button"
+								role="tab"
+								aria-selected={filter === key}
+								onClick={() => setFilter(key)}
+								className={`filter-chip${filter === key ? " is-active" : ""}`}>
+								{key === "all" ? "All bills" : key.charAt(0).toUpperCase() + key.slice(1)}
+								<span>{counts[key]}</span>
+							</button>
+						))}
+					</div>
+					<div className="room-tools">
+						{earliestDue && (
+							<span className="toolbar-meta">
+								{bills.length} {bills.length === 1 ? "bill" : "bills"}, due {shortDate(earliestDue)}
+							</span>
+						)}
+						<label className="search-field">
+							<Search size={15} />
+							<input
+								value={query}
+								onChange={(event) => setQuery(event.target.value)}
+								placeholder="Search tenant or bill"
+								aria-label="Search tenant or bill number"
+							/>
+						</label>
 						<button
 							className="refresh-button"
 							onClick={() => void loadBills()}
@@ -226,7 +200,7 @@ export default function BillsClient() {
 					</div>
 				</div>
 
-				{loading ? (
+{loading ? (
 					<div className="room-state">
 						<LoaderCircle className="spin" size={22} />
 						<span>Loading bills…</span>
@@ -278,7 +252,7 @@ export default function BillsClient() {
 											<strong className="room-number">
 												{billNumber(bill.billingMonth, bill.roomNumber)}
 											</strong>
-											<span className="block text-xs text-[#7d7269]">
+											<span className="block text-xs text-(--be-text-muted)">
 												{bill.tenantName}
 											</span>
 										</td>
@@ -292,15 +266,15 @@ export default function BillsClient() {
 										<td>{shortDate(bill.dueDate)}</td>
 										<td>
 											<span
-												className={`inline-block rounded-full px-3 py-1 text-[11px] font-semibold ${STATUS_STYLE[bill.status]}`}>
-												{bill.status.toUpperCase()}
+												className={`be-badge is-${bill.status}`}>
+												{bill.status.charAt(0).toUpperCase() + bill.status.slice(1)}
 											</span>
 										</td>
 										<td>
 											<Link
 												className="detail-button"
 												href={`/monthly-bills/${bill.billId}`}>
-												View bill <ArrowRight size={14} />
+												View <ArrowRight size={14} />
 											</Link>
 										</td>
 									</tr>
@@ -311,39 +285,35 @@ export default function BillsClient() {
 				)}
 			</section>
 
-			<p className="mt-4 text-xs text-[#7d7269]">
+			<p className="mt-4 text-xs text-(--be-text-muted)">
 				Showing {visibleBills.length} of {bills.length} bills for{" "}
 				{monthLabel(month)}
 			</p>
-
-			<section className="mt-5 grid gap-4 rounded-2xl bg-[#efe6dc] p-5 sm:grid-cols-3">
-				<Legend status="unpaid" text="No payment recorded" />
-				<Legend status="partial" text="Payment recorded; balance remains" />
-				<Legend status="paid" text="Balance fully settled" />
-			</section>
 		</div>
 	);
 }
 
-function SummaryFigure({label, value}: {label: string; value: string}) {
+function SummaryFigure({
+	icon: Icon,
+	tone,
+	label,
+	value,
+}: {
+	icon: LucideIcon;
+	tone: string;
+	label: string;
+	value: string;
+}) {
 	return (
-		<div>
-			<span className="text-xs text-[#7d7269]">{label}</span>
-			<strong className="mt-1 block text-2xl font-semibold text-[#2f2520]">
-				{value}
-			</strong>
-		</div>
+		<article className="room-stat-card">
+			<div className={`room-stat-icon ${tone}`}>
+				<Icon size={16} aria-hidden="true" />
+			</div>
+			<div>
+				<span>{label}</span>
+				<strong>{value}</strong>
+			</div>
+		</article>
 	);
 }
 
-function Legend({status, text}: {status: BillStatus; text: string}) {
-	return (
-		<div>
-			<span
-				className={`inline-block rounded-full px-3 py-1 text-[11px] font-semibold ${STATUS_STYLE[status]}`}>
-				{status.toUpperCase()}
-			</span>
-			<p className="mt-2 text-[13px] text-[#5a4a3f]">{text}</p>
-		</div>
-	);
-}

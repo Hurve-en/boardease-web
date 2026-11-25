@@ -21,11 +21,11 @@ type FormValues = {
 };
 
 const inputBase =
-  "mt-2 h-[42px] w-full rounded-lg bg-white px-3.5 text-sm text-[#2f2520] outline-none transition";
+  "mt-2 h-[42px] w-full rounded-lg bg-white px-3.5 text-sm text-(--be-text-primary) outline-none transition";
 const inputOk =
-  "border border-[#e0d8cb] focus:border-[#5e3d2b] focus:ring-2 focus:ring-[#5e3d2b]/20";
+  "border border-(--be-border-strong) focus:border-(--be-action-primary) focus:ring-2 focus:ring-(--be-action-primary)/20";
 const inputBad =
-  "border border-[#9b3a2e] ring-1 ring-[#9b3a2e] focus:ring-2 focus:ring-[#9b3a2e]";
+  "border border-(--be-danger-text) ring-1 ring-(--be-danger-text) focus:ring-2 focus:ring-(--be-danger-text)";
 
 export default function RoomsClient({houses}: {houses: {name: string}[]}) {
   const router = useRouter();
@@ -105,10 +105,10 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
 
   return (
     <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-12 pt-8">
-        <h1 className="text-[32px] font-semibold tracking-tight text-[#2f2520]">
+        <h1 className="text-[32px] font-semibold tracking-tight text-(--be-text-primary)">
           Add room
         </h1>
-        <p className="mt-1 text-sm text-[#7d7269]">
+        <p className="mt-1 text-sm text-(--be-text-muted)">
           Create a room and choose its boarding house. Assign a tenant after saving.
         </p>
 
@@ -117,12 +117,12 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
           <form
             onSubmit={submit}
             noValidate
-            className="rounded-2xl border border-[#e8e1d6] bg-white p-5"
+            className="rounded-2xl border border-(--be-border-subtle) bg-white p-5"
           >
-            <h2 className="text-base font-semibold text-[#2f2520]">
+            <h2 className="text-base font-semibold text-(--be-text-primary)">
               Room details
             </h2>
-            <p className="mt-1 text-[13px] text-[#8a7f76]">
+            <p className="mt-1 text-[13px] text-(--be-text-muted)">
               All fields are required. All amounts are in Philippine pesos
               (PHP).
             </p>
@@ -130,7 +130,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
             {showBanner && (
               <div
                 role="alert"
-                className="mt-5 flex gap-3 rounded-lg bg-[#f7e4dd] px-4 py-3.5 text-[#9b3a2e]"
+                className="mt-5 flex gap-3 rounded-lg bg-(--be-danger-surface) px-4 py-3.5 text-(--be-danger-text)"
               >
                 <svg
                   className="mt-0.5 shrink-0"
@@ -166,7 +166,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
             {/* Room identifier */}
             <label
               htmlFor="identifier"
-              className="mt-6 block text-[13px] font-semibold text-[#2f2520]"
+              className="mt-6 block text-[13px] font-semibold text-(--be-text-primary)"
             >
               Room identifier *
             </label>
@@ -180,7 +180,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
               className={`${inputBase} ${errors.identifier ? inputBad : inputOk}`}
             />
             {errors.identifier && (
-              <p id="identifier-error" className="mt-2 text-xs text-[#9b3a2e]">
+              <p id="identifier-error" className="mt-2 text-xs text-(--be-danger-text)">
                 {errors.identifier}
               </p>
             )}
@@ -188,7 +188,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
             {/* Monthly rent */}
             <label
               htmlFor="rent"
-              className="mt-5 block text-[13px] font-semibold text-[#2f2520]"
+              className="mt-5 block text-[13px] font-semibold text-(--be-text-primary)"
             >
               Monthly rent (PHP) *
             </label>
@@ -209,7 +209,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
               className={`${inputBase} ${errors.rent ? inputBad : inputOk}`}
             />
             {errors.rent && (
-              <p id="rent-error" className="mt-2 text-xs text-[#9b3a2e]">
+              <p id="rent-error" className="mt-2 text-xs text-(--be-danger-text)">
                 {errors.rent}
               </p>
             )}
@@ -217,7 +217,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
             {/* Max occupancy */}
             <label
               htmlFor="capacity"
-              className="mt-5 block text-[13px] font-semibold text-[#2f2520]"
+              className="mt-5 block text-[13px] font-semibold text-(--be-text-primary)"
             >
               Max occupancy *
             </label>
@@ -234,24 +234,24 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
               className={`${inputBase} ${errors.capacity ? inputBad : inputOk}`}
             />
             {errors.capacity && (
-              <p id="capacity-error" className="mt-2 text-xs text-[#9b3a2e]">
+              <p id="capacity-error" className="mt-2 text-xs text-(--be-danger-text)">
                 {errors.capacity}
               </p>
             )}
 
             {/* Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-[#ebe4d8] pt-5">
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-(--be-border-subtle) pt-5">
               <button
                 type="button"
                 onClick={() => router.push(ROOMS_PATH)}
-                className="h-[38px] rounded-lg px-5 text-[13px] font-semibold text-[#4a3f38] transition hover:bg-[#f7f3ec]"
+                className="h-[38px] rounded-lg px-5 text-[13px] font-semibold text-(--be-text-secondary) transition hover:bg-(--be-surface-subtle)"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="h-[38px] rounded-lg bg-[#5e3d2b] px-6 text-[13px] font-semibold text-white transition hover:bg-[#4d3123] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5e3d2b] focus-visible:ring-offset-2 disabled:opacity-70"
+                className="h-[38px] rounded-lg bg-(--be-action-primary) px-6 text-[13px] font-semibold text-white transition hover:bg-(--be-action-primary-hover) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--be-action-primary) focus-visible:ring-offset-2 disabled:opacity-70"
               >
                 {saving ? "Saving…" : "Save room"}
               </button>
@@ -260,23 +260,23 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
 
           {/* Side cards */}
           <aside className="space-y-4">
-            <div className="rounded-2xl border border-[#e8e1d6] bg-white p-5">
-              <h2 className="text-base font-semibold text-[#2f2520]">
+            <div className="rounded-2xl border border-(--be-border-subtle) bg-white p-5">
+              <h2 className="text-base font-semibold text-(--be-text-primary)">
                 Occupancy after saving
               </h2>
-              <span className="mt-4 inline-block rounded-full bg-[#e4eedf] px-3 py-1 text-[11px] font-semibold text-[#3d6b3a]">
+              <span className="mt-4 inline-block rounded-full bg-(--be-success-surface) px-3 py-1 text-[12.5px] font-semibold text-(--be-success-text)">
                 Available
               </span>
-              <p className="mt-5 text-[13px] leading-relaxed text-[#7d7269]">
+              <p className="mt-5 text-[13px] leading-relaxed text-(--be-text-muted)">
                 New rooms have no tenant assignment and start as Available.
                 Occupancy updates from tenant assignments, not a room setting.
               </p>
-              <p className="mt-5 text-[13px] font-semibold text-[#5e3d2b]">
-                Save first, then Assign tenant →
+              <p className="mt-5 text-[13px] font-semibold text-(--be-action-primary)">
+                Save first, then assign a tenant
               </p>
             </div>
 
-            <div className="flex gap-3 rounded-2xl bg-[#efe6dc] p-4 text-[#5a4a3f]">
+            <div className="flex gap-3 rounded-2xl bg-(--be-surface-muted) p-4 text-(--be-text-secondary)">
               <svg
                 className="mt-0.5 shrink-0"
                 width="16"
@@ -294,7 +294,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
                 <path d="M12 8h.01" />
               </svg>
               <div>
-                <p className="text-[13px] font-semibold text-[#3a2a21]">
+                <p className="text-[13px] font-semibold text-(--be-brand-deep)">
                   Monthly rent
                 </p>
                 <p className="mt-1 text-xs leading-relaxed">
@@ -306,7 +306,7 @@ export default function RoomsClient({houses}: {houses: {name: string}[]}) {
           </aside>
         </div>
 
-        <p className="mt-5 text-xs text-[#7d7269]">
+        <p className="mt-5 text-xs text-(--be-text-muted)">
           A room is added only after a successful save. Cancel returns to Rooms
           without creating a room.
         </p>

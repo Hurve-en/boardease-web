@@ -54,7 +54,7 @@ export default function RoomDetails({
         <div className={styles.head}>
           <div>
             <h1 className={styles.title}>{room.identifier}</h1>
-            <div className={styles.sub}>{property.name} · Room details</div>
+            <div className={styles.sub}>{property.name}</div>
           </div>
           <Link className={styles.btn} href={`/rooms/${room.id}/edit`}>
             Edit room
@@ -149,7 +149,7 @@ export default function RoomDetails({
               <div className={styles.lbl}>Monthly rent</div>
               <div className={styles.rent}>{php(room.monthly_rent)}</div>
               <Link className={`${styles.btn} ${styles.btnLg} ${styles.manageLink}`} href={assignHref}>
-                Manage assignment →
+                Manage assignment
               </Link>
             </div>
 
