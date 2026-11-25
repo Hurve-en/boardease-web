@@ -3,7 +3,6 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import AuthBrand from "./auth/AuthBrand";
 import AuthMessage from "./auth/AuthMessage";
 import PasswordField from "./auth/PasswordField";
 import { authInputClass, authPrimaryButtonClass } from "./auth/authStyles";
@@ -48,7 +47,6 @@ export default function LoginForm({
 
   return (
     <div className="w-full max-w-[340px]">
-      <AuthBrand />
 
       <h1 className="text-center text-[26px] font-semibold tracking-[-0.02em] text-(--be-text-primary)">
         Sign in to BoardEase

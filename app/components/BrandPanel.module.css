@@ -15,6 +15,25 @@
 	}
 }
 
+@media (max-width: 899px) {
+	.panel {
+		display: block;
+		position: fixed;
+		inset: 0 0 auto;
+		height: 62svh;
+	}
+
+	.stage {
+		inset: auto;
+		top: calc(-162px * 0.54);
+		left: calc(-158px * 0.54);
+		width: 926px;
+		height: 1287px;
+		transform: scale(0.54);
+		transform-origin: top left;
+	}
+}
+
 .logo {
 	position: absolute;
 	top: 32px;
@@ -27,6 +46,14 @@
 	font-size: 19px;
 	font-weight: 700;
 	letter-spacing: -0.02em;
+}
+
+@media (max-width: 899px) {
+	.logo {
+		top: calc(20px + env(safe-area-inset-top));
+		left: 24px;
+		font-size: 18px;
+	}
 }
 
 .logoMark {
