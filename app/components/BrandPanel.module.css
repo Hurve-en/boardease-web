@@ -7,6 +7,12 @@
 		radial-gradient(90% 70% at 0% 100%, color-mix(in srgb, var(--be-action-primary) 90%, transparent) 0%, transparent 60%),
 		linear-gradient(160deg, var(--be-action-primary) 0%, var(--be-brand-deep) 70%);
 	isolation: isolate;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.panel img {
+	-webkit-user-drag: none;
 }
 
 @media (min-width: 900px) {
