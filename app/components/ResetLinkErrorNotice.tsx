@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { AlertCircle } from "lucide-react";
 
 function subscribe(onChange: () => void) {
   window.addEventListener("hashchange", onChange);
@@ -61,11 +62,14 @@ export default function ResetLinkErrorNotice({
 
   if (!message) return null;
   return (
-    <div className="mt-4 text-sm text-red-700">
-      <p role="alert">{message}</p>
-      {process.env.NODE_ENV === "development" && error === "verify_failed" && reason && (
-        <p className="mt-1 break-words">Reason: {reason}</p>
-      )}
+    <div role="alert" className="flex gap-2 rounded-2xl bg-(--be-danger-surface) px-4 py-3 text-sm text-(--be-danger-text)">
+      <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+      <div>
+        <p>{message}</p>
+        {process.env.NODE_ENV === "development" && error === "verify_failed" && reason && (
+          <p className="mt-1 break-words">Reason: {reason}</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -69,18 +69,17 @@ export const dateTime = (value: string | null | undefined) => {
     }).format(date);
 };
 
-// Bill status colors (paid / partial / unpaid).
-export const statusClass = (status: string) =>
-    status === "paid"
-        ? "bg-[#e4eedf] text-[#3d6b3a]"
-        : status === "partial"
-            ? "bg-[#f9eeda] text-[#8a5a12]"
-            : "bg-[#f7e4dd] text-[#9b3a2e]";
+export const statusClass = (status: string) => `be-badge is-${status}`;
 
-// Submission status colors (pending / approved / rejected).
-export const submissionStatusClass = (status: string) =>
-    status === "approved"
-        ? "bg-[#e4eedf] text-[#3d6b3a]"
-        : status === "pending"
-            ? "bg-[#f9eeda] text-[#8a5a12]"
-            : "bg-[#f7e4dd] text-[#9b3a2e]";
+export const submissionStatusClass = (status: string) => `be-badge is-${status}`;
+
+const STATUS_LABELS: Record<string, string> = {
+    paid: "Paid",
+    partial: "Partial",
+    unpaid: "Unpaid",
+    pending: "Pending review",
+    approved: "Approved",
+    needs_update: "Needs update",
+};
+
+export const statusLabel = (status: string) => STATUS_LABELS[status] ?? status;

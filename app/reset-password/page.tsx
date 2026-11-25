@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import BrandPanel from "@/app/components/BrandPanel";
 import ResetPasswordForm from "./ResetPasswordForm";
 
 export default async function ResetPasswordPage() {
@@ -10,5 +11,12 @@ export default async function ResetPasswordPage() {
     redirect("/forgot-password?error=missing_session");
   }
 
-  return <ResetPasswordForm />;
+  return (
+    <main className="grid min-h-screen min-[900px]:grid-cols-2">
+      <BrandPanel />
+      <section className="flex items-center justify-center bg-white px-6 py-12">
+        <ResetPasswordForm />
+      </section>
+    </main>
+  );
 }

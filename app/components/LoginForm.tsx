@@ -3,9 +3,10 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import TextField from "./auth/Textfield";
+import AuthBrand from "./auth/AuthBrand";
 import AuthMessage from "./auth/AuthMessage";
+import PasswordField from "./auth/PasswordField";
+import { authInputClass, authPrimaryButtonClass } from "./auth/authStyles";
 import { signIn, type LoginState } from "@/app/login/actions";
 
 const initialState: LoginState = {
@@ -46,84 +47,80 @@ export default function LoginForm({
   }, [state.success, state.email, rememberMe, router]);
 
   return (
-    <div className="w-full max-w-md space-y-6">
-      <div className="space-y-3">
-        <span className="inline-block rounded-full bg-[#efe3d5] px-3 py-1 text-xs font-medium uppercase text-[#3b271f]">
-          Tenant Workspace
-        </span>
-        <h2 className="text-3xl font-semibold text-[#2b2623]">Welcome home.</h2>
-        <p className="text-sm text-[#8a817a]">
-          Sign in to view your monthly bills and recorded payments.
-        </p>
-      </div>
+    <div className="w-full max-w-[340px]">
+      <AuthBrand />
 
-      {passwordResetSuccess && (
-        <AuthMessage
-          type="success"
-          message="Your password was reset. Sign in with your new password."
-        />
-      )}
+      <h1 className="text-center text-[26px] font-semibold tracking-[-0.02em] text-(--be-text-primary)">
+        Sign in to BoardEase
+      </h1>
+      <p className="mt-2 text-center text-sm text-(--be-text-muted)">For boarding-house owners and admins</p>
 
-      <form action={action} className="space-y-5">
-        <TextField
-          id="email"
-          name="email"
-          label="Email address"
-          type="email"
-          placeholder="you@email.com"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          autoComplete="email"
-          required
-        />
-        <TextField
-          id="password"
-          name="password"
-          label="Password"
-          type="password"
-          placeholder="••••••••"
-          required
-        />
-
-        <label className="flex items-center gap-2 text-xs text-[#8a817a]">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(event) => setRememberMe(event.target.checked)}
-            className="h-4 w-4 accent-[#613d2b]"
-          />
-          Remember me
-        </label>
-
-        <Link
-          href="/forgot-password"
-          className="block text-xs font-medium text-[#613d2b]"
-        >
-          Forgot password?
-        </Link>
-
-        {state.message && (
+      <div className="mt-8 space-y-4">
+        {passwordResetSuccess && (
           <AuthMessage
-            type={state.success ? "success" : "error"}
-            message={state.message}
+            type="success"
+            message="Your password was reset. Sign in with your new password."
           />
         )}
 
-        <button
-          type="submit"
-          disabled={pending || state.success}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#613d2b] py-3 text-sm font-medium text-white transition hover:bg-[#4f3223] disabled:opacity-60"
-        >
-          <ArrowRight size={16} />
-          {pending ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+        <form action={action} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+              className={authInputClass}
+            />
+          </div>
 
-      <p className="text-xs text-[#8a817a]">
-        Need an account? Ask your boarding-house owner for your sign-in details.
-      </p>
-      <p className="text-xs text-[#8a817a]">
-        Secure access to your bills and recorded payments.
+          <PasswordField id="password" name="password" label="Password" autoComplete="current-password" required />
+
+          <div className="flex items-center justify-between px-1">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-(--be-text-primary)">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+                className="h-4 w-4 cursor-pointer rounded-full accent-(--be-action-primary)"
+              />
+              Remember me
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-sm text-(--be-text-secondary) underline underline-offset-4 transition hover:text-(--be-action-primary)"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          {state.message && (
+            <AuthMessage
+              type={state.success ? "success" : "error"}
+              message={state.message}
+            />
+          )}
+
+          <button
+            type="submit"
+            disabled={pending || state.success}
+            aria-busy={pending}
+            className={authPrimaryButtonClass}
+          >
+            {pending ? "Signing in…" : state.success ? "Signed in" : "Sign in"}
+          </button>
+        </form>
+      </div>
+
+      <p className="mt-8 text-center text-sm text-(--be-text-muted)">
+        Need an account? Your BoardEase administrator sets up owner accounts.
       </p>
     </div>
   );

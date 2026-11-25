@@ -82,11 +82,7 @@ export default function RoomsClient() {
     <div className="dashboard-content rooms-content">
       <section className="rooms-heading">
         <div>
-          <p className="eyebrow">PROPERTY MANAGEMENT</p>
           <h1>Rooms</h1>
-          <p className="welcome-copy">
-            Keep occupancy and rent details clear at a glance.
-          </p>
         </div>
         <button className="create-action" onClick={openCreate}>
           <Plus size={16} /> Add room
@@ -97,18 +93,11 @@ export default function RoomsClient() {
         <RoomStat label="Total rooms" value={summary.total} tone="brown" />
         <RoomStat label="Occupied" value={summary.occupied} tone="green" />
         <RoomStat label="Available" value={summary.unoccupied} tone="sand" />
-        <RoomStat
-          label="Maintenance"
-          value="—"
-          tone="gray"
-          note="Not tracked yet"
-        />
       </section>
       <section className="room-list-panel panel">
         <div className="room-list-header">
           <div>
             <h2>Room list</h2>
-            <p>Room assignments and monthly rent</p>
           </div>
           <div className="room-tools">
             <label className="search-field">
@@ -185,7 +174,6 @@ export default function RoomsClient() {
                   <tr key={room.roomId}>
                     <td>
                       <strong className="room-number">{room.roomNumber}</strong>
-                      {room.boardingHouseName && <div>{room.boardingHouseName}</div>}
                     </td>
                     <td>
                       <span className="room-type">Standard</span>
@@ -214,7 +202,7 @@ export default function RoomsClient() {
                         className="detail-button"
                         href={`/room_management/${encodeURIComponent(room.roomId)}`}
                       >
-                        View Room <ArrowRight size={14} />
+                        View <ArrowRight size={14} />
                       </Link>
                     </td>
                   </tr>
@@ -232,12 +220,10 @@ function RoomStat({
   label,
   value,
   tone,
-  note,
 }: {
   label: string;
   value: number | string;
   tone: string;
-  note?: string;
 }) {
   return (
     <article className="room-stat-card">
@@ -247,14 +233,6 @@ function RoomStat({
       <div>
         <span>{label}</span>
         <strong>{value}</strong>
-        <small>
-          {note ??
-            (label === "Occupied"
-              ? "Currently assigned"
-              : label === "Available"
-                ? "Ready for tenants"
-                : "Across your property")}
-        </small>
       </div>
     </article>
   );

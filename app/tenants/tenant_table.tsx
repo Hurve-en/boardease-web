@@ -321,11 +321,18 @@ export function TenantTable({
           <button
             type="button"
             className="assignment-submit"
-            disabled={isSubmitting || !selectedTenant || rooms.length === 0}
+            disabled={isSubmitting || Boolean(blockedReason)}
+            aria-busy={isSubmitting}
+            aria-describedby={blockedReason ? "assign-blocked" : undefined}
             onClick={() => void handleAssignRoom()}
           >
             {isSubmitting ? "Saving assignment…" : "Save room assignment"}
           </button>
+          {blockedReason && !isSubmitting && (
+            <p id="assign-blocked" className="assignment-blocked">
+              {blockedReason}
+            </p>
+          )}
           <button
             type="button"
             className="assignment-cancel"

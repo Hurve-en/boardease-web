@@ -14,7 +14,7 @@ export default function TextField({ label, id, ...props }: TextFieldProps) {
 
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block text-sm font-medium text-[#2b2623]">
+      <label htmlFor={id} className="block text-sm font-medium text-(--be-text-primary)">
         {label}
       </label>
       <div className="relative">
