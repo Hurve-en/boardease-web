@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, desc, eq, gt, inArray, max, sql} from "drizzle-orm";
+import {and, desc, eq, gt, inArray, isNull, max, sql} from "drizzle-orm";
 import {db} from "@/db";
 import {bills, payments, profiles, rooms, tenantRoomAssignment, tenants} from "@/db/schema";
 
@@ -35,7 +35,7 @@ export async function getTenantBillingHistory(userId: string) {
       roomNumber: sql<string | null>`(${currentRoom})`,
     })
     .from(tenants)
-    .where(eq(tenants.userId, userId))
+    .where(and(eq(tenants.userId, userId), isNull(tenants.archivedAt)))
     .limit(1);
 
   if (!tenant) return null;

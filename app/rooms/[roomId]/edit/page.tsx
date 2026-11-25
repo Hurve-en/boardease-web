@@ -7,17 +7,24 @@ import { getRoomDetails } from "@/lib/room_management";
 
 export default async function EditRoomPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ roomId: string }>;
+  searchParams: Promise<{ delete_error?: string }>;
 }) {
   await verifyAdmin();
-  const { roomId } = await params;
+  const [{ roomId }, query] = await Promise.all([params, searchParams]);
   const details = await getRoomDetails(roomId);
 
   if (!details) notFound();
 
   return (
     <DashboardShell section="ROOMS">
+      {query.delete_error ? (
+        <p role="alert" className="mx-auto mt-6 w-full max-w-[1200px] px-8 text-sm text-red-700">
+          This room could not be deleted while it has linked records.
+        </p>
+      ) : null}
       <EditRoomForm
         houses={await getBoardingHouses()}
         room={{

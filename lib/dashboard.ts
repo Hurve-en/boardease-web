@@ -2,7 +2,7 @@ import "server-only";
 
 import {getRoomSummary} from "@/lib/room";
 
-import {and, eq, gt, lt, sql} from "drizzle-orm";
+import {and, eq, gt, isNull, lt, sql} from "drizzle-orm";
 import {db} from "@/db";
 import {
 	rooms,
@@ -121,7 +121,8 @@ export async function getDashboardData(): Promise<DashboardData> {
 						eq(tenants.tenantId, tenantRoomAssignment.tenantId),
 						eq(tenantRoomAssignment.status, "active"),
 					),
-				),
+				)
+				.where(isNull(tenants.archivedAt)),
 
 			db
 				.select({

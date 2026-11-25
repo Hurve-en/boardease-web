@@ -3,6 +3,7 @@
 import HouseField from "./HouseField";
 
 import { editRoomDetails } from "./actions";
+import DeleteRoomForm from "./DeleteRoomForm";
 import type { UpdateActionState } from "@/lib/room_management";
 import Link from "next/link";
 import { useActionState, useState } from "react";
@@ -51,7 +52,7 @@ export default function EditRoomForm({
         Update the details for {room.identifier}. Tenant assignment stays unchanged.
       </p>
 
-      <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
         <form
           action={formAction}
           className="overflow-hidden rounded-2xl border border-[#e5ded5] bg-white"
@@ -139,30 +140,35 @@ export default function EditRoomForm({
           </div>
         </form>
 
-        <aside className="rounded-2xl border border-[#e5ded5] bg-[#f4eee7] p-5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
+        <aside className="flex h-full flex-col">
+          <div className="rounded-2xl border border-[#e5ded5] bg-[#f4eee7] p-5 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-[#603e2b]">Room summary</h2>
             <span className="rounded-full bg-[#e8f0e9] px-2.5 py-1 text-[10px] font-semibold text-[#38674b]">
               Current
             </span>
+            </div>
+            <dl className="space-y-3 text-xs">
+              <div className="flex justify-between gap-4">
+                <dt className="text-[#80766d]">Room</dt>
+                <dd className="font-semibold text-[#302a25]">{room.identifier}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-[#80766d]">Monthly rent</dt>
+                <dd className="font-semibold text-[#302a25]">₱{room.monthly_rent.toLocaleString()}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-[#80766d]">Max occupancy</dt>
+                <dd className="font-semibold text-[#302a25]">{room.max_occupancy} people</dd>
+              </div>
+            </dl>
+            <p className="mt-5 border-t border-[#d5c3b3] pt-4 text-xs leading-relaxed text-[#80766d]">
+              Editing room details does not change the current tenant assignment.
+            </p>
           </div>
-          <dl className="space-y-3 text-xs">
-            <div className="flex justify-between gap-4">
-              <dt className="text-[#80766d]">Room</dt>
-              <dd className="font-semibold text-[#302a25]">{room.identifier}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-[#80766d]">Monthly rent</dt>
-              <dd className="font-semibold text-[#302a25]">₱{room.monthly_rent.toLocaleString()}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-[#80766d]">Max occupancy</dt>
-              <dd className="font-semibold text-[#302a25]">{room.max_occupancy} people</dd>
-            </div>
-          </dl>
-          <p className="mt-5 border-t border-[#d5c3b3] pt-4 text-xs leading-relaxed text-[#80766d]">
-            Editing room details does not change the current tenant assignment.
-          </p>
+          <div className="mt-auto flex justify-end pt-5">
+            <DeleteRoomForm roomId={room.id} roomName={room.identifier} />
+          </div>
         </aside>
       </div>
     </main>

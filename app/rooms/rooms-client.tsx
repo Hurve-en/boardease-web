@@ -77,6 +77,7 @@ export default function RoomsClient() {
     router.push("/room_management/add");
   }
 
+ 
   return (
     <div className="dashboard-content rooms-content">
       <section className="rooms-heading">
@@ -90,6 +91,7 @@ export default function RoomsClient() {
         <button className="create-action" onClick={openCreate}>
           <Plus size={16} /> Add room
         </button>
+         
       </section>
       <section className="room-stat-grid" aria-label="Room summary">
         <RoomStat label="Total rooms" value={summary.total} tone="brown" />

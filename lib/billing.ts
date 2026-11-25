@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, eq, sql} from "drizzle-orm";
+import {and, eq, isNull, sql} from "drizzle-orm";
 import {db} from "@/db";
 import {
 	bills,
@@ -41,6 +41,7 @@ export async function getBillableTenants() {
 			),
 		)
 		.innerJoin(rooms, eq(rooms.roomId, tenantRoomAssignment.roomId))
+		.where(isNull(tenants.archivedAt))
 		.orderBy(tenants.firstName);
 }
 
@@ -59,7 +60,7 @@ export async function getTenantRent(tenantId: string) {
 			),
 		)
 		.leftJoin(rooms, eq(rooms.roomId, tenantRoomAssignment.roomId))
-		.where(eq(tenants.tenantId, tenantId))
+		.where(and(eq(tenants.tenantId, tenantId), isNull(tenants.archivedAt)))
 		.limit(1);
 
 	return tenant;
@@ -152,7 +153,7 @@ export async function getBillsForTenant(userId: string, billingMonth: string) {
 		.from(bills)
 		.innerJoin(tenants, eq(tenants.tenantId, bills.tenantId))
 		.where(
-			and(eq(tenants.userId, userId), eq(bills.billingMonth, billingMonth)),
+			and(eq(tenants.userId, userId), eq(bills.billingMonth, billingMonth), isNull(tenants.archivedAt)),
 		)
 		.orderBy(bills.dueDate);
 }

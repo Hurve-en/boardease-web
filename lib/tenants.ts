@@ -12,6 +12,7 @@ import {
 	boardingHouses,
 	rooms,
 } from "@/db/schema";
+import { UpdateActionState } from "./room_management";
 
 export type TenantData = {
 
@@ -19,7 +20,7 @@ export type TenantData = {
         id: string;
         name: string;
         contactNumber: string;
-        status: "active" | "inactive";
+        status: "active" | "inactive" | "archived";
         roomId: string | null;
         startDate: string;
         hasRecord: boolean;
@@ -54,7 +55,8 @@ export async function getTenantData(): Promise<TenantData> {
             id: tenants.tenantId,
             name: sql<string>`CONCAT(${tenants.firstName}, ' ', ${tenants.lastName})`,
             contactNumber: tenants.contactNumber,
-            status: sql<string>`case when ${tenantRoomAssignment.assignmentId} is not null then 'active' else 'inactive' end`,
+            archivedAt: tenants.archivedAt,
+            status: sql<string>`case when ${tenants.archivedAt} is not null then 'archived' when ${tenantRoomAssignment.assignmentId} is not null then 'active' else 'inactive' end`,
             roomId: tenantRoomAssignment.roomId,
             assignedRoom: rooms.roomNumber,
             startDate: tenantRoomAssignment.startDate,
@@ -121,7 +123,7 @@ export async function getTenantData(): Promise<TenantData> {
             name: String(t.name ?? ""),
             contactNumber: String(t.contactNumber ?? ""),
             roomNumber: String(t.assignedRoom ?? ""),
-            status: String(t.status ?? "inactive") as "active" | "inactive",
+            status: String(t.status ?? "inactive") as "active" | "inactive" | "archived",
             hasRecord: true,
             roomId: t.roomId,
             startDate: String(t.startDate ?? ""),
@@ -182,7 +184,7 @@ export async function AssignRoom(input: {
             const assignment = await db.transaction(async(tx) => {
                 let tenantId = input.tenant_Id;
                 const [existingTenant] = await tx
-                    .select({ tenantId: tenants.tenantId })
+                    .select({ tenantId: tenants.tenantId, archivedAt: tenants.archivedAt })
                     .from(tenants)
                     .where(eq(tenants.tenantId, input.tenant_Id))
                     .limit(1);
@@ -215,6 +217,8 @@ export async function AssignRoom(input: {
                         .returning({ tenantId: tenants.tenantId });
 
                     tenantId = createdTenant.tenantId;
+                } else if (existingTenant.archivedAt) {
+                    throw new Error("Archived tenants must be restored before assigning a room");
                 }
 
                 const previousTenantAssignments = await tx
@@ -282,3 +286,94 @@ export async function AssignRoom(input: {
 
 
         }
+
+
+
+
+
+
+
+function manilaToday() {
+    return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Manila",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).format(new Date());
+}
+
+function dayAfter(value: string) {
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+}
+
+export async function setTenantArchived(
+    tenantId: string,
+    archived: boolean,
+): Promise<UpdateActionState> {
+    if (!tenantId.trim()) return {success: false, error: "A valid tenant is required."};
+
+    try {
+        if (archived) {
+            const today = manilaToday();
+            await db.transaction(async (tx) => {
+                const [tenant] = await tx
+                    .select({tenantId: tenants.tenantId, archivedAt: tenants.archivedAt})
+                    .from(tenants)
+                    .where(eq(tenants.tenantId, tenantId))
+                    .limit(1);
+                if (!tenant) throw new Error("Tenant not found.");
+                if (tenant.archivedAt) return;
+
+                const assignments = await tx
+                    .select({assignmentId: tenantRoomAssignment.assignmentId, roomId: tenantRoomAssignment.roomId, startDate: tenantRoomAssignment.startDate})
+                    .from(tenantRoomAssignment)
+                    .where(and(
+                        eq(tenantRoomAssignment.tenantId, tenantId),
+                        eq(tenantRoomAssignment.status, "active"),
+                    ));
+
+                for (const assignment of assignments) {
+                    const endDate = assignment.startDate < today ? today : dayAfter(assignment.startDate);
+                    await tx
+                        .update(tenantRoomAssignment)
+                        .set({status: "inactive", endDate})
+                        .where(eq(tenantRoomAssignment.assignmentId, assignment.assignmentId));
+
+                    const [remainingAssignment] = await tx
+                        .select({assignmentId: tenantRoomAssignment.assignmentId})
+                        .from(tenantRoomAssignment)
+                        .where(and(
+                            eq(tenantRoomAssignment.roomId, assignment.roomId),
+                            eq(tenantRoomAssignment.status, "active"),
+                        ))
+                        .limit(1);
+                    if (!remainingAssignment) {
+                        await tx.update(rooms)
+                            .set({status: "unoccupied"})
+                            .where(eq(rooms.roomId, assignment.roomId));
+                    }
+                }
+
+                await tx.update(tenants)
+                    .set({archivedAt: new Date()})
+                    .where(eq(tenants.tenantId, tenantId));
+            });
+        } else {
+            const [restored] = await db.update(tenants)
+                .set({archivedAt: null})
+                .where(eq(tenants.tenantId, tenantId))
+                .returning({tenantId: tenants.tenantId});
+            if (!restored) return {success: false, error: "Tenant not found."};
+        }
+    } catch (error) {
+        console.error(archived ? "Error archiving tenant:" : "Error restoring tenant:", error);
+        return {success: false, error: archived ? "Could not archive this tenant." : "Could not restore this tenant."};
+    }
+
+    revalidatePath("/tenants");
+    revalidatePath("/rooms");
+    revalidatePath("/dashboard");
+    revalidatePath("/monthly-bills/new");
+    return {success: true, message: archived ? "Tenant archived. Payment and bill history was kept." : "Tenant restored."};
+}

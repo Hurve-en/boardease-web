@@ -238,3 +238,24 @@ export async function EditRoomDetails(
 	revalidatePath(`/room_management/${roomId}`);
 	return {success: true};
 }
+
+
+export async function DeleteRoom(roomId: string): Promise<UpdateActionState> {
+	if (!roomId.trim()) return {success: false, error: "A valid room is required."};
+
+	try {
+		const [deleted] = await db
+			.delete(rooms)
+			.where(eq(rooms.roomId, roomId))
+			.returning({roomId: rooms.roomId});
+		if (!deleted) return {success: false, error: "Room not found."};
+	} catch (error) {
+		console.error("Error deleting room:", error);
+		return {success: false, error: "This room could not be deleted while it has linked records."};
+	}
+
+	revalidatePath("/rooms");
+	revalidatePath("/tenants");
+	revalidatePath(`/room_management/${roomId}`);
+	return {success: true, message: "Room deleted."};
+}

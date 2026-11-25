@@ -3,13 +3,14 @@
 import { useMemo, useState } from "react";
 import { UserRound } from "lucide-react";
 import { assignRoomAction } from "@/app/tenants/actions";
+import TenantArchiveForm from "@/app/tenants/TenantArchiveForm";
 
 type Tenant = {
   id: string;
   name: string;
   contactNumber: string;
   roomNumber: string | null;
-  status: "active" | "inactive";
+  status: "active" | "inactive" | "archived";
   startDate: string;
 };
 
@@ -31,13 +32,14 @@ function todayInManila() {
 
 function displayDate(value: string) {
   if (!value) return "Not assigned";
-  const date = new Date(`${value.slice(0, 10)}T00:00:00`);
+  // Parse and format in UTC so the calendar day never shifts with the viewer's timezone.
+  const date = new Date(`${value.slice(0, 10)}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
-    timeZone: "Asia/Manila",
+    timeZone: "UTC",
   }).format(date);
 }
 
@@ -56,40 +58,61 @@ export function TenantTable({
   tenants: Tenant[];
   rooms: Room[];
 }) {
-  const firstTenant =
-    tenants.find((tenant) => !tenant.roomNumber)?.id ?? tenants[0]?.id ?? "";
-  const [selectedId, setSelectedId] = useState(firstTenant);
-  const [roomId, setRoomId] = useState(rooms[0]?.roomId ?? "");
+  const [selectedId, setSelectedId] = useState(
+    () => tenants.find((tenant) => tenant.status !== "archived" && !tenant.roomNumber)?.id ?? tenants.find((tenant) => tenant.status !== "archived")?.id ?? tenants[0]?.id ?? "",
+  );
+  const [roomId, setRoomId] = useState(() => rooms[0]?.roomId ?? "");
   const [startDate, setStartDate] = useState(todayInManila);
   const [endDate, setEndDate] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const selectedTenant = tenants.find((tenant) => tenant.id === selectedId);
+  // If the selected tenant was deleted (it no longer exists in props), fall back gracefully.
+  const selectedTenant = useMemo(
+    () => tenants.find((tenant) => tenant.id === selectedId) ?? tenants[0],
+    [tenants, selectedId],
+  );
+  const activeSelectedId = selectedTenant?.id ?? "";
+
+  // If the chosen room is no longer available (e.g. just assigned), treat it as unselected.
   const selectedRoom = rooms.find((room) => room.roomId === roomId);
-  const activeAssignments = tenants.filter((tenant) => tenant.roomNumber).length;
-  const readyTenants = tenants.length - activeAssignments;
+  const activeRoomId = selectedRoom?.roomId ?? "";
+
+  const activeTenants = tenants.filter((tenant) => tenant.status !== "archived");
+  const activeAssignments = activeTenants.filter((tenant) => tenant.roomNumber).length;
+  const readyTenants = activeTenants.length - activeAssignments;
 
   const roomOptions = useMemo(
     () =>
       rooms.map((room) => ({
         ...room,
-        label: [room.boardingHouseName, `Room ${room.roomNumber}`].filter(Boolean).join(" · "),
+        label: [room.boardingHouseName, `Room ${room.roomNumber}`]
+          .filter(Boolean)
+          .join(" · "),
       })),
     [rooms],
   );
+
+  function selectTenant(id: string) {
+    setSelectedId(id);
+    setMessage(null);
+  }
 
   async function handleAssignRoom() {
     if (!selectedTenant) {
       setMessage("Select a tenant first.");
       return;
     }
-    if (!roomId) {
+    if (!activeRoomId) {
       setMessage("Select an available room first.");
       return;
     }
     if (!startDate || !endDate) {
       setMessage("Choose a start date and an end date.");
+      return;
+    }
+    if (endDate < startDate) {
+      setMessage("The end date can't be before the start date.");
       return;
     }
 
@@ -98,14 +121,16 @@ export function TenantTable({
 
     try {
       await assignRoomAction({
-        tenant_Id: selectedId,
-        roomId,
+        tenant_Id: activeSelectedId,
+        roomId: activeRoomId,
         hasRecord: true,
         start_date: startDate,
         end_date: endDate,
         status: "active",
       });
       setMessage("Room assigned successfully.");
+      setRoomId("");
+      setEndDate("");
     } catch {
       setMessage("The room could not be assigned. Please try again.");
     } finally {
@@ -142,42 +167,43 @@ export function TenantTable({
                 </tr>
               </thead>
               <tbody>
-                {tenants.map((tenant) => (
-                  <tr
-                    key={tenant.id}
-                    onClick={() => setSelectedId(tenant.id)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setSelectedId(tenant.id);
-                      }
-                    }}
-                    tabIndex={0}
-                    aria-selected={selectedId === tenant.id}
-                    className="tenant-row"
-                  >
-                    <td>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedId(tenant.id)}
-                        aria-pressed={selectedId === tenant.id}
-                        className="tenant-select"
-                      >
-                        <strong>{tenant.name}</strong>
-                        <span>{tenant.contactNumber || "Contact not provided"}</span>
-                      </button>
-                    </td>
-                    <td>{tenant.roomNumber || "—"}</td>
-                    <td>{tenant.roomNumber ? displayDate(tenant.startDate) : "Not assigned"}</td>
-                    <td>
-                      <span
-                        className={`tenant-status ${tenant.roomNumber ? "is-active" : "is-unassigned"}`}
-                      >
-                        {tenant.roomNumber ? "Active" : "Unassigned"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {tenants.map((tenant) => {
+                  const isSelected = activeSelectedId === tenant.id;
+                  return (
+                    <tr
+                      key={tenant.id}
+                      onClick={() => selectTenant(tenant.id)}
+                      data-selected={isSelected}
+                      className="tenant-row"
+                    >
+                      <td>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            selectTenant(tenant.id);
+                          }}
+                          aria-pressed={isSelected}
+                          className="tenant-select"
+                        >
+                          <strong>{tenant.name}</strong>
+                          <span>{tenant.contactNumber || "Contact not provided"}</span>
+                        </button>
+                      </td>
+                      <td>{tenant.roomNumber || "—"}</td>
+                      <td>
+                        {tenant.roomNumber ? displayDate(tenant.startDate) : "Not assigned"}
+                      </td>
+                      <td>
+                        <span
+                          className={`tenant-status ${tenant.status === "archived" ? "is-archived" : tenant.roomNumber ? "is-active" : "is-unassigned"}`}
+                        >
+                          {tenant.status === "archived" ? "Archived" : tenant.roomNumber ? "Active" : "Unassigned"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {tenants.length === 0 && (
                   <tr>
                     <td className="tenant-empty" colSpan={4}>
@@ -192,12 +218,15 @@ export function TenantTable({
 
         <p className="assignment-summary">
           {activeAssignments} active {activeAssignments === 1 ? "assignment" : "assignments"}
-          {readyTenants > 0 && ` · ${readyTenants} ${readyTenants === 1 ? "tenant" : "tenants"} ready for a room`}
+          {readyTenants > 0 &&
+            ` · ${readyTenants} ${readyTenants === 1 ? "tenant" : "tenants"} ready for a room`}
         </p>
 
         <section className="assignment-records">
           <h2>Assignment records</h2>
-          <p className="assignment-records-subtitle">A dated history of each tenant’s stay</p>
+          <p className="assignment-records-subtitle">
+            A dated history of each tenant’s stay
+          </p>
           <p>
             When a tenant moves out, end their assignment to make the room available.
             Previous bills stay linked to that tenant.
@@ -210,7 +239,11 @@ export function TenantTable({
           <h2 id="assign-room-title">Assign a room</h2>
           <p>
             {selectedTenant
-              ? `${selectedTenant.name} · ${selectedTenant.roomNumber ? `currently in Room ${selectedTenant.roomNumber}` : "no current assignment"}`
+              ? `${selectedTenant.name} · ${
+                  selectedTenant.roomNumber
+                    ? `currently in Room ${selectedTenant.roomNumber}`
+                    : "no current assignment"
+                }`
               : "Select a tenant to get started"}
           </p>
         </header>
@@ -225,10 +258,17 @@ export function TenantTable({
           </div>
         )}
 
-        <div className="assignment-form">
+        {selectedTenant?.status === "archived" ? (
+          <div className="assignment-form">
+            <p className="assignment-notice">This tenant is archived. Their bills, payment records, and receipts are preserved. Restore them to make the account active again.</p>
+          </div>
+        ) : <div className="assignment-form">
           <label className="assignment-field assignment-room">
             <span>Available room</span>
-            <select value={roomId} onChange={(event) => setRoomId(event.target.value)}>
+            <select
+              value={activeRoomId}
+              onChange={(event) => setRoomId(event.target.value)}
+            >
               <option value="">Select a room</option>
               {roomOptions.map((room) => (
                 <option key={room.roomId} value={room.roomId}>
@@ -259,6 +299,7 @@ export function TenantTable({
             <input
               type="date"
               value={endDate}
+              min={startDate || undefined}
               onChange={(event) => setEndDate(event.target.value)}
             />
             <small>Choose an end date for this stay.</small>
@@ -272,7 +313,9 @@ export function TenantTable({
           )}
 
           {message && (
-            <p className="assignment-message" role="status">{message}</p>
+            <p className="assignment-message" role="status">
+              {message}
+            </p>
           )}
 
           <button
@@ -290,7 +333,17 @@ export function TenantTable({
           >
             Cancel
           </button>
-        </div>
+        </div>}
+
+        {selectedTenant && (
+          <div className="assignment-danger-zone">
+            <TenantArchiveForm
+              tenantId={selectedTenant.id}
+              tenantName={selectedTenant.name}
+              archived={selectedTenant.status === "archived"}
+            />
+          </div>
+        )}
       </aside>
     </div>
   );

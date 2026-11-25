@@ -15,6 +15,7 @@ export async function getTenantAccount(userId: string) {
     name: profiles.name,
     email: profiles.email,
     tenantId: tenants.tenantId,
+    archivedAt: tenants.archivedAt,
     roomNumber: currentRoom.roomNumber,
     boardingHouseName: currentRoom.houseName,
   }).from(profiles)
@@ -24,7 +25,7 @@ export async function getTenantAccount(userId: string) {
   if (!account) return null;
   return {
     profile: {name: account.name, email: account.email},
-    tenancy: account.tenantId ? {roomNumber: account.roomNumber, boardingHouseName: account.boardingHouseName} : null,
+    tenancy: account.tenantId && !account.archivedAt ? {roomNumber: account.roomNumber, boardingHouseName: account.boardingHouseName} : null,
     // Houses do not yet have an owner relationship.
     // Never expose an arbitrary admin's profile as the tenant's owner.
     owner: null,

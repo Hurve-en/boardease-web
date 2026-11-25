@@ -1,4 +1,4 @@
-import { and, desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -69,6 +69,7 @@ export async function POST(request: Request){
                 and(
                     eq(bills.billId, parsed.data.billId),
                     eq(tenants.userId, auth.user.id),
+                    isNull(tenants.archivedAt),
                 ),
             )
             .limit(1);
