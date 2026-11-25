@@ -1,8 +1,15 @@
 import "server-only";
 
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { bills, payments, paymentSubmissions } from "@/db/schema";
+import {
+    bills,
+    payments,
+    paymentSubmissions,
+    rooms,
+    tenantRoomAssignment,
+    tenants,
+} from "@/db/schema";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
 import { toCents } from "./bill-math";
 
@@ -150,4 +157,79 @@ export async function getReceiptsForBill(billId: string): Promise<PaymentReceipt
             };
         }),
     );
+}
+
+
+
+export type ReceivedPayment = {
+    paymentId: string;
+    billId: string;
+    billingMonth: string;
+    tenantName: string;
+    roomNumber: string | null;
+    amount: string;
+    paymentDate: string;
+};
+
+export type PendingProof = {
+    submissionId: string;
+    billId: string;
+    billingMonth: string;
+    tenantName: string;
+    roomNumber: string | null;
+    amount: string;
+    referenceNumber: string;
+    submittedAt: string;
+};
+
+const tenantName = sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`;
+
+export async function getPaymentsOverview(month: string): Promise<{
+    received: ReceivedPayment[];
+    pending: PendingProof[];
+}> {
+    const activeRoom = and(
+        eq(tenants.tenantId, tenantRoomAssignment.tenantId),
+        eq(tenantRoomAssignment.status, "active"),
+    );
+
+    const [received, pending] = await Promise.all([
+        db
+            .select({
+                paymentId: payments.paymentId,
+                billId: bills.billId,
+                billingMonth: bills.billingMonth,
+                tenantName,
+                roomNumber: rooms.roomNumber,
+                amount: payments.amount,
+                paymentDate: payments.paymentDate,
+            })
+            .from(payments)
+            .innerJoin(bills, eq(payments.billId, bills.billId))
+            .innerJoin(tenants, eq(bills.tenantId, tenants.tenantId))
+            .leftJoin(tenantRoomAssignment, activeRoom)
+            .leftJoin(rooms, eq(tenantRoomAssignment.roomId, rooms.roomId))
+            .where(eq(bills.billingMonth, `${month}-01`))
+            .orderBy(desc(payments.paymentDate), desc(payments.createdAt)),
+        db
+            .select({
+                submissionId: paymentSubmissions.submissionId,
+                billId: bills.billId,
+                billingMonth: bills.billingMonth,
+                tenantName,
+                roomNumber: rooms.roomNumber,
+                amount: paymentSubmissions.amount,
+                referenceNumber: paymentSubmissions.referenceNumber,
+                submittedAt: sql<string>`${paymentSubmissions.submittedAt}::text`,
+            })
+            .from(paymentSubmissions)
+            .innerJoin(bills, eq(paymentSubmissions.billId, bills.billId))
+            .innerJoin(tenants, eq(paymentSubmissions.submittedBy, tenants.tenantId))
+            .leftJoin(tenantRoomAssignment, activeRoom)
+            .leftJoin(rooms, eq(tenantRoomAssignment.roomId, rooms.roomId))
+            .where(eq(paymentSubmissions.status, "pending"))
+            .orderBy(desc(paymentSubmissions.submittedAt)),
+    ]);
+
+    return { received, pending };
 }

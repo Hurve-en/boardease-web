@@ -49,11 +49,11 @@ const monthLabel = (iso: string) =>
 	}).format(new Date(`${iso}T00:00:00Z`));
 
 const inputBase =
-	"mt-2 h-[42px] w-full rounded-lg bg-white px-3.5 text-sm text-[#2f2520] outline-none transition";
+	"mt-2 h-[42px] w-full rounded-lg bg-white px-3.5 text-sm text-(--be-text-primary) outline-none transition";
 const inputOk =
-	"border border-[#e0d8cb] focus:border-[#5e3d2b] focus:ring-2 focus:ring-[#5e3d2b]/20";
+	"border border-(--be-border-strong) focus:border-(--be-action-primary) focus:ring-2 focus:ring-(--be-action-primary)/20";
 const inputBad =
-	"border border-[#9b3a2e] ring-1 ring-[#9b3a2e] focus:ring-2 focus:ring-[#9b3a2e]";
+	"border border-(--be-danger-text) ring-1 ring-(--be-danger-text) focus:ring-2 focus:ring-(--be-danger-text)";
 const INVALID = "Enter a valid amount (₱0.00 or more, up to 2 decimals).";
 
 export default function EditBillForm({
@@ -124,18 +124,18 @@ export default function EditBillForm({
 		<main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-12 pt-8">
 			<div className="flex flex-wrap items-start justify-between gap-4">
 				<div>
-					<h1 className="text-[32px] font-semibold tracking-tight text-[#2f2520]">
+					<h1 className="text-[32px] font-semibold tracking-tight text-(--be-text-primary)">
 						Edit bill
 					</h1>
-					<p className="mt-1 text-sm text-[#7d7269]">
-						{bill.tenantName} ·{" "}
-						{bill.roomNumber ? `Room ${bill.roomNumber}` : "No room"} ·{" "}
+					<p className="mt-1 text-sm text-(--be-text-muted)">
+						{bill.tenantName},{" "}
+						{bill.roomNumber ? `Room ${bill.roomNumber}` : "No room"},{" "}
 						{monthLabel(bill.billingMonth)}
 					</p>
 				</div>
 				<Link
 					href={detailPath}
-					className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[#e0d8cb] bg-white px-4 text-[13px] font-semibold text-[#5e3d2b] hover:bg-[#f7f3ec]">
+					className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-(--be-border-strong) bg-white px-4 text-[13px] font-semibold text-(--be-action-primary) hover:bg-(--be-surface-subtle)">
 					<ArrowLeft size={15} /> Back to bill
 				</Link>
 			</div>
@@ -144,15 +144,15 @@ export default function EditBillForm({
 				onSubmit={submit}
 				noValidate
 				className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
-				<section className="space-y-5 rounded-2xl border border-[#e8e1d6] bg-white p-5">
+				<section className="space-y-5 rounded-2xl border border-(--be-border-subtle) bg-white p-5">
 					{errors.form && (
 						<p
 							role="alert"
-							className="rounded-lg bg-[#f7e4dd] px-4 py-3 text-xs text-[#9b3a2e]">
+							className="rounded-lg bg-(--be-danger-surface) px-4 py-3 text-xs text-(--be-danger-text)">
 							{errors.form}
 						</p>
 					)}
-					<p className="text-[13px] text-[#8a7f76]">
+					<p className="text-[13px] text-(--be-text-muted)">
 						Tenant and billing month can’t be changed. To change them, delete
 						this bill and create a new one.
 					</p>
@@ -212,8 +212,8 @@ export default function EditBillForm({
 					</div>
 				</section>
 
-				<aside className="rounded-2xl border border-[#e8e1d6] bg-white p-5">
-					<h2 className="text-base font-semibold text-[#2f2520]">
+				<aside className="rounded-2xl border border-(--be-border-subtle) bg-white p-5">
+					<h2 className="text-base font-semibold text-(--be-text-primary)">
 						After saving
 					</h2>
 					<dl className="mt-4 space-y-3 text-[13px]">
@@ -222,20 +222,20 @@ export default function EditBillForm({
 						<Line label="New balance" value={money(balance)} />
 					</dl>
 					{Number(total) < Number(paid) && (
-						<p className="mt-3 text-xs text-[#9b3a2e]">
+						<p className="mt-3 text-xs text-(--be-danger-text)">
 							The total can’t be less than what’s already been paid.
 						</p>
 					)}
 					<button
 						type="submit"
 						disabled={saving}
-						className="mt-5 inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-[#5e3d2b] text-[13px] font-semibold text-white hover:bg-[#4d3123] disabled:opacity-70">
+						className="mt-5 inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-(--be-action-primary) text-[13px] font-semibold text-white hover:bg-(--be-action-primary-hover) disabled:opacity-70">
 						<Check size={15} /> {saving ? "Saving…" : "Save changes"}
 					</button>
 					<button
 						type="button"
 						onClick={() => router.push(detailPath)}
-						className="mt-3 h-[42px] w-full rounded-lg border border-[#e0d8cb] text-[13px] font-semibold text-[#4a3f38] hover:bg-[#f7f3ec]">
+						className="mt-3 h-[42px] w-full rounded-lg border border-(--be-border-strong) text-[13px] font-semibold text-(--be-text-secondary) hover:bg-(--be-surface-subtle)">
 						Cancel
 					</button>
 				</aside>
@@ -259,11 +259,11 @@ function Field({
 		<div>
 			<label
 				htmlFor={id}
-				className="block text-[13px] font-semibold text-[#2f2520]">
+				className="block text-[13px] font-semibold text-(--be-text-primary)">
 				{label}
 			</label>
 			{children}
-			{error && <p className="mt-2 text-xs text-[#9b3a2e]">{error}</p>}
+			{error && <p className="mt-2 text-xs text-(--be-danger-text)">{error}</p>}
 		</div>
 	);
 }
@@ -271,8 +271,8 @@ function Field({
 function Line({label, value}: {label: string; value: string}) {
 	return (
 		<div className="flex items-center justify-between gap-3">
-			<dt className="text-[#7d7269]">{label}</dt>
-			<dd className="break-all text-right text-[#2f2520]">{value}</dd>
+			<dt className="text-(--be-text-muted)">{label}</dt>
+			<dd className="break-all text-right text-(--be-text-primary)">{value}</dd>
 		</div>
 	);
 }

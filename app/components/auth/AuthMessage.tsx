@@ -10,12 +10,14 @@ export default function AuthMessage({ type, message }: Props) {
 
   return (
     <div
-      role="status"
-      className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm ${
-        isSuccess ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
+      role={isSuccess ? "status" : "alert"}
+      className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm ${
+        isSuccess
+          ? "bg-(--be-success-surface) text-(--be-success-text)"
+          : "bg-(--be-danger-surface) text-(--be-danger-text)"
       }`}
     >
-      {isSuccess ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+      {isSuccess ? <CheckCircle2 size={16} aria-hidden="true" /> : <AlertCircle size={16} aria-hidden="true" />}
       {message}
     </div>
   );

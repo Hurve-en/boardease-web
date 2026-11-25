@@ -47,6 +47,9 @@ export type DashboardData = {
 		tenantName: string;
 		roomNumber: string | null;
 		totalAmount: string;
+		rentAmount: string;
+		electricCharge: string;
+		waterCharge: string;
 		outstandingBalance: string;
 		status: "paid" | "partial" | "unpaid";
 	}[];
@@ -70,8 +73,7 @@ function currentDate(now = new Date()): string {
 	}).format(now);
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
-	const month = currentBillingMonth();
+export async function getDashboardData(month = currentBillingMonth()): Promise<DashboardData> {
 	const today = currentDate();
 	const [roomSummary, billing, overdue, recentPayments, tenantSummary, ledger] =
 		await Promise.all([
@@ -129,6 +131,9 @@ export async function getDashboardData(): Promise<DashboardData> {
 					tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
 					roomNumber: rooms.roomNumber,
 					totalAmount: bills.totalAmount,
+					rentAmount: bills.rentAmount,
+					electricCharge: bills.electricCharge,
+					waterCharge: bills.waterCharge,
 					outstandingBalance: bills.outstandingBalance,
 					status: bills.status,
 				})

@@ -64,11 +64,11 @@ const amountInput =
 	};
 
 const inputBase =
-	"mt-2 h-[42px] w-full rounded-lg bg-white px-3.5 text-sm text-[#2f2520] outline-none transition";
+	"mt-2 h-[42px] w-full rounded-lg bg-white px-3.5 text-sm text-(--be-text-primary) outline-none transition";
 const inputOk =
-	"border border-[#e0d8cb] focus:border-[#5e3d2b] focus:ring-2 focus:ring-[#5e3d2b]/20";
+	"border border-(--be-border-strong) focus:border-(--be-action-primary) focus:ring-2 focus:ring-(--be-action-primary)/20";
 const inputBad =
-	"border border-[#9b3a2e] ring-1 ring-[#9b3a2e] focus:ring-2 focus:ring-[#9b3a2e]";
+	"border border-(--be-danger-text) ring-1 ring-(--be-danger-text) focus:ring-2 focus:ring-(--be-danger-text)";
 
 export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 	const router = useRouter();
@@ -173,16 +173,16 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 		<main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-12 pt-8">
 			<div className="flex flex-wrap items-start justify-between gap-4">
 				<div>
-					<h1 className="text-[32px] font-semibold tracking-tight text-[#2f2520]">
+					<h1 className="text-[32px] font-semibold tracking-tight text-(--be-text-primary)">
 						Create monthly bill
 					</h1>
-					<p className="mt-1 text-sm text-[#7d7269]">
+					<p className="mt-1 text-sm text-(--be-text-muted)">
 						Choose a tenant, add monthly charges and review before saving.
 					</p>
 				</div>
 				<Link
 					href={BILLS_PATH}
-					className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[#e0d8cb] bg-white px-4 text-[13px] font-semibold text-[#5e3d2b] hover:bg-[#f7f3ec]">
+					className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-(--be-border-strong) bg-white px-4 text-[13px] font-semibold text-(--be-action-primary) hover:bg-(--be-surface-subtle)">
 					<ArrowLeft size={15} /> Back to bills
 				</Link>
 			</div>
@@ -195,7 +195,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 					{(errorCount > 0 || errors.form) && (
 						<div
 							role="alert"
-							className="rounded-lg bg-[#f7e4dd] px-4 py-3.5 text-[#9b3a2e]">
+							className="rounded-lg bg-(--be-danger-surface) px-4 py-3.5 text-(--be-danger-text)">
 							<p className="text-[13px] font-semibold">Bill not saved</p>
 							<p className="mt-0.5 text-xs">
 								{errorCount > 0
@@ -205,11 +205,11 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 						</div>
 					)}
 
-					<section className="rounded-2xl border border-[#e8e1d6] bg-white p-5">
-						<h2 className="text-base font-semibold text-[#2f2520]">
+					<section className="rounded-2xl border border-(--be-border-subtle) bg-white p-5">
+						<h2 className="text-base font-semibold text-(--be-text-primary)">
 							Bill details
 						</h2>
-						<p className="mt-1 text-[13px] text-[#8a7f76]">
+						<p className="mt-1 text-[13px] text-(--be-text-muted)">
 							A separate bill for each tenant and month
 						</p>
 
@@ -223,13 +223,13 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 								<option value="">Select a tenant</option>
 								{tenants.map((t) => (
 									<option key={t.tenantId} value={t.tenantId}>
-										{t.name} · Room {t.roomNumber}
+										{t.name}, Room {t.roomNumber}
 									</option>
 								))}
 							</select>
 						</Field>
 						{tenants.length === 0 && (
-							<p className="mt-2 text-xs text-[#7d7269]">
+							<p className="mt-2 text-xs text-(--be-text-muted)">
 								No tenants with a room assignment yet. Assign a room on the
 								Tenants page first.
 							</p>
@@ -262,11 +262,11 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 						</div>
 					</section>
 
-					<section className="rounded-2xl border border-[#e8e1d6] bg-white p-5">
-						<h2 className="text-base font-semibold text-[#2f2520]">
+					<section className="rounded-2xl border border-(--be-border-subtle) bg-white p-5">
+						<h2 className="text-base font-semibold text-(--be-text-primary)">
 							Monthly charges
 						</h2>
-						<p className="mt-1 text-[13px] text-[#8a7f76]">
+						<p className="mt-1 text-[13px] text-(--be-text-muted)">
 							Enter the amounts in Philippine pesos (PHP).
 						</p>
 
@@ -284,7 +284,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 							/>
 						</Field>
 						{tenant && !errors.rent && (
-							<p className="mt-2 text-xs text-[#7d7269]">
+							<p className="mt-2 text-xs text-(--be-text-muted)">
 								From Room {tenant.roomNumber}’s monthly rent.
 							</p>
 						)}
@@ -321,7 +321,7 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 							</Field>
 						</div>
 
-						<p className="mt-5 flex items-center gap-2 rounded-lg bg-[#f7f3ec] px-4 py-3 text-xs text-[#5a4a3f]">
+						<p className="mt-5 flex items-center gap-2 rounded-lg bg-(--be-surface-subtle) px-4 py-3 text-xs text-(--be-text-secondary)">
 							<Calculator size={15} /> Total is calculated automatically: rent +
 							electricity + water.
 						</p>
@@ -329,24 +329,24 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 				</div>
 
 				<aside className="space-y-4">
-					<section className="rounded-2xl border border-[#e8e1d6] bg-white p-5">
-						<h2 className="text-base font-semibold text-[#2f2520]">
+					<section className="rounded-2xl border border-(--be-border-subtle) bg-white p-5">
+						<h2 className="text-base font-semibold text-(--be-text-primary)">
 							Bill preview
 						</h2>
-						<p className="mt-1 text-xs text-[#8a7f76]">
-							{monthLabel(month)} · Not yet saved
+						<p className="mt-1 text-xs text-(--be-text-muted)">
+							{monthLabel(month)}, not yet saved
 						</p>
 
-						<p className="mt-5 text-xl font-semibold text-[#2f2520]">
+						<p className="mt-5 text-xl font-semibold text-(--be-text-primary)">
 							{tenant?.name ?? "No tenant selected"}
 						</p>
-						<p className="mt-1 text-xs text-[#7d7269]">
+						<p className="mt-1 text-xs text-(--be-text-muted)">
 							{tenant
-								? `Room ${tenant.roomNumber} · Maple House`
+								? `Room ${tenant.roomNumber}, Maple House`
 								: "Choose a tenant to see their room"}
 						</p>
 
-						<dl className="mt-5 space-y-3 border-t border-[#ebe4d8] pt-4 text-[13px]">
+						<dl className="mt-5 space-y-3 border-t border-(--be-border-subtle) pt-4 text-[13px]">
 							<PreviewLine label="Rent" value={money(toAmount(rent) || 0)} />
 							<PreviewLine
 								label="Electricity"
@@ -355,10 +355,10 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 							<PreviewLine label="Water" value={money(toAmount(water) || 0)} />
 						</dl>
 
-						<div className="mt-4 space-y-3 border-t border-[#ebe4d8] pt-4">
+						<div className="mt-4 space-y-3 border-t border-(--be-border-subtle) pt-4">
 							<div className="flex items-baseline justify-between">
-								<span className="text-sm text-[#5a4a3f]">Total amount</span>
-								<strong className="min-w-0 break-all text-right text-2xl font-semibold text-[#2f2520]">
+								<span className="text-sm text-(--be-text-secondary)">Total amount</span>
+								<strong className="min-w-0 break-all text-right text-2xl font-semibold text-(--be-text-primary)">
 									{money(preview)}
 								</strong>
 							</div>
@@ -367,8 +367,8 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 								value={isDate(dueDate) ? longDate(dueDate) : "—"}
 							/>
 							<div className="flex items-center justify-between text-[13px]">
-								<span className="text-[#7d7269]">Status after saving</span>
-								<span className="rounded-full bg-[#f7e4dd] px-3 py-1 text-[11px] font-semibold text-[#9b3a2e]">
+								<span className="text-(--be-text-muted)">Status after saving</span>
+								<span className="rounded-full bg-(--be-danger-surface) px-3 py-1 text-[12.5px] font-semibold text-(--be-danger-text)">
 									UNPAID
 								</span>
 							</div>
@@ -377,18 +377,18 @@ export default function CreateBillForm({tenants}: {tenants: BillableTenant[]}) {
 						<button
 							type="submit"
 							disabled={saving}
-							className="mt-5 inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-[#5e3d2b] text-[13px] font-semibold text-white transition hover:bg-[#4d3123] disabled:opacity-70">
+							className="mt-5 inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-lg bg-(--be-action-primary) text-[13px] font-semibold text-white transition hover:bg-(--be-action-primary-hover) disabled:opacity-70">
 							<Check size={15} /> {saving ? "Saving…" : "Save monthly bill"}
 						</button>
 						<button
 							type="button"
 							onClick={() => router.push(BILLS_PATH)}
-							className="mt-3 h-[42px] w-full rounded-lg border border-[#e0d8cb] text-[13px] font-semibold text-[#4a3f38] hover:bg-[#f7f3ec]">
+							className="mt-3 h-[42px] w-full rounded-lg border border-(--be-border-strong) text-[13px] font-semibold text-(--be-text-secondary) hover:bg-(--be-surface-subtle)">
 							Cancel
 						</button>
 					</section>
 
-					<p className="flex gap-3 rounded-2xl bg-[#efe6dc] p-4 text-xs leading-relaxed text-[#5a4a3f]">
+					<p className="flex gap-3 rounded-2xl bg-(--be-surface-muted) p-4 text-xs leading-relaxed text-(--be-text-secondary)">
 						<Info size={15} className="mt-0.5 shrink-0" />
 						Saving makes this bill visible in{" "}
 						{tenant ? `${tenant.name}’s` : "the tenant’s"} mobile app. Payments
@@ -415,11 +415,11 @@ function Field({
 		<div className="mt-5">
 			<label
 				htmlFor={id}
-				className="block text-[13px] font-semibold text-[#2f2520]">
+				className="block text-[13px] font-semibold text-(--be-text-primary)">
 				{label}
 			</label>
 			{children}
-			{error && <p className="mt-2 text-xs text-[#9b3a2e]">{error}</p>}
+			{error && <p className="mt-2 text-xs text-(--be-danger-text)">{error}</p>}
 		</div>
 	);
 }
@@ -427,8 +427,8 @@ function Field({
 function PreviewLine({label, value}: {label: string; value: string}) {
 	return (
 		<div className="flex items-center justify-between text-[13px]">
-			<dt className="text-[#7d7269]">{label}</dt>
-			<dd className="text-[#2f2520]">{value}</dd>
+			<dt className="text-(--be-text-muted)">{label}</dt>
+			<dd className="text-(--be-text-primary)">{value}</dd>
 		</div>
 	);
 }

@@ -8,9 +8,9 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   return (
-    <main className="grid min-h-screen md:grid-cols-2">
+    <main className="grid min-h-screen min-[900px]:grid-cols-2">
       <BrandPanel />
-      <section className="flex items-center justify-center bg-[#f7f3ec] p-8">
+      <section className="flex items-center justify-center bg-white px-6 py-12">
         <LoginForm passwordResetSuccess={params.password_reset === "success"} />
       </section>
     </main>

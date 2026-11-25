@@ -19,9 +19,6 @@ export default async function TenantsPage() {
         <section className="tenant-page-heading">
           <div>
             <h1>Tenants</h1>
-            <p className="welcome-copy">
-              Keep tenant details and room assignments together.
-            </p>
           </div>
         </section>
         <TenantTable tenants={data.tenants} rooms={data.AvailableRooms} />

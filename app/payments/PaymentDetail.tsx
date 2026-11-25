@@ -12,6 +12,7 @@ import {
     dateTime,
     statusClass,
     submissionStatusClass,
+    statusLabel,
     type Bill,
     type Receipt,
 } from "@/lib/payment-ui";
@@ -19,10 +20,10 @@ import {
 function Detail({ label, children }: { label: string; children: ReactNode }){
     return (
         <div>
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-[#8a8077]">
+            <dt className="text-[12.5px] font-medium text-(--be-text-muted)">
                 {label}
             </dt>
-            <dd className="m-0 mt-1 text-sm text-[#322d29]">{children}</dd>
+            <dd className="m-0 mt-1 text-sm text-(--be-text-primary)">{children}</dd>
         </div>
     );
 }
@@ -34,10 +35,10 @@ function ReceiptDetails({ receipt }: { receipt: Receipt }){
     return (
         <dl className="m-0 grid gap-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${submissionStatusClass(receipt.status)}`}>
-                    {receipt.status}
+                <span className={submissionStatusClass(receipt.status)}>
+                    {statusLabel(receipt.status)}
                 </span>
-                <strong className="text-xl text-[#322d29]">{money(receipt.amount)}</strong>
+                <strong className="text-xl text-(--be-text-primary)">{money(receipt.amount)}</strong>
             </div>
 
             <Detail label="Reference number">{receipt.referenceNumber || "—"}</Detail>
@@ -213,7 +214,7 @@ export default function PaymentDetail({
     if(loading && !bill){
         return (
             <div className="dashboard-content">
-                <p className="text-sm text-[#8a8077]">Loading bill…</p>
+                <p className="text-sm text-(--be-text-muted)">Loading bill…</p>
             </div>
         );
     }
@@ -222,15 +223,15 @@ export default function PaymentDetail({
         return (
             <div className="dashboard-content">
                 <section className="panel py-12 text-center">
-                    <h2 className="m-0 text-lg font-semibold text-[#322d29]">Bill not found</h2>
-                    <p className="mb-5 mt-2 text-sm text-[#8a8077]">
+                    <h2 className="m-0 text-lg font-semibold text-(--be-text-primary)">Bill not found</h2>
+                    <p className="mb-5 mt-2 text-sm text-(--be-text-muted)">
                         {error || "This bill doesn't exist for the selected month."}
                     </p>
                     <Link
                         href={backHref}
-                        className="rounded-lg border border-[#e0d8cb] bg-white px-4 py-3 text-sm font-semibold text-[#60422f] hover:bg-[#f7f3ec]"
+                        className="rounded-lg border border-(--be-border-strong) bg-white px-4 py-3 text-sm font-semibold text-(--be-action-primary) hover:bg-(--be-surface-subtle)"
                     >
-                        ← Back to payments
+                        Back to payments
                     </Link>
                 </section>
             </div>
@@ -244,19 +245,18 @@ export default function PaymentDetail({
         <div className="dashboard-content">
             <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <p className="eyebrow">PAYMENTS</p>
-                    <h1 className="m-0 text-3xl font-semibold tracking-tight text-[#322d29]">
+                    <h1 className="m-0 text-3xl font-semibold tracking-tight text-(--be-text-primary)">
                         Bill {billNumber(bill.billingMonth, bill.roomNumber)}
                     </h1>
-                    <p className="mt-2 text-sm text-[#8a8077]">
-                        {bill.tenantName} · Room {bill.roomNumber ?? "—"} · {monthLabel(bill.billingMonth)}
+                    <p className="mt-2 text-sm text-(--be-text-muted)">
+                        {bill.tenantName}, Room {bill.roomNumber ?? "—"}, {monthLabel(bill.billingMonth)}
                     </p>
                 </div>
                 <Link
                     href={backHref}
-                    className="rounded-lg border border-[#e0d8cb] bg-white px-4 py-3 text-sm font-semibold text-[#60422f] hover:bg-[#f7f3ec]"
+                    className="rounded-lg border border-(--be-border-strong) bg-white px-4 py-3 text-sm font-semibold text-(--be-action-primary) hover:bg-(--be-surface-subtle)"
                 >
-                    ← Back to rooms
+                    Back to rooms
                 </Link>
             </div>
 
@@ -274,37 +274,37 @@ export default function PaymentDetail({
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_390px]">
                 <div className="min-w-0">
                     <section className="panel">
-                        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#e7ded3] pb-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-(--be-border-subtle) pb-4">
                             <div>
-                                <h2 className="m-0 text-xl font-semibold text-[#322d29]">
+                                <h2 className="m-0 text-xl font-semibold text-(--be-text-primary)">
                                     {monthLabel(bill.billingMonth)}
                                 </h2>
-                                <p className="mt-1 text-xs text-[#8a8077]">
+                                <p className="mt-1 text-xs text-(--be-text-muted)">
                                     Due {new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${bill.dueDate}T00:00:00Z`))}
                                 </p>
                             </div>
-                            <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${statusClass(bill.status)}`}>
-                                {bill.status}
+                            <span className={statusClass(bill.status)}>
+                                {statusLabel(bill.status)}
                             </span>
                         </div>
 
                         <div className="grid gap-4 py-5 text-sm">
-                            <div className="flex justify-between gap-4 text-[#82766c]">
+                            <div className="flex justify-between gap-4 text-(--be-text-muted)">
                                 <span>Total bill</span>
-                                <strong className="text-base text-[#322d29]">{money(bill.totalAmount)}</strong>
+                                <strong className="text-base text-(--be-text-primary)">{money(bill.totalAmount)}</strong>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 border-t border-[#e7ded3] pt-4">
+                        <div className="grid grid-cols-2 gap-4 border-t border-(--be-border-subtle) pt-4">
                             <div>
-                                <p className="m-0 text-xs text-[#8a8077]">Payments recorded</p>
-                                <strong className="mt-1 block text-2xl font-semibold text-[#322d29]">
+                                <p className="m-0 text-xs text-(--be-text-muted)">Payments recorded</p>
+                                <strong className="mt-1 block text-2xl font-semibold text-(--be-text-primary)">
                                     {money(paid)}
                                 </strong>
                             </div>
                             <div>
-                                <p className="m-0 text-xs text-[#8a8077]">Outstanding balance</p>
-                                <strong className="mt-1 block text-2xl font-semibold text-[#704b34]">
+                                <p className="m-0 text-xs text-(--be-text-muted)">Outstanding balance</p>
+                                <strong className="mt-1 block text-2xl font-semibold text-(--be-action-primary)">
                                     {money(bill.outstandingBalance)}
                                 </strong>
                             </div>
@@ -312,31 +312,31 @@ export default function PaymentDetail({
                     </section>
 
                     <section className="mt-5">
-                        <h2 className="mb-3 text-base font-semibold text-[#322d29]">Recorded payments</h2>
+                        <h2 className="mb-3 text-base font-semibold text-(--be-text-primary)">Recorded payments</h2>
                         <div className="panel flex flex-wrap items-center justify-between gap-3">
                             <div>
-                                <p className="m-0 text-xs font-semibold uppercase text-[#8a8077]">Total received so far</p>
-                                <p className="mb-0 mt-1 text-xs text-[#8a8077]">Payments already applied to this bill</p>
+                                <p className="m-0 text-[12.5px] font-medium text-(--be-text-muted)">Total received so far</p>
+                                <p className="mb-0 mt-1 text-xs text-(--be-text-muted)">Payments already applied to this bill</p>
                             </div>
-                            <strong className="text-lg text-[#322d29]">{money(paid)}</strong>
+                            <strong className="text-lg text-(--be-text-primary)">{money(paid)}</strong>
                         </div>
-                        <p className="mt-3 text-[11px] text-[#8a8077]">
-                            Linked bill: {billNumber(bill.billingMonth, bill.roomNumber)} · Saving a payment updates the outstanding balance.
+                        <p className="mt-3 text-[12.5px] text-(--be-text-muted)">
+                            Linked to bill {billNumber(bill.billingMonth, bill.roomNumber)}. Saving a payment updates the outstanding balance.
                         </p>
                     </section>
 
                     <section className="mt-5">
-                        <h2 className="mb-3 text-base font-semibold text-[#322d29]">
+                        <h2 className="mb-3 text-base font-semibold text-(--be-text-primary)">
                             Receipt images
                             {receipts.length > 0 && (
-                                <span className="ml-2 text-xs font-normal text-[#8a8077]">
+                                <span className="ml-2 text-xs font-normal text-(--be-text-muted)">
                                     {receipts.length} submitted
                                 </span>
                             )}
                         </h2>
 
                         {receiptsLoading ? (
-                            <div className="panel text-sm text-[#8a8077]">Loading receipts…</div>
+                            <div className="panel text-sm text-(--be-text-muted)">Loading receipts…</div>
                         ) : receipts.length > 0 ? (
                             <div className="grid gap-4">
                                 {receipts.map((receipt) => (
@@ -348,7 +348,7 @@ export default function PaymentDetail({
                                             <button
                                                 type="button"
                                                 onClick={() => setPreviewReceipt(receipt)}
-                                                className="group relative block h-80 w-full shrink-0 overflow-hidden rounded-xl border border-[#e0d8cb] bg-[#f4ede5] sm:w-72"
+                                                className="group relative block h-80 w-full shrink-0 overflow-hidden rounded-xl border border-(--be-border-strong) bg-(--be-surface-muted) sm:w-72"
                                                 aria-label="View full receipt image"
                                             >
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -357,12 +357,12 @@ export default function PaymentDetail({
                                                     alt="Payment receipt"
                                                     className="h-full w-full object-contain"
                                                 />
-                                                <span className="absolute inset-x-0 bottom-0 bg-black/55 py-2 text-center text-[11px] font-semibold text-white opacity-0 transition group-hover:opacity-100">
+                                                <span className="absolute inset-x-0 bottom-0 bg-black/55 py-2 text-center text-[12.5px] font-semibold text-white opacity-0 transition group-hover:opacity-100">
                                                     Click to enlarge
                                                 </span>
                                             </button>
                                         ) : (
-                                            <div className="flex h-80 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-[#e0d8cb] bg-[#f4ede5] text-xs text-[#8a8077] sm:w-72">
+                                            <div className="flex h-80 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-(--be-border-strong) bg-(--be-surface-muted) text-xs text-(--be-text-muted) sm:w-72">
                                                 Image unavailable
                                             </div>
                                         )}
@@ -375,12 +375,12 @@ export default function PaymentDetail({
                             </div>
                         ) : (
                             <div className="panel flex items-center gap-4">
-                                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-[#ece4d9] text-[10px] font-bold uppercase text-[#8a8077]">
+                                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-(--be-border-subtle) text-[12px] font-bold uppercase text-(--be-text-muted)">
                                     Image
                                 </div>
                                 <div>
-                                    <p className="m-0 text-sm font-semibold text-[#322d29]">No receipt images yet</p>
-                                    <p className="mb-0 mt-1 text-xs text-[#8a8077]">
+                                    <p className="m-0 text-sm font-semibold text-(--be-text-primary)">No receipt images yet</p>
+                                    <p className="mb-0 mt-1 text-xs text-(--be-text-muted)">
                                         Receipt images linked to this bill will appear here.
                                     </p>
                                 </div>
@@ -390,21 +390,21 @@ export default function PaymentDetail({
                 </div>
 
                 <section className="panel">
-                    <h2 className="m-0 text-lg font-semibold text-[#322d29]">Record a payment</h2>
-                    <p className="mb-5 mt-1 text-xs text-[#8a8077]">Only record money already received.</p>
+                    <h2 className="m-0 text-lg font-semibold text-(--be-text-primary)">Record a payment</h2>
+                    <p className="mb-5 mt-1 text-xs text-(--be-text-muted)">Only record money already received.</p>
 
-                    <div className="mb-4 rounded-lg bg-[#f7f3ee] p-3.5">
-                        <p className="m-0 text-xs text-[#8a8077]">Linked bill · {billNumber(bill.billingMonth, bill.roomNumber)}</p>
-                        <p className="mb-0 mt-1 text-sm font-semibold text-[#322d29]">
-                            {bill.tenantName} · Room {bill.roomNumber ?? "—"}
+                    <div className="mb-4 rounded-lg bg-(--be-surface-subtle) p-3.5">
+                        <p className="m-0 text-xs text-(--be-text-muted)">Linked bill {billNumber(bill.billingMonth, bill.roomNumber)}</p>
+                        <p className="mb-0 mt-1 text-sm font-semibold text-(--be-text-primary)">
+                            {bill.tenantName}, Room {bill.roomNumber ?? "—"}
                         </p>
                     </div>
 
                     <form className="grid gap-4" onSubmit={handleSubmit}>
-                        <label className="block text-[13px] font-semibold text-[#322d29]">
+                        <label className="block text-[13px] font-semibold text-(--be-text-primary)">
                             Amount received
                             <input
-                                className="mt-2 block h-11 w-full rounded-lg border border-[#e0d8cb] bg-white px-3 text-sm font-medium text-[#322d29] outline-none focus:border-[#704b34] focus:ring-2 focus:ring-[#704b34]/15 disabled:bg-[#f7f3ee]"
+                                className="mt-2 block h-11 w-full rounded-lg border border-(--be-border-strong) bg-white px-3 text-sm font-medium text-(--be-text-primary) outline-none focus:border-(--be-action-primary) focus:ring-2 focus:ring-(--be-action-primary)/15 disabled:bg-(--be-surface-subtle)"
                                 type="number"
                                 min="0.01"
                                 step="0.01"
@@ -415,17 +415,17 @@ export default function PaymentDetail({
                                 disabled={fullyPaid}
                                 required
                             />
-                            <span className="mt-2 block text-xs font-normal text-[#8a8077]">
+                            <span className="mt-2 block text-xs font-normal text-(--be-text-muted)">
                                 {fullyPaid
                                     ? "This bill is fully paid."
                                     : `Maximum: ${money(bill.outstandingBalance)} outstanding`}
                             </span>
                         </label>
 
-                        <label className="block text-[13px] font-semibold text-[#322d29]">
+                        <label className="block text-[13px] font-semibold text-(--be-text-primary)">
                             Payment date
                             <input
-                                className="mt-2 block h-11 w-full rounded-lg border border-[#e0d8cb] bg-white px-3 text-sm font-medium text-[#322d29] outline-none focus:border-[#704b34] focus:ring-2 focus:ring-[#704b34]/15 disabled:bg-[#f7f3ee]"
+                                className="mt-2 block h-11 w-full rounded-lg border border-(--be-border-strong) bg-white px-3 text-sm font-medium text-(--be-text-primary) outline-none focus:border-(--be-action-primary) focus:ring-2 focus:ring-(--be-action-primary)/15 disabled:bg-(--be-surface-subtle)"
                                 type="date"
                                 value={paymentDate}
                                 max={manilaToday()}
@@ -435,15 +435,15 @@ export default function PaymentDetail({
                             />
                         </label>
 
-                        <div className="border-t border-[#e7ded3] pt-4">
-                            <div className="flex justify-between gap-3 text-sm text-[#8a8077]">
+                        <div className="border-t border-(--be-border-subtle) pt-4">
+                            <div className="flex justify-between gap-3 text-sm text-(--be-text-muted)">
                                 <span>Current balance</span>
-                                <strong className="text-[#322d29]">{money(bill.outstandingBalance)}</strong>
+                                <strong className="text-(--be-text-primary)">{money(bill.outstandingBalance)}</strong>
                             </div>
                         </div>
 
                         <button
-                            className="h-11 rounded-lg bg-[#60402d] px-4 text-sm font-semibold text-white transition hover:bg-[#4c3223] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="h-11 rounded-lg bg-(--be-action-primary) px-4 text-sm font-semibold text-white transition hover:bg-(--be-action-primary-hover) disabled:cursor-not-allowed disabled:opacity-60"
                             type="submit"
                             disabled={saving || loading || fullyPaid}
                         >
@@ -451,11 +451,11 @@ export default function PaymentDetail({
                         </button>
                         <Link
                             href={backHref}
-                            className="flex h-11 items-center justify-center rounded-lg border border-[#e0d8cb] bg-white px-4 text-sm font-semibold text-[#60422f] hover:bg-[#f7f3ec]"
+                            className="flex h-11 items-center justify-center rounded-lg border border-(--be-border-strong) bg-white px-4 text-sm font-semibold text-(--be-action-primary) hover:bg-(--be-surface-subtle)"
                         >
                             Cancel
                         </Link>
-                        <p className="mb-0 text-[11px] leading-relaxed text-[#8a8077]">
+                        <p className="mb-0 text-[12.5px] leading-relaxed text-(--be-text-muted)">
                             This is an unsaved entry. The bill balance changes only after you save the payment record.
                         </p>
                     </form>
@@ -479,12 +479,12 @@ export default function PaymentDetail({
                             type="button"
                             aria-label="Close image"
                             onClick={() => setPreviewReceipt(null)}
-                            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-base font-semibold text-[#322d29] shadow-lg hover:bg-[#f7f3ec]"
+                            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-base font-semibold text-(--be-text-primary) shadow-lg hover:bg-(--be-surface-subtle)"
                         >
                             ✕
                         </button>
 
-                        <div className="flex min-h-0 flex-1 items-center justify-center bg-[#1f1b18] p-3">
+                        <div className="flex min-h-0 flex-1 items-center justify-center bg-(--be-action-primary) p-3">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={previewReceipt.receiptUrl}
@@ -494,7 +494,7 @@ export default function PaymentDetail({
                         </div>
 
                         <aside className="w-full shrink-0 overflow-y-auto p-6 lg:w-80">
-                            <h2 className="mb-5 mt-0 text-base font-semibold text-[#322d29]">
+                            <h2 className="mb-5 mt-0 text-base font-semibold text-(--be-text-primary)">
                                 Receipt details
                             </h2>
                             <ReceiptDetails receipt={previewReceipt} />
