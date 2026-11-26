@@ -166,7 +166,7 @@ export default function EditRoomForm({
               Editing room details does not change the current tenant assignment.
             </p>
           </div>
-          <div className="mt-auto flex justify-end pt-5">
+          <div className="mt-5">
             <DeleteRoomForm roomId={room.id} roomName={room.identifier} />
           </div>
         </aside>
