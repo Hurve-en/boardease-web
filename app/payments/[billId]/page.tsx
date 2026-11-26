@@ -7,15 +7,15 @@ export default async function PaymentDetailPage({
     searchParams,
 }: {
     params: Promise<{ billId: string }>;
-    searchParams: Promise<{ month?: string }>;
+    searchParams: Promise<{ month?: string; proof?: string }>;
 }){
     await verifyAdmin();
     const { billId } = await params;
-    const { month } = await searchParams;
+    const { month, proof } = await searchParams;
 
     return(
         <DashboardShell section="PAYMENTS">
-            <PaymentDetail billId={billId} month={month} />
+            <PaymentDetail billId={billId} month={month} proof={proof} />
         </DashboardShell>
     );
 }

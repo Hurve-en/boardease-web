@@ -1,3 +1,4 @@
+import { notifyTenant } from "./notifications";
 import "server-only";
 
 import { and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
@@ -41,6 +42,7 @@ export async function recordPayment(input: NewPayment){
         const [bill] = await tx
             .select({
                 billId: bills.billId,
+                tenantId: bills.tenantId,
                 totalAmount: bills.totalAmount,
                 outstandingBalance: bills.outstandingBalance,
             })
@@ -116,6 +118,11 @@ export async function recordPayment(input: NewPayment){
             }
         }
 
+        await notifyTenant(tx, bill.tenantId, {
+            billId: bill.billId, eventKey: payment.paymentId, kind: "payment_recorded",
+            title: status === "paid" ? "Bill paid in full" : "Payment recorded",
+            body: `₱${payment.amount} credited. Remaining balance: ₱${updatedBill.outstandingBalance}.`,
+        });
         return {payment, bill: updatedBill};
     });
 }

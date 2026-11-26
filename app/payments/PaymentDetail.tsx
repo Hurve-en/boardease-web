@@ -58,9 +58,11 @@ function ReceiptDetails({ receipt }: { receipt: Receipt }){
 export default function PaymentDetail({
     billId,
     month: monthParam,
+    proof,
 }: {
     billId: string;
     month?: string;
+    proof?: string;
 }){
     const month = resolveMonth(monthParam);
     const backHref = `${PAYMENTS_PATH}?month=${month}`;
@@ -74,7 +76,8 @@ export default function PaymentDetail({
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [receipts, setReceipts] = useState<Receipt[]>([]);
-    const [receiptsLoading, setReceiptsLoading] = useState(true);
+    const [loadedReceiptsFor, setLoadedReceiptsFor] = useState("");
+    const receiptsLoading = loadedReceiptsFor !== billId;
     const [previewReceipt, setPreviewReceipt] = useState<Receipt | null>(null);
 
     // Load this bill (the list endpoint is reused and filtered by id).
@@ -116,10 +119,13 @@ export default function PaymentDetail({
         };
     }, [billId, month, reloadKey]);
 
+    useEffect(() => {
+        if (!loading && !receiptsLoading && proof && receipts.length) document.getElementById(`proof-${proof}`)?.scrollIntoView({block: "center"});
+    }, [proof, loading, receiptsLoading, receipts]);
+
     // Load the submitted receipts for this bill.
     useEffect(() => {
         let cancelled = false;
-        setReceiptsLoading(true);
 
         fetch(`/api/payment-submissions?billId=${billId}`, { cache: "no-store" })
             .then((res) => res.json())
@@ -130,7 +136,7 @@ export default function PaymentDetail({
                 if(!cancelled) setReceipts([]);
             })
             .finally(() => {
-                if(!cancelled) setReceiptsLoading(false);
+                if(!cancelled) setLoadedReceiptsFor(billId);
             });
 
         return () => {
@@ -341,6 +347,7 @@ export default function PaymentDetail({
                             <div className="grid gap-4">
                                 {receipts.map((receipt) => (
                                     <article
+                                        id={`proof-${receipt.submissionId}`}
                                         key={receipt.submissionId}
                                         className="panel flex flex-col gap-5 sm:flex-row"
                                     >

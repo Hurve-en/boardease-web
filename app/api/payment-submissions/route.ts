@@ -2,11 +2,13 @@ import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { randomUUID } from "node:crypto";
+import { notifyTenant } from "@/lib/notifications";
 import { authorize } from "@/lib/api-auth";
 import { CreatePaymentSubmissionSchema } from "@/lib/definitions";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
 import { db } from "@/db";
-import { bills, paymentSubmissions, tenants } from "@/db/schema";
+import { bills, paymentSubmissions, tenants, notifications, userRoles } from "@/db/schema";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -61,6 +63,7 @@ export async function POST(request: Request){
             .select({
                 id: bills.billId,
                 tenantId: tenants.tenantId,
+                firstName: tenants.firstName, lastName: tenants.lastName,
                 outstandingBalance: bills.outstandingBalance,
             })
             .from(bills)
@@ -89,20 +92,29 @@ export async function POST(request: Request){
             ));
         }
 
-        const [submission] = await db
-            .insert(paymentSubmissions)
-            .values({
-                billId: bill.id,
-                submittedBy: bill.tenantId,
-                amount: parsed.data.amount.toFixed(2),
-                referenceNumber: parsed.data.referenceNumber,
-                receiptPath: parsed.data.receiptPath,
-                paymentDate: parsed.data.paymentDate,
-            })
-            .returning({
-                submissionId: paymentSubmissions.submissionId,
-                status: paymentSubmissions.status,
-            });
+        const submission = await db.transaction(async tx => {
+            const [submission] = await tx
+                .insert(paymentSubmissions)
+                .values({
+                    billId: bill.id,
+                    submittedBy: bill.tenantId,
+                    amount: parsed.data.amount.toFixed(2),
+                    referenceNumber: parsed.data.referenceNumber,
+                    receiptPath: parsed.data.receiptPath,
+                    paymentDate: parsed.data.paymentDate,
+                })
+                .returning({
+                    submissionId: paymentSubmissions.submissionId,
+                    status: paymentSubmissions.status,
+                });
+            const admins = await tx.select({ recipientId: userRoles.userId }).from(userRoles).where(eq(userRoles.role, "admin"));
+            if (admins.length) await tx.insert(notifications).values(admins.map(admin => ({
+                ...admin, role: "admin" as const, billId: bill.id, eventKey: submission.submissionId,
+                kind: "proof_submitted", title: "Payment proof submitted",
+                body: `${bill.firstName} ${bill.lastName} submitted proof for ₱${parsed.data.amount.toFixed(2)}.`,
+            })));
+            return submission;
+        });
 
         return withCors(NextResponse.json(submission, { status: 201 }));
     }catch{
@@ -200,27 +212,39 @@ export async function PATCH(request: Request) {
 
     try {
         const {submissionId, status, reviewNote} = parsed.data;
-        const [updated] = await db
-            .update(paymentSubmissions)
-            .set({
-                status,
-                reviewedBy: status === "needs_update" ? auth.user.id : null,
-                reviewedAt: status === "needs_update" ? new Date() : null,
-                reviewNote: status === "needs_update" ? reviewNote || null : null,
-            })
-            .where(and(
-                eq(paymentSubmissions.submissionId, submissionId),
-                or(
-                    eq(paymentSubmissions.status, "pending"),
-                    eq(paymentSubmissions.status, "needs_update"),
-                ),
-            ))
-            .returning({
-                submissionId: paymentSubmissions.submissionId,
-                status: paymentSubmissions.status,
-                reviewNote: paymentSubmissions.reviewNote,
-                reviewedAt: paymentSubmissions.reviewedAt,
-            });
+        const updated = await db.transaction(async tx => {
+            const [previous] = await tx.select({ status: paymentSubmissions.status, note: paymentSubmissions.reviewNote })
+                .from(paymentSubmissions).where(eq(paymentSubmissions.submissionId, submissionId)).for("update");
+            const [updated] = await tx
+                .update(paymentSubmissions)
+                .set({
+                    status,
+                    reviewedBy: status === "needs_update" ? auth.user.id : null,
+                    reviewedAt: status === "needs_update" ? new Date() : null,
+                    reviewNote: status === "needs_update" ? reviewNote || null : null,
+                })
+                .where(and(
+                    eq(paymentSubmissions.submissionId, submissionId),
+                    or(
+                        eq(paymentSubmissions.status, "pending"),
+                        eq(paymentSubmissions.status, "needs_update"),
+                    ),
+                ))
+                .returning({
+                    submissionId: paymentSubmissions.submissionId,
+                    status: paymentSubmissions.status,
+                    reviewNote: paymentSubmissions.reviewNote,
+                    billId: paymentSubmissions.billId, tenantId: paymentSubmissions.submittedBy,
+                    reviewedAt: paymentSubmissions.reviewedAt,
+                });
+            if (updated && status === "needs_update" && (previous.status !== status || previous.note !== updated.reviewNote)) {
+                await notifyTenant(tx, updated.tenantId, {
+                    billId: updated.billId, eventKey: randomUUID(), kind: "proof_needs_update",
+                    title: "Please update your payment proof", body: updated.reviewNote || "Please submit a corrected payment photo.",
+                });
+            }
+            return updated;
+        });
 
         if (!updated) {
             return withCors(NextResponse.json(

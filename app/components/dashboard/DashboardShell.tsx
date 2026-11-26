@@ -1,3 +1,4 @@
+import NotificationBell from "./NotificationBell";
 import { signOut } from "@/app/login/actions";
 import { verifyAdmin } from "@/lib/dal";
 import { LogOut } from "lucide-react";
@@ -64,6 +65,7 @@ export default async function DashboardShell({ section, children }: DashboardShe
               <span>Owner</span>
             </span>
             <span className="app-topbar-divider" aria-hidden="true" />
+            <NotificationBell />
             <ZoomToggle initialZoomed={zoomed} />
             <form action={signOut}>
               <button className="app-signout" type="submit">
