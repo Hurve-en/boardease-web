@@ -1,6 +1,7 @@
 import {sql} from "drizzle-orm";
 
 import {
+	index,
 	check,
 	date,
 	bigint,
@@ -256,3 +257,19 @@ export const paymentSubmissions = pgTable("payment_submissions", {
 	reviewedAt: timestamp("reviewed_at", { withTimezone: true}),
 	paymentDate: date("payment_date"),
 }).enableRLS();
+
+export const notifications = pgTable("notifications", {
+	id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+	recipientId: uuid("recipient_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+	role: appRoleEnum("role").notNull(),
+	billId: uuid("bill_id").notNull().references(() => bills.billId, { onDelete: "cascade" }),
+	kind: text("kind").notNull(),
+	eventKey: text("event_key").notNull(),
+	title: text("title").notNull(),
+	body: text("body").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+	readAt: timestamp("read_at", { withTimezone: true }),
+}, t => [
+	unique("notifications_event_unique").on(t.recipientId, t.eventKey),
+	index("notifications_inbox_idx").on(t.recipientId, t.role, t.id),
+]).enableRLS();
