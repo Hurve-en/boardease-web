@@ -28,7 +28,11 @@
 		inset: 0 0 auto;
 		height: 62svh;
 	}
+}
 
+/* Phones in portrait: fixed-scale stage. Wider screens keep the
+   percentage-based stage so the cards fill the whole panel. */
+@media (max-width: 499px) {
 	.stage {
 		inset: auto;
 		top: calc(-162px * 0.54);

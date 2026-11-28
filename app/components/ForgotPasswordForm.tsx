@@ -56,7 +56,6 @@ export default function ForgotPasswordForm({
 
   return (
     <div className="w-full max-w-[340px]">
-
       {sent ? (
         <div className="text-center">
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-(--be-surface-selected) text-(--be-action-primary)">
