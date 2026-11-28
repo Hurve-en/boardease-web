@@ -10,7 +10,9 @@ type Notice = Pick<typeof notifications.$inferInsert, "kind" | "title" | "body" 
 export async function notifyTenant(tx: Transaction, tenantId: string, notice: Notice) {
   const [tenant] = await tx.select({ recipientId: tenants.userId }).from(tenants)
     .where(and(eq(tenants.tenantId, tenantId), isNull(tenants.archivedAt)));
-  if (tenant) await tx.insert(notifications).values({ ...notice, ...tenant, role: "tenant" });
+  if (!tenant) return null;
+  const [row] = await tx.insert(notifications).values({ ...notice, ...tenant, role: "tenant" }).returning();
+  return row;
 }
 
 export function inboxScope(user: CurrentUser) {

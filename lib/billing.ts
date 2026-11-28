@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { notifyTenant } from "./notifications";
+import { sendPushForNotice } from "./push";
 
 import {and, eq, isNull, sql} from "drizzle-orm";
 import {db} from "@/db";
@@ -84,7 +85,7 @@ export async function createBill(input: NewBill) {
 		input.waterCharge,
 	);
 
-	return db.transaction(async tx => {
+	const { bill, notice } = await db.transaction(async tx => {
 		const [bill] = await tx
 			.insert(bills)
 			.values({
@@ -99,12 +100,17 @@ export async function createBill(input: NewBill) {
 			})
 			.returning();
 
-		await notifyTenant(tx, bill.tenantId, {
+		const notice = await notifyTenant(tx, bill.tenantId, {
 			kind: "bill_issued", eventKey: `bill:${bill.billId}`, billId: bill.billId,
 			title: "New monthly bill", body: `${bill.billingMonth.slice(0, 7)} · ₱${total} due ${bill.dueDate}`,
 		});
-		return bill;
+		return { bill, notice };
 	});
+
+	// Send the push only after the transaction has committed
+	if (notice) await sendPushForNotice(notice);
+
+	return bill;
 }
 
 export async function getBillsForMonth(billingMonth: string) {
@@ -206,7 +212,7 @@ export async function getBillDetails(billId: string) {
 }
 
 export async function updateBill(billId: string, input: UpdateBillInput) {
-	return db.transaction(async (tx) => {
+	const outcome = await db.transaction(async (tx) => {
 		const [bill] = await tx
 			.select({billingMonth: bills.billingMonth, total: bills.totalAmount, dueDate: bills.dueDate})
 			.from(bills)
@@ -255,11 +261,20 @@ export async function updateBill(billId: string, input: UpdateBillInput) {
 		const changes = [];
 		if (bill.total !== updated.totalAmount) changes.push(`Amount changed from ₱${bill.total} to ₱${updated.totalAmount}.`);
 		if (bill.dueDate !== updated.dueDate) changes.push(`Due date changed from ${bill.dueDate} to ${updated.dueDate}.`);
-		if (changes.length) await notifyTenant(tx, updated.tenantId, {
-			kind: "bill_revised", eventKey: randomUUID(), billId,
-			title: `${bill.billingMonth.slice(0, 7)} bill revised`, body: changes.join(" "),
-		});
+		const notice = changes.length
+			? await notifyTenant(tx, updated.tenantId, {
+				kind: "bill_revised", eventKey: randomUUID(), billId,
+				title: `${bill.billingMonth.slice(0, 7)} bill revised`, body: changes.join(" "),
+			})
+			: null;
 
-		return {result: "updated", bill: updated} as const;
+		return {result: "updated", bill: updated, notice} as const;
 	});
+
+	if (outcome.result !== "updated") return outcome;
+
+	// Send the push only after the transaction has committed
+	if (outcome.notice) await sendPushForNotice(outcome.notice);
+
+	return {result: "updated", bill: outcome.bill} as const;
 }

@@ -1,4 +1,5 @@
 import { notifyTenant } from "./notifications";
+import { sendPushForNotice } from "./push";
 import "server-only";
 
 import { and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
@@ -37,7 +38,7 @@ export type NewPayment = {
 };
 
 export async function recordPayment(input: NewPayment){
-    return db.transaction(async (tx) => {
+    const { payment, bill: updatedBill, notice } = await db.transaction(async (tx) => {
         // Lock the bill row so two concurrent payments can't both pass the balance check.
         const [bill] = await tx
             .select({
@@ -118,13 +119,18 @@ export async function recordPayment(input: NewPayment){
             }
         }
 
-        await notifyTenant(tx, bill.tenantId, {
+        const notice = await notifyTenant(tx, bill.tenantId, {
             billId: bill.billId, eventKey: payment.paymentId, kind: "payment_recorded",
             title: status === "paid" ? "Bill paid in full" : "Payment recorded",
             body: `₱${payment.amount} credited. Remaining balance: ₱${updatedBill.outstandingBalance}.`,
         });
-        return {payment, bill: updatedBill};
+        return {payment, bill: updatedBill, notice};
     });
+
+    // Send the push only after the transaction has committed
+    if (notice) await sendPushForNotice(notice);
+
+    return {payment, bill: updatedBill};
 }
 
 export type PaymentReceipt = {

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { randomUUID } from "node:crypto";
 import { notifyTenant } from "@/lib/notifications";
+import { sendPushForNotice } from "@/lib/push";
 import { authorize } from "@/lib/api-auth";
 import { CreatePaymentSubmissionSchema } from "@/lib/definitions";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
@@ -92,7 +93,7 @@ export async function POST(request: Request){
             ));
         }
 
-        const submission = await db.transaction(async tx => {
+        const { submission, notices } = await db.transaction(async tx => {
             const [submission] = await tx
                 .insert(paymentSubmissions)
                 .values({
@@ -108,13 +109,18 @@ export async function POST(request: Request){
                     status: paymentSubmissions.status,
                 });
             const admins = await tx.select({ recipientId: userRoles.userId }).from(userRoles).where(eq(userRoles.role, "admin"));
-            if (admins.length) await tx.insert(notifications).values(admins.map(admin => ({
-                ...admin, role: "admin" as const, billId: bill.id, eventKey: submission.submissionId,
-                kind: "proof_submitted", title: "Payment proof submitted",
-                body: `${bill.firstName} ${bill.lastName} submitted proof for ₱${parsed.data.amount.toFixed(2)}.`,
-            })));
-            return submission;
+            const notices = admins.length
+                ? await tx.insert(notifications).values(admins.map(admin => ({
+                    ...admin, role: "admin" as const, billId: bill.id, eventKey: submission.submissionId,
+                    kind: "proof_submitted", title: "Payment proof submitted",
+                    body: `${bill.firstName} ${bill.lastName} submitted proof for ₱${parsed.data.amount.toFixed(2)}.`,
+                }))).returning()
+                : [];
+            return { submission, notices };
         });
+
+        // Send pushes only after the transaction has committed
+        await Promise.all(notices.map((n) => sendPushForNotice(n)));
 
         return withCors(NextResponse.json(submission, { status: 201 }));
     }catch{
@@ -125,7 +131,7 @@ export async function POST(request: Request){
     }
 }
 
-    export async function GET(request: Request) {
+export async function GET(request: Request) {
     const auth = await authorize(request, ["admin"]);
     if (auth.response) return withCors(auth.response);
 
@@ -212,7 +218,7 @@ export async function PATCH(request: Request) {
 
     try {
         const {submissionId, status, reviewNote} = parsed.data;
-        const updated = await db.transaction(async tx => {
+        const { updated, notice } = await db.transaction(async tx => {
             const [previous] = await tx.select({ status: paymentSubmissions.status, note: paymentSubmissions.reviewNote })
                 .from(paymentSubmissions).where(eq(paymentSubmissions.submissionId, submissionId)).for("update");
             const [updated] = await tx
@@ -237,13 +243,14 @@ export async function PATCH(request: Request) {
                     billId: paymentSubmissions.billId, tenantId: paymentSubmissions.submittedBy,
                     reviewedAt: paymentSubmissions.reviewedAt,
                 });
+            let notice: Awaited<ReturnType<typeof notifyTenant>> = null;
             if (updated && status === "needs_update" && (previous.status !== status || previous.note !== updated.reviewNote)) {
-                await notifyTenant(tx, updated.tenantId, {
+                notice = await notifyTenant(tx, updated.tenantId, {
                     billId: updated.billId, eventKey: randomUUID(), kind: "proof_needs_update",
                     title: "Please update your payment proof", body: updated.reviewNote || "Please submit a corrected payment photo.",
                 });
             }
-            return updated;
+            return { updated, notice };
         });
 
         if (!updated) {
@@ -253,12 +260,15 @@ export async function PATCH(request: Request) {
             ));
         }
 
+        // Send the push only after the transaction has committed
+        if (notice) await sendPushForNotice(notice);
+
         return withCors(NextResponse.json(updated));
     } catch (error) {
         console.error("PATCH PAYMENT SUBMISSION ERROR:", error);
         return withCors(NextResponse.json(
             {error: "Failed to update the payment submission."},
-            {status: 500},
+            { status: 500 },
         ));
     }
 }

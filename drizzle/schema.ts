@@ -1,17 +1,44 @@
-import { pgSchema, pgTable, foreignKey, unique, pgPolicy, bigint, uuid, text, timestamp, check, numeric, integer, date, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, uuid, numeric, text, timestamp, date, unique, pgPolicy, bigint, check, integer, index, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
-
-const auth = pgSchema("auth")
-export const usersInAuth = auth.table("users", {
-	id: uuid().primaryKey(),
-})
 
 export const appPermission = pgEnum("app_permission", ['dashboard.view', 'rooms.manage', 'tenants.manage', 'assignments.manage', 'bills.manage', 'payments.manage', 'billing.view_all', 'billing.view_own'])
 export const appRole = pgEnum("app_role", ['admin', 'tenant'])
 export const assignmentStatus = pgEnum("assignment_status", ['active', 'inactive'])
 export const billStatus = pgEnum("bill_status", ['paid', 'partial', 'unpaid'])
+export const paymentSubmissionStatus = pgEnum("payment_submission_status", ['pending', 'approved', 'needs_update'])
 export const roomStatus = pgEnum("room_status", ['occupied', 'unoccupied'])
 
+
+export const paymentSubmissions = pgTable("payment_submissions", {
+	submissionId: uuid("submission_id").defaultRandom().primaryKey().notNull(),
+	billId: uuid("bill_id").notNull(),
+	submittedBy: uuid("submitted_by").notNull(),
+	amount: numeric({ precision: 12, scale:  2 }).notNull(),
+	referenceNumber: text("reference_number").notNull(),
+	receiptPath: text("receipt_path").notNull(),
+	status: paymentSubmissionStatus().default('pending').notNull(),
+	reviewedBy: uuid("reviewed_by"),
+	reviewNote: text("review_note"),
+	submittedAt: timestamp("submitted_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	reviewedAt: timestamp("reviewed_at", { withTimezone: true, mode: 'string' }),
+	paymentDate: date("payment_date"),
+}, (table) => [
+	foreignKey({
+			columns: [table.billId],
+			foreignColumns: [bills.billId],
+			name: "payment_submissions_bill_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.reviewedBy],
+			foreignColumns: [profiles.id],
+			name: "payment_submissions_reviewed_by_fkey"
+		}),
+	foreignKey({
+			columns: [table.submittedBy],
+			foreignColumns: [tenants.tenantId],
+			name: "payment_submissions_submitted_by_fkey"
+		}),
+]);
 
 export const userRoles = pgTable("user_roles", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -21,7 +48,7 @@ export const userRoles = pgTable("user_roles", {
 }, (table) => [
 	foreignKey({
 			columns: [table.userId],
-			foreignColumns: [usersInAuth.id],
+			foreignColumns: [users.id],
 			name: "user_roles_user_id_fkey"
 		}).onDelete("cascade"),
 	unique("user_roles_user_id_key").on(table.userId),
@@ -45,25 +72,9 @@ export const profiles = pgTable("profiles", {
 }, (table) => [
 	foreignKey({
 			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
+			foreignColumns: [users.id],
 			name: "profiles_id_auth_users_id_fk"
 		}).onDelete("cascade"),
-]);
-
-export const tenants = pgTable("tenants", {
-	tenantId: uuid("tenant_id").defaultRandom().primaryKey().notNull(),
-	userId: uuid("user_id").notNull(),
-	firstName: text("first_name").notNull(),
-	lastName: text("last_name").notNull(),
-	contactNumber: text("contact_number").notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [profiles.id],
-			name: "tenants_user_id_profiles_id_fk"
-		}).onDelete("cascade"),
-	unique("tenants_user_id_unique").on(table.userId),
 ]);
 
 export const rooms = pgTable("rooms", {
@@ -73,10 +84,40 @@ export const rooms = pgTable("rooms", {
 	maxOccupancy: integer("max_occupancy").notNull(),
 	status: roomStatus().default('unoccupied').notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	boardingHouseId: uuid("boarding_house_id"),
 }, (table) => [
-	unique("rooms_room_number_unique").on(table.roomNumber),
+	foreignKey({
+			columns: [table.boardingHouseId],
+			foreignColumns: [boardingHouses.id],
+			name: "rooms_boarding_house_id_boarding_houses_id_fk"
+		}),
+	unique("rooms_house_room_unique").on(table.roomNumber, table.boardingHouseId),
 	check("rooms_capacity_positive", sql`max_occupancy >= 1`),
 	check("rooms_monthly_rent_nonnegative", sql`monthly_rent >= (0)::numeric`),
+]);
+
+export const boardingHouses = pgTable("boarding_houses", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	name: text().notNull(),
+}, (table) => [
+	unique("boarding_houses_name_unique").on(table.name),
+]);
+
+export const tenants = pgTable("tenants", {
+	tenantId: uuid("tenant_id").defaultRandom().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	firstName: text("first_name").notNull(),
+	lastName: text("last_name").notNull(),
+	contactNumber: text("contact_number").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	archivedAt: timestamp("archived_at", { withTimezone: true, mode: 'string' }),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [profiles.id],
+			name: "tenants_user_id_profiles_id_fk"
+		}).onDelete("cascade"),
+	unique("tenants_user_id_unique").on(table.userId),
 ]);
 
 export const bills = pgTable("bills", {
@@ -148,4 +189,45 @@ export const payments = pgTable("payments", {
 			name: "payments_recorded_by_profiles_id_fk"
 		}),
 	check("amount_nonnegative", sql`amount >= (0)::numeric`),
+]);
+
+export const notifications = pgTable("notifications", {
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	id: bigint({ mode: "number" }).primaryKey().generatedAlwaysAsIdentity({ name: "notifications_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 9223372036854775807, cache: 1 }),
+	recipientId: uuid("recipient_id").notNull(),
+	role: appRole().notNull(),
+	billId: uuid("bill_id").notNull(),
+	kind: text().notNull(),
+	eventKey: text("event_key").notNull(),
+	title: text().notNull(),
+	body: text().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	readAt: timestamp("read_at", { withTimezone: true, mode: 'string' }),
+}, (table) => [
+	index("notifications_inbox_idx").using("btree", table.recipientId.asc().nullsLast().op("uuid_ops"), table.role.asc().nullsLast().op("uuid_ops"), table.id.asc().nullsLast().op("enum_ops")),
+	foreignKey({
+			columns: [table.billId],
+			foreignColumns: [bills.billId],
+			name: "notifications_bill_id_bills_bill_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.recipientId],
+			foreignColumns: [profiles.id],
+			name: "notifications_recipient_id_profiles_id_fk"
+		}).onDelete("cascade"),
+	unique("notifications_event_unique").on(table.recipientId, table.eventKey),
+]);
+
+export const pushTokens = pgTable("push_tokens", {
+	token: text().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	platform: text(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("push_tokens_user_id_idx").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "push_tokens_user_id_fkey"
+		}).onDelete("cascade"),
 ]);

@@ -1,5 +1,51 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, userRoles, profiles, tenants, bills, rooms, tenantRoomAssignment, payments } from "./schema";
+import { bills, paymentSubmissions, profiles, tenants, usersInAuth, userRoles, boardingHouses, rooms, tenantRoomAssignment, payments, notifications, pushTokens } from "./schema";
+
+export const paymentSubmissionsRelations = relations(paymentSubmissions, ({one}) => ({
+	bill: one(bills, {
+		fields: [paymentSubmissions.billId],
+		references: [bills.billId]
+	}),
+	profile: one(profiles, {
+		fields: [paymentSubmissions.reviewedBy],
+		references: [profiles.id]
+	}),
+	tenant: one(tenants, {
+		fields: [paymentSubmissions.submittedBy],
+		references: [tenants.tenantId]
+	}),
+}));
+
+export const billsRelations = relations(bills, ({one, many}) => ({
+	paymentSubmissions: many(paymentSubmissions),
+	tenant: one(tenants, {
+		fields: [bills.tenantId],
+		references: [tenants.tenantId]
+	}),
+	payments: many(payments),
+	notifications: many(notifications),
+}));
+
+export const profilesRelations = relations(profiles, ({one, many}) => ({
+	paymentSubmissions: many(paymentSubmissions),
+	usersInAuth: one(usersInAuth, {
+		fields: [profiles.id],
+		references: [usersInAuth.id]
+	}),
+	tenants: many(tenants),
+	payments: many(payments),
+	notifications: many(notifications),
+}));
+
+export const tenantsRelations = relations(tenants, ({one, many}) => ({
+	paymentSubmissions: many(paymentSubmissions),
+	profile: one(profiles, {
+		fields: [tenants.userId],
+		references: [profiles.id]
+	}),
+	bills: many(bills),
+	tenantRoomAssignments: many(tenantRoomAssignment),
+}));
 
 export const userRolesRelations = relations(userRoles, ({one}) => ({
 	usersInAuth: one(usersInAuth, {
@@ -11,32 +57,19 @@ export const userRolesRelations = relations(userRoles, ({one}) => ({
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	userRoles: many(userRoles),
 	profiles: many(profiles),
+	pushTokens: many(pushTokens),
 }));
 
-export const profilesRelations = relations(profiles, ({one, many}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [profiles.id],
-		references: [usersInAuth.id]
+export const roomsRelations = relations(rooms, ({one, many}) => ({
+	boardingHouse: one(boardingHouses, {
+		fields: [rooms.boardingHouseId],
+		references: [boardingHouses.id]
 	}),
-	tenants: many(tenants),
-	payments: many(payments),
-}));
-
-export const tenantsRelations = relations(tenants, ({one, many}) => ({
-	profile: one(profiles, {
-		fields: [tenants.userId],
-		references: [profiles.id]
-	}),
-	bills: many(bills),
 	tenantRoomAssignments: many(tenantRoomAssignment),
 }));
 
-export const billsRelations = relations(bills, ({one, many}) => ({
-	tenant: one(tenants, {
-		fields: [bills.tenantId],
-		references: [tenants.tenantId]
-	}),
-	payments: many(payments),
+export const boardingHousesRelations = relations(boardingHouses, ({many}) => ({
+	rooms: many(rooms),
 }));
 
 export const tenantRoomAssignmentRelations = relations(tenantRoomAssignment, ({one}) => ({
@@ -50,10 +83,6 @@ export const tenantRoomAssignmentRelations = relations(tenantRoomAssignment, ({o
 	}),
 }));
 
-export const roomsRelations = relations(rooms, ({many}) => ({
-	tenantRoomAssignments: many(tenantRoomAssignment),
-}));
-
 export const paymentsRelations = relations(payments, ({one}) => ({
 	bill: one(bills, {
 		fields: [payments.billId],
@@ -62,5 +91,23 @@ export const paymentsRelations = relations(payments, ({one}) => ({
 	profile: one(profiles, {
 		fields: [payments.recordedBy],
 		references: [profiles.id]
+	}),
+}));
+
+export const notificationsRelations = relations(notifications, ({one}) => ({
+	bill: one(bills, {
+		fields: [notifications.billId],
+		references: [bills.billId]
+	}),
+	profile: one(profiles, {
+		fields: [notifications.recipientId],
+		references: [profiles.id]
+	}),
+}));
+
+export const pushTokensRelations = relations(pushTokens, ({one}) => ({
+	usersInAuth: one(usersInAuth, {
+		fields: [pushTokens.userId],
+		references: [usersInAuth.id]
 	}),
 }));
