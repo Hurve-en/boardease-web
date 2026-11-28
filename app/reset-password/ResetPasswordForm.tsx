@@ -54,7 +54,6 @@ export default function ResetPasswordForm() {
 
   return (
     <div className="w-full max-w-[340px]">
-
       <h1 className="text-center text-[26px] font-semibold tracking-[-0.02em] text-(--be-text-primary)">
         Choose a new password
       </h1>
