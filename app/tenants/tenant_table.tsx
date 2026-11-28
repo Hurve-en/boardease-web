@@ -350,6 +350,7 @@ export function TenantTable({
         {selectedTenant && (
           <div className="assignment-danger-zone">
             <TenantArchiveForm
+              key={selectedTenant.id}
               tenantId={selectedTenant.id}
               tenantName={selectedTenant.name}
               archived={selectedTenant.status === "archived"}
