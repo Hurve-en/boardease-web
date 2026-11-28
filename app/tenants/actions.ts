@@ -25,9 +25,9 @@ export async function archiveTenantAction(tenantId: string, formData: FormData) 
 }
 
 export async function restoreTenantAction(tenantId: string, formData: FormData) {
-  void formData;
   await verifyAdmin();
+  const base = formData.get("from") === "archived" ? "/tenants/archived" : "/tenants";
   const result = await setTenantArchived(tenantId, false);
-  if (!result.success) redirect("/tenants?archive_error=1");
-  redirect("/tenants?tenant_notice=restored");
+  if (!result.success) redirect(`${base}?archive_error=1`);
+  redirect(`${base}?tenant_notice=restored`);
 }

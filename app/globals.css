@@ -1529,6 +1529,78 @@ a {
   color: var(--be-danger-text);
 }
 
+.tenant-archive-link,
+.tenant-restore-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--be-border-subtle);
+  border-radius: 9px;
+  background: var(--be-surface);
+  color: var(--be-text-secondary);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.tenant-archive-link {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.tenant-archive-link:hover,
+.tenant-restore-button:hover {
+  border-color: var(--be-border-strong);
+  background: var(--be-surface-hover);
+}
+
+.tenant-archive-count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: var(--be-radius-pill);
+  background: var(--be-surface-muted);
+  color: var(--be-text-muted);
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.tenant-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: var(--be-text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.tenant-back-link:hover {
+  color: var(--be-text-primary);
+}
+
+.tenant-row-action {
+  text-align: right;
+}
+
+.tenant-restore-button {
+  min-height: 36px;
+  padding: 0 12px;
+  color: var(--be-success-text);
+}
+
+.tenant-restore-button:hover {
+  background: var(--be-success-surface);
+}
+
+.tenant-feedback-link {
+  color: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .tenant-empty {
   height: 110px !important;
   color: var(--be-text-muted) !important;
