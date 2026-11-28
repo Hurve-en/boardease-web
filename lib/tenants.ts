@@ -1,6 +1,6 @@
 import "server-only";
 
-import {and, eq, isNull, notExists, sql} from "drizzle-orm";
+import {and, desc, eq, inArray, isNotNull, isNull, notExists, sql} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
 import {db} from "@/db";
 import {createClient} from "@/lib/supabase/server";
@@ -164,7 +164,50 @@ export async function getTenantData(): Promise<TenantData> {
 
 }
 
+export type ArchivedTenant = {
+    id: string;
+    name: string;
+    contactNumber: string;
+    archivedAt: string;
+    lastRoomNumber: string | null;
+};
 
+export async function getArchivedTenants(): Promise<ArchivedTenant[]> {
+    const archived = await db
+        .select({
+            id: tenants.tenantId,
+            firstName: tenants.firstName,
+            lastName: tenants.lastName,
+            contactNumber: tenants.contactNumber,
+            archivedAt: tenants.archivedAt,
+        })
+        .from(tenants)
+        .where(isNotNull(tenants.archivedAt))
+        .orderBy(desc(tenants.archivedAt));
+
+    if (archived.length === 0) return [];
+
+    // Most recent stay first, so the first row seen per tenant is their last room.
+    const stays = await db
+        .select({tenantId: tenantRoomAssignment.tenantId, roomNumber: rooms.roomNumber})
+        .from(tenantRoomAssignment)
+        .innerJoin(rooms, eq(tenantRoomAssignment.roomId, rooms.roomId))
+        .where(inArray(tenantRoomAssignment.tenantId, archived.map((t) => t.id)))
+        .orderBy(desc(tenantRoomAssignment.endDate), desc(tenantRoomAssignment.startDate));
+
+    const lastRoom = new Map<string, string>();
+    for (const stay of stays) {
+        if (!lastRoom.has(stay.tenantId)) lastRoom.set(stay.tenantId, stay.roomNumber);
+    }
+
+    return archived.map((t) => ({
+        id: t.id,
+        name: `${t.firstName ?? ""} ${t.lastName ?? ""}`.trim(),
+        contactNumber: t.contactNumber ?? "",
+        archivedAt: t.archivedAt ? new Date(t.archivedAt).toISOString() : "",
+        lastRoomNumber: lastRoom.get(t.id) ?? null,
+    }));
+}
 
 export async function AssignRoom(input: {
     tenant_Id: string;
@@ -372,6 +415,7 @@ export async function setTenantArchived(
     }
 
     revalidatePath("/tenants");
+    revalidatePath("/tenants/archived");
     revalidatePath("/rooms");
     revalidatePath("/dashboard");
     revalidatePath("/monthly-bills/new");
